@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TESSERA DESK // Private Market Secondary Terminal</title>
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050705;
+  --panel:#0a0d0a;
+  --card:#0f140f;
+  --line:rgba(195,234,110,.14);
+  --line-strong:rgba(195,234,110,.35);
+  --lime:#c3ea6e;
+  --lime-dim:rgba(195,234,110,.15);
+  --ink:#f0f5ec;
+  --mute:#8b9986;
+  --red:#f26a57;
+  --red-dim:rgba(242,106,87,.15);
+  --mono:"JetBrains Mono",monospace;
+  --sans:"Satoshi",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.45;font-size:14px;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
+
+.terminal{max-width:1380px;margin:12px auto 40px;padding:0 12px}
+.frame{background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+
+/* STATUS TOP BAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--line);background:#070a07;font-family:var(--mono);font-size:11px}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.live-tag{display:flex;align-items:center;gap:6px;color:var(--lime);font-weight:700}
+.pulse{width:6px;height:6px;background:var(--lime);border-radius:50%;box-shadow:0 0 8px var(--lime);animation:p 1.6s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* APP HEADER */
+.header{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--line);gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-name{display:flex;flex-direction:column}
+.brand-name b{font-size:17px;letter-spacing:-.02em;font-weight:900}
+.brand-name span{font-family:var(--mono);font-size:9px;letter-spacing:.25em;color:var(--lime);text-transform:uppercase}
+.view-nav{display:flex;gap:4px;background:#050705;border:1px solid var(--line);padding:3px;border-radius:10px}
+.view-btn{padding:8px 14px;border:none;background:transparent;color:var(--mute);font-size:12px;font-weight:700;border-radius:7px;transition:.2s}
+.view-btn.active,.view-btn:hover{background:var(--lime);color:#050705}
+
+/* LIVE TICKER STRIP */
+.ticker-strip{border-bottom:1px solid var(--line);background:#070a07;overflow:hidden;white-space:nowrap}
+.track{display:flex;width:max-content;animation:marq 32s linear infinite}
+.track:hover{animation-play-state:paused}
+@keyframes marq{to{transform:translateX(-50%)}}
+.tick-item{padding:8px 22px;border-right:1px solid rgba(195,234,110,.08);font-family:var(--mono);font-size:11.5px;display:flex;gap:8px}
+.tick-item strong{color:var(--ink)}
+.up{color:var(--lime)}.dn{color:var(--red)}
+
+/* SUB-PAGES / VIEWS */
+.view{display:none;padding:28px 24px 36px}
+.view.show{display:block}
+
+/* GRID PANELS */
+.grid-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:20px;gap:12px;flex-wrap:wrap}
+.grid-head h2{font-size:22px;letter-spacing:-.03em;font-weight:700}
+.grid-head p{font-size:13px;color:var(--mute);font-family:var(--mono)}
+
+/* DESK CARDS (FEATURE 1: ARBITRAGE DESK) */
+.market-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;transition:border-color .2s}
+.card:hover{border-color:var(--line-strong)}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.token-spec b{font-size:18px;display:block}
+.token-spec span{font-family:var(--mono);font-size:10px;color:var(--lime);letter-spacing:.08em}
+.badge{padding:4px 8px;border-radius:6px;font-family:var(--mono);font-size:10.5px;font-weight:700}
+.badge.prem{background:var(--lime-dim);color:var(--lime);border:1px solid var(--line-strong)}
+.badge.disc{background:var(--red-dim);color:var(--red);border:1px solid rgba(242,106,87,.3)}
+
+.stat-table{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:14px 0;margin:12px 0;display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.stat-box span{display:block;font-size:10px;text-transform:uppercase;color:var(--mute);font-family:var(--mono);letter-spacing:.08em}
+.stat-box b{font-family:var(--mono);font-size:16px}
+.stat-box b.big{font-size:20px}
+
+.card-actions{display:flex;gap:8px;margin-top:10px}
+.btn-mkt{flex:1;text-align:center;padding:9px;border-radius:8px;font-size:11.5px;font-weight:700;border:1px solid var(--line);transition:.2s}
+.btn-mkt.prime{background:var(--lime);color:#050705;border-color:var(--lime)}
+.btn-mkt.prime:hover{background:#d8f498}
+.btn-mkt.sub:hover{background:#172017}
+
+/* FEATURE 2: COMPARISON MATRIX */
+.table-wrap{border:1px solid var(--line);border-radius:12px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;text-align:left}
+th,td{padding:14px 18px;border-bottom:1px solid var(--line)}
+th{background:#070a07;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--lime)}
+td.spec{font-weight:700;color:var(--ink);font-family:var(--mono);font-size:12px}
+td.t-win{color:var(--lime);font-weight:700}
+
+/* FEATURE 3: REDEMPTION & EXIT CALCULATOR */
+.calc-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px}
+.calc-left{display:flex;flex-direction:column;gap:18px}
+.inp-grp label{display:block;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(--mute);margin-bottom:6px}
+.token-pills{display:flex;gap:6px}
+.t-pill{flex:1;padding:8px;background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--mono);font-size:12px}
+.t-pill.active{background:var(--lime-dim);border-color:var(--lime);color:var(--lime);font-weight:700}
+.field{width:100%;padding:10px 12px;background:#050705;border:1px solid var(--line);border-radius:8px;color:var(--ink);font-family:var(--mono);font-size:15px;outline:none}
+.field:focus{border-color:var(--lime)}
+.slider-wrap{display:flex;align-items:center;gap:12px;margin-top:4px}
+input[type="range"]{flex:1;accent-color:var(--lime)}
+
+.calc-right{background:#050705;border:1px solid var(--line);border-radius:12px;padding:22px;display:flex;flex-direction:column;justify-content:space-between}
+.c-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line);font-family:var(--mono);font-size:12.5px}
+.c-row.total{border-top:1px solid var(--line);border-bottom:none;padding-top:16px}
+.c-row.total b{font-size:22px;color:var(--lime)}
+
+/* FEATURE 4: ARCHITECTURE STEPS */
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.step-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.step-num{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--lime);text-transform:uppercase;display:block;margin-bottom:8px}
+.step-card h3{font-size:16px;margin-bottom:6px}
+.step-card p{font-size:12.5px;color:var(--mute);line-height:1.5}
+
+footer{padding:18px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--mute);font-family:var(--mono);flex-wrap:wrap;gap:8px}
+.mono{font-family:var(--mono)}
+
+@media(max-width:840px){
+  .calc-grid{grid-template-columns:1fr}
+  .view-nav{width:100%;overflow-x:auto}
+  .view-btn{white-space:nowrap}
+}
+</style>
+</head>
+<body>
+
+<div class="terminal">
+  <div class="frame">
+    <!-- TOP STATUS TAPE -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="live-tag"><span class="pulse"></span>ORACLE FEED: SYNCHRONIZED</span>
+        <span style="color:var(--mute)">TOKEN-2022 RUNTIME</span>
+      </div>
+      <div class="topbar-right">
+        <span>SOLANA CLUSTER: MAINNET-BETA</span>
+      </div>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header class="header">
+      <div class="brand">
+        <svg viewBox="0 0 32 32" width="26" height="26"><path fill="#c3ea6e" d="M16 2 4 9v14l12 7 12-7V9L16 2zm0 2.4 9.2 5.3L16 15.1 6.8 9.7 16 4.4zM6 11.2l9 5.2v11.3L6 22.5V11.2zm11 16.5V16.4l9-5.2v11.3l-9 5.2z"/></svg>
+        <div class="brand-name">
+          <b>TESSERA DESK</b>
+          <span>Pre-IPO Institutional Secondary Terminal</span>
+        </div>
+      </div>
+      <nav class="view-nav">
+        <button class="view-btn active" data-v="mkt">Arbitrage Desk</button>
+        <button class="view-btn" data-v="calc">Exit Simulator</button>
+        <button class="view-btn" data-v="comp">Structure Matrix</button>
+        <button class="view-btn" data-v="arch">Protocol Architecture</button>
+        <button class="view-btn" data-v="verify">Verification Keys</button>
+      </nav>
+    </header>
+
+    <!-- LIVE MARQUEE -->
+    <div class="ticker-strip">
+      <div class="track" id="track"></div>
+    </div>
+
+    <!-- VIEW 1: ARBITRAGE DESK (LIVE DEX VS NAV) -->
+    <main class="view show" id="v-mkt">
+      <div class="grid-head">
+        <div>
+          <h2>Secondary Pools vs. Proof-of-Reserve NAV</h2>
+          <p>// TRACKING LIVE METEORA SPOT PRICE SPREAD RELATIVE TO POR RESERVE BASE</p>
+        </div>
+      </div>
+      <div class="market-grid" id="market-cards"></div>
+    </main>
+
+    <!-- VIEW 2: REDEMPTION & EXIT CALCULATOR -->
+    <section class="view" id="v-calc">
+      <div class="grid-head">
+        <div>
+          <h2>Pre-IPO Liquidation & Exit Simulator</h2>
+          <p>// MODEL RETURNS UPON PUBLIC LISTING OR CORPORATE LIQUIDITY EVENT</p>
+        </div>
+      </div>
+      <div class="calc-grid">
+        <div class="calc-left">
+          <div class="inp-grp">
+            <label>Select Asset Position</label>
+            <div class="token-pills">
+              <button class="t-pill active" data-asset="spx">tSpaceX</button>
+              <button class="t-pill" data-asset="oai">tOpenAI</button>
+              <button class="t-pill" data-asset="kls">tKalshi</button>
+            </div>
+          </div>
+          <div class="inp-grp">
+            <label>Token Balance</label>
+            <input type="number" id="c-tokens" class="field" value="2500" min="1">
+          </div>
+          <div class="inp-grp">
+            <label>Entry Price ($ / USDC)</label>
+            <input type="number" id="c-entry" class="field" value="1.00" step="0.01">
+          </div>
+          <div class="inp-grp">
+            <label>Projected Exit Valuation / Share Price ($)</label>
+            <input type="number" id="c-exit" class="field" value="2.80" step="0.05">
+            <div class="slider-wrap">
+              <input type="range" id="c-slider" min="0.5" max="10" step="0.05" value="2.80">
+            </div>
+          </div>
+        </div>
+        <div class="calc-right">
+          <div>
+            <div class="c-row"><span>Deployed Capital:</span><b id="o-cost">—</b></div>
+            <div class="c-row"><span>Gross Realization:</span><b id="o-gross">—</b></div>
+            <div class="c-row"><span>Token-2022 Transfer Friction (20 bps):</span><b id="o-fee" style="color:var(--red)">—</b></div>
+            <div class="c-row"><span>Return Multiple:</span><b id="o-mult" class="mono">—</b></div>
+          </div>
+          <div class="c-row total">
+            <span>Net Projected Gain:</span>
+            <b id="o-net">—</b>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: COMPARISON MATRIX -->
+    <section class="view" id="v-comp">
+      <div class="grid-head">
+        <div>
+          <h2>Institutional Pre-IPO vs. Tessera T-Tokens</h2>
+          <p>// STRUCTURAL DELTAS: TRADITIONAL BROKERAGE VS. DECENTRALIZED LOAN PARTICIPATION</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Evaluation Parameter</th>
+              <th>Legacy Private Markets (Forge / EquityZen)</th>
+              <th>Tessera T-Token Architecture</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="spec">Minimum Ticket</td>
+              <td>$100,000 – $250,000+</td>
+              <td class="t-win">$1.00 (Fractional Solana Units)</td>
+            </tr>
+            <tr>
+              <td class="spec">Accreditation Barrier</td>
+              <td>Accredited / QIB Investors Only</td>
+              <td class="t-win">Permissionless Secondary Pool Access</td>
+            </tr>
+            <tr>
+              <td class="spec">Liquidity Window</td>
+              <td>Multi-Year Lockup until IPO</td>
+              <td class="t-win">24/7 Continuous Trading on Meteora/Jupiter</td>
+            </tr>
+            <tr>
+              <td class="spec">Legal Instrument</td>
+              <td>Direct Common Stock / Forward Contracts</td>
+              <td>Loan Participation Rights (Cayman SPC)</td>
+            </tr>
+            <tr>
+              <td class="spec">Reserve Auditing</td>
+              <td>Annual / Quarterly PDF Statements</td>
+              <td class="t-win">Real-Time Chainlink Proof of Reserve (PoR)</td>
+            </tr>
+            <tr>
+              <td class="spec">Settlement Latency</td>
+              <td>30 – 90 Business Days (Issuer RoFR)</td>
+              <td class="t-win">Sub-Second Solana Finality</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- VIEW 4: ARCHITECTURE FLOW -->
+    <section class="view" id="v-arch">
+      <div class="grid-head">
+        <div>
+          <h2>Protocol Mechanics & Lifecycle</h2>
+          <p>// LEGAL CUSTODY ISOLATION TO PROGRAMMATIC SETTLEMENT</p>
+        </div>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-num">Phase 01 // Inflow</span>
+          <h3>Lending Deployment</h3>
+          <p>Stablecoin liquidity (USDC) is deposited to a dedicated Cayman Islands Segregated Portfolio Company (SPC).</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">Phase 02 // Ring-Fencing</span>
+          <h3>Asset Ring-Fencing</h3>
+          <p>Securities are held strictly segregated per portfolio. Signing authorities reside in multi-party Fireblocks vaults.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">Phase 03 // Token-2022</span>
+          <h3>Supply Minting</h3>
+          <p>Tokens mint on Solana with automated 20 bps transfer fees. Chainlink oracles verify circulating supply matches custodian assets.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">Phase 04 // Redemption</span>
+          <h3>Event Execution</h3>
+          <p>Upon an authorized corporate exit (IPO or M&A), loan participation settles and redemption gates open.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: VERIFICATION REPOSITORY -->
+    <section class="view" id="v-verify">
+      <div class="grid-head">
+        <div>
+          <h2>On-Chain Program & Authority Directory</h2>
+          <p>// INDEPENDENTLY AUDITABLE CONTRACT ADDRESSES ON SOLSCAN</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Series Name</th>
+              <th>Standard</th>
+              <th>Mint Address</th>
+              <th>PoR Oracle Benchmark</th>
+              <th>Transfer Fee Hook</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="spec">tSpaceX</td>
+              <td><span class="mono" style="color:var(--lime)">Token-2022</span></td>
+              <td><a class="mono" href="https://solscan.io/token/TSPXcLV76s6V2zDiZQ18kBfcbnjaE2ZzNT3ga2Pd99v" target="_blank">TSPXcLV...ga2Pd99v ↗</a></td>
+              <td class="mono">tSpaceX / USD</td>
+              <td class="mono">0.20% (20 bps)</td>
+            </tr>
+            <tr>
+              <td class="spec">tOpenAI</td>
+              <td><span class="mono" style="color:var(--lime)">Token-2022</span></td>
+              <td><a class="mono" href="https://solscan.io/token/oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ" target="_blank">oPAiAik...BZRHSkjTZ ↗</a></td>
+              <td class="mono">tOpenAI / NAV</td>
+              <td class="mono">0.20% (20 bps)</td>
+            </tr>
+            <tr>
+              <td class="spec">tKalshi</td>
+              <td><span class="mono" style="color:var(--lime)">Token-2022</span></td>
+              <td><a class="mono" href="https://solscan.io/token/TKLSidmLVt3cqGaaodG8tyRzoANfQwoh67AccjmubeZ" target="_blank">TKLSidm...ccjmubeZ ↗</a></td>
+              <td class="mono">tKalshi / USD</td>
+              <td class="mono">0.20% (20 bps)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <span>Tessera Ambassador Research Terminal // Curated by @emuch4pf</span>
+      <span>T-Tokens represent loan participation rights. Not direct common equity shares.</span>
+    </footer>
+  </div>
+</div>
+
+<script>
+const ASSETS = [
+  {
+    id: "spx",
+    name: "T-SpaceX",
+    sym: "tSpaceX",
+    mint: "TSPXcLV76s6V2zDiZQ18kBfcbnjaE2ZzNT3ga2Pd99v",
+    pair: "8obGpjiUu7QTJHK58YHCoz5HxobmrVP2x5zpMZu3c4BT",
+    nav: 1.12, // Institutional Benchmark Reserve NAV
+    desc: "Segregated private debt allocation linked to SpaceX equity performance."
+  },
+  {
+    id: "oai",
+    name: "T-OpenAI",
+    sym: "tOpenAI",
+    mint: "oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ",
+    pair: "2ZWxT3niYjyudmDMDVar9ajNE42RkwYdzZBh6TiMuKQY",
+    nav: 1.05,
+    desc: "Segregated debt portfolio with underlying exposure to OpenAI tender benchmarks."
+  },
+  {
+    id: "kls",
+    name: "T-Kalshi",
+    sym: "tKalshi",
+    mint: "TKLSidmLVt3cqGaaodG8tyRzoANfQwoh67AccjmubeZ",
+    pair: "CGYxcqLiJEoYapZrU7uVGBGfEE15pXDV4mB9AQ8Fsuff",
+    nav: 0.98,
+    desc: "Series exposure backed by Kalshi regulatory prediction market growth round."
+  }
+];
+
+const state = {};
+ASSETS.forEach(a => state[a.id] = { p: a.nav, c: 0, v: 0 });
+
+const fmt = n => "$" + Number(n).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2});
+
+// 1. Static Initial Render
+function initCards() {
+  document.getElementById("market-cards").innerHTML = ASSETS.map(a => `
+    <article class="card" id="card-${a.id}">
+      <div>
+        <div class="card-top">
+          <div class="token-spec">
+            <b>${a.name}</b>
+            <span>${a.sym} · PORTFOLIO ALLOCATION</span>
+          </div>
+          <span class="badge prem" id="badge-${a.id}">CALCULATING SPREAD...</span>
+        </div>
+        <p style="font-size:12.5px;color:var(--mute);margin-bottom:12px">${a.desc}</p>
+        <div class="stat-table">
+          <div class="stat-box">
+            <span>DEX Secondary Pool</span>
+            <b class="val-p big">—</b>
+          </div>
+          <div class="stat-box">
+            <span>Proof of Reserve NAV</span>
+            <b class="mono big">${fmt(a.nav)}</b>
+          </div>
+          <div class="stat-box">
+            <span>24h Pool Trajectory</span>
+            <b class="val-c">—</b>
+          </div>
+          <div class="stat-box">
+            <span>24h Pool Liquidity Vol</span>
+            <b class="val-v">—</b>
+          </div>
+        </div>
+      </div>
+      <div class="card-actions">
+        <a class="btn-mkt prime" href="https://dexscreener.com/solana/${a.pair}" target="_blank" rel="noopener">Meteora Pool ↗</a>
+        <a class="btn-mkt sub" href="https://solscan.io/token/${a.mint}" target="_blank" rel="noopener">Solscan Audit</a>
+      </div>
+    </article
