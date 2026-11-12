@@ -12,7 +12,7 @@ import {C, eInOut, FONT, mix, p, sec} from './theme';
 /** Product starts early so the browser rises under the outgoing "No accreditation." */
 export const PRODUCT_LEAD = 14;
 
-export const MUSIC_VOLUME = 0;
+export const MUSIC_VOLUME = 0.7;
 
 export const SCENES = {
   hook: [0, sec(5)],
