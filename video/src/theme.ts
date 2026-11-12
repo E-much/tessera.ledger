@@ -18,6 +18,7 @@ export const C = {
 	line: 'rgba(255,255,255,0.09)',
 	lineStrong: 'rgba(255,255,255,0.16)',
 	lime: '#C6FF00',
+	ink: '#12121A', // logo cube color
 	limeSoft: 'rgba(198,255,0,0.14)',
 	limeLine: 'rgba(198,255,0,0.45)',
 	white: '#FFFFFF',
