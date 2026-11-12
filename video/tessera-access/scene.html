@@ -1,0 +1,303 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Tessera Access</title>
+<style>
+@font-face{font-family:Outfit;font-weight:400;src:url(fonts/outfit-400.woff2) format('woff2')}
+@font-face{font-family:Outfit;font-weight:500;src:url(fonts/outfit-500.woff2) format('woff2')}
+@font-face{font-family:Outfit;font-weight:600;src:url(fonts/outfit-600.woff2) format('woff2')}
+@font-face{font-family:Outfit;font-weight:700;src:url(fonts/outfit-700.woff2) format('woff2')}
+@font-face{font-family:Outfit;font-weight:800;src:url(fonts/outfit-800.woff2) format('woff2')}
+html,body{margin:0;background:#fff}canvas{display:block;width:100vw;height:auto}
+</style></head><body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+/* Tessera — "Private markets, open to all". Deterministic: renderFrame(t) draws time t (s).
+   Everything lives on a long horizontal "strip" in world space; a camera pans left→right
+   along it and zooms in / out, so each phrase arrives from the right and slides off left. */
+const DUR=35, W=1920,H=1080,CX=W/2,CY=H/2;
+const C={bg:'#ffffff',ink:'#0f0f0d',grey:'#8d8d86',ghost:'#dcdcd6',line:'#e9e9e3',lime:'#d2fb95',limeHi:'#cdf98a',green:'#2a6a14',mark:'#12121a'};
+const F='Outfit, sans-serif';
+const cv=document.getElementById('c'), X=cv.getContext('2d');
+
+/* ---------- math ---------- */
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x));
+const P=(t,a,b)=>cl((t-a)/(b-a));
+const lerp=(a,b,k)=>a+(b-a)*k;
+const eo=x=>1-Math.pow(1-x,3), eo5=x=>1-Math.pow(1-x,5), ei=x=>x*x*x;
+const eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const eio5=x=>x<.5?16*x**5:1-Math.pow(-2*x+2,5)/2;
+const back=x=>{const a=1.5,b=a+1;return 1+b*Math.pow(x-1,3)+a*Math.pow(x-1,2)};
+const mixc=(h1,h2,k)=>{const a=parseInt(h1.slice(1),16),b=parseInt(h2.slice(1),16);
+  return `rgb(${lerp(a>>16,b>>16,k)|0},${lerp(a>>8&255,b>>8&255,k)|0},${lerp(a&255,b&255,k)|0})`};
+function font(c,size,w=600,ls){c.font=`${w} ${size}px ${F}`;c.letterSpacing=(ls??-size*0.03)+'px'}
+function rr(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,Math.max(0,Math.min(r,w/2,h/2)))}
+
+/* ---------- Tessera mark: four isometric cubes forming a T (9 faces) ---------- */
+const K3=Math.sqrt(3)/2, Pi=(x,y,z)=>[(x-y)*K3,(x+y)/2-z];
+const fTop=(x,y,z)=>[Pi(x,y,z+1),Pi(x+1,y,z+1),Pi(x+1,y+1,z+1),Pi(x,y+1,z+1)];
+const fR=(x,y,z)=>[Pi(x+1,y,z+1),Pi(x+1,y+1,z+1),Pi(x+1,y+1,z),Pi(x+1,y,z)];
+const fL=(x,y,z)=>[Pi(x,y+1,z+1),Pi(x+1,y+1,z+1),Pi(x+1,y+1,z),Pi(x,y+1,z)];
+const FACES=[[fTop(-1,0,0),[-1,-1]],[fTop(0,-1,0),[1,-1]],[fTop(0,0,0),[0,-1.2]],[fL(-1,0,0),[-1.2,0]],[fR(0,-1,0),[1.2,0]],
+  [fL(0,0,0),[-1,.4]],[fR(0,0,0),[1,.4]],[fL(0,0,-1),[-.8,1.2]],[fR(0,0,-1),[.8,1.2]]].map(([pts,from])=>{
+  const cx=pts.reduce((a,p)=>a+p[0],0)/4, cy=pts.reduce((a,p)=>a+p[1],0)/4, g=0.075, s=(Math.sqrt(3)/4-g)/(Math.sqrt(3)/4);
+  return {pts:pts.map(([x,y])=>[cx+(x-cx)*s,cy+(y-cy)*s]),from}});
+function mark(c,cx,cy,size,assemble=1,color=C.mark){
+  const u=size/3.8;
+  FACES.forEach((f,i)=>{const t0=i/9*0.55, k=cl((assemble-t0)/0.45), e=eo5(k), d=(1-e)*2.4;
+    if(k<=0)return; c.save();c.globalAlpha*=Math.min(1,k*2.5);c.fillStyle=color;c.beginPath();
+    f.pts.forEach(([x,y],j)=>{const px=cx+(x+f.from[0]*d)*u, py=cy+(y-0.25+f.from[1]*d)*u; j?c.lineTo(px,py):c.moveTo(px,py)});
+    c.closePath();c.fill();c.restore()});
+}
+function wordmark(c,x,y,size,alpha=1,color=C.ink){
+  c.save();c.globalAlpha*=alpha;font(c,size,700,-size*0.04);c.textBaseline='alphabetic';c.textAlign='left';
+  c.fillStyle=color;c.fillText('tessera',x,y);const w=c.measureText('tessera').width;c.fillStyle=C.green;c.fillText('.',x+w,y);c.restore();
+  return w+size*0.25;
+}
+
+/* ================= layout: elements on the strip ================= */
+// A text element is a run of parts on one baseline; parts arrive one after another from the right.
+function T(id,parts,o){return Object.assign({id,kind:'text',parts:parts.map(p=>typeof p==='string'?{s:p}:p),size:150,weight:600},o)}
+const S1=[], S2=[];
+function measure(el){
+  font(X,el.size,el.weight); el.sp=X.measureText(' ').width;
+  el.parts.forEach(p=>p.w=X.measureText(p.s).width);
+  el.w=el.parts.reduce((a,p)=>a+p.w,0)+el.sp*(el.parts.length-1)+(el.extraW||0);
+}
+function row(list,y,x0,gaps){let x=x0;list.forEach((el,i)=>{if(el.kind==="text")measure(el);el.x=x;el.y=y;x+=el.w+(gaps[i]??380)});return x}
+const ctr=el=>[el.x+el.w/2, el.y-el.size*0.34+(el.cyOff||0)];
+
+/* ---- world 1: the problem ---- */
+const A1=T('A1',['The','best','companies'],{t:0.35});
+const A2=T('A2',['stay','private',{s:'longer.',hl:1}],{t:1.5,hlAt:2.55});
+const A3=T('A3',['Most','people','are'],{t:3.3});
+const A4={id:'A4',kind:'pill',s:'Locked out',size:150,t:4.1};
+const B1=T('B1',['You','need','to','be'],{t:5.55});
+const B2=T('B2',[{s:'accredited.',hl:1}],{t:6.7,hlAt:7.05,chip:'Accredited investors only'});
+const B3={id:'B3',kind:'money',size:330,t:8.1};
+const B4=T('B4',['minimum.'],{t:10.45});
+const B5=T('B5',['Locked','up','for'],{t:11.55});
+const B6=T('B6',[{s:'years.',hl:1}],{t:12.75,hlAt:13.0,bar:1,cyOff:70});
+const C0=T('C0',['Private','markets','were'],{t:14.3,size:230,weight:500,color:C.grey});
+const C1=T('C1',['built','for','the','few'],{t:14.95,size:470,weight:700,stagger:0.16,dot:1});
+function layout1(){
+  font(X,150,600); A4.w=X.measureText(A4.s).width+300;
+  row([A1,A2,A3,A4],0,0,[0.3*150*1.6,420,60]);
+  // second row continues to the right, lower down (camera whips diagonally)
+  font(X,330,700); B3.w=X.measureText('$250,000').width;
+  row([B1,B2,B3,B4,B5,B6],720,A4.x+A4.w+380,[50,420,90,420,50]);
+  // closing statement sits under everything
+  measure(C0);measure(C1); C1.extraW=C1.size*0.3;C1.w+=C1.extraW;
+  const mid=(A1.x+B6.x+B6.w)/2;
+  C0.x=mid-C0.w/2;C0.y=1720; C1.x=mid-C1.w/2;C1.y=C0.y+520;
+  S1.push(A1,A2,A3,A4,B1,B2,B3,B4,B5,B6,C0,C1);
+}
+
+/* ---- world 2: the solution ---- */
+const L={id:'L',kind:'lockup',size:300,t:17.05};
+const D1=T('D1',['changes','that.'],{t:18.0,color:C.grey,weight:500});
+const D2=T('D2',['Opens','private','markets'],{t:19.25});
+const D3=T('D3',['to',{s:'everyone.',hl:1}],{t:20.5,hlAt:20.75});
+const E1=T('E1',[{s:'No',hl:1},'accreditation.'],{t:22.0,hlAt:22.15});
+const E2=T('E2',['Start','with',{s:'$1.',hl:1}],{t:23.5,hlAt:24.35,invest:1,cyOff:110});
+const E3=T('E3',['Buy','&','sell',{s:'anytime.',hl:1}],{t:25.4,hlAt:26.2,chip:'Markets open 24/7',live:1});
+const G0=T('G0',['Private','markets.'],{t:27.75,size:330,weight:700});
+const G1=T('G1',['Now',{s:'open',hl:1},'to','all.'],{t:28.75,size:330,weight:700,hlAt:29.2});
+const END={id:'END',kind:'end',size:360,t:30.35};
+function layout2(){
+  font(X,300*0.62,700,-300*0.62*0.04); L.w=300+70+X.measureText('tessera.').width;
+  L.size=300; // lockup: tile + wordmark; y is the tile centre line
+  measure(D1);measure(D2);measure(D3);
+  L.x=0;L.y=0; D1.x=L.x+L.w+60;D1.y=0+150*0.34; // baseline aligned to tile centre
+  row([D2,D3],D1.y,D1.x+D1.w+420,[50]);
+  row([E1,E2,E3],760,D3.x+D3.w*0.15,[420,420]);
+  measure(G0);measure(G1);
+  const mid=(L.x+E3.x+E3.w)/2;
+  const gw=G0.w+G0.sp*1.4+G1.w; G0.x=mid-gw/2;G0.y=1880;G1.x=G0.x+G0.w+G0.sp*1.4;G1.y=G0.y;
+  END.x=mid;END.y=G0.y+1500; END.w=0;
+  S2.push(L,D1,D2,D3,E1,E2,E3,G0,G1,END);
+}
+
+/* ================= camera ================= */
+// moves: camera starts at moves[0]; each later move eases to its target from wherever the camera is.
+// Between moves it keeps drifting right (text slides left) and slowly pushes in.
+const DRIFT_X=26, DRIFT_Z=0.02;
+let CAM1=[],CAM2=[];
+function fitBox(list){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const e of list){x0=Math.min(x0,e.x);x1=Math.max(x1,e.x+e.w);y0=Math.min(y0,e.y-e.size);y1=Math.max(y1,e.y+e.size*0.5)}
+  return {x:(x0+x1)/2,y:(y0+y1)/2,z:Math.min(W*0.84/(x1-x0),H*0.80/(y1-y0))}}
+function mv(t,d,[x,y],z,o={}){return Object.assign({t,d,x,y,z},o)}
+function buildCams(){
+  const c=ctr, mid=(a,b)=>[(a.x+b.x+b.w)/2,(a.y+b.y)/2-a.size*0.3];
+  const fitR=fitBox(S1.filter(e=>e!==C0&&e!==C1));
+  const dot=[C1.x+C1.w-C1.extraW+C1.size*0.05+C1.size*0.11, C1.y-C1.size*0.11];
+  CAM1=[mv(0,0,c(A1),1.12),
+    mv(1.3,.6,c(A2),1.0,{dip:.10}), mv(3.15,.6,c(A3),1.06,{dip:.1}), mv(4.0,.45,c(A4),1.42,{dip:.12}),
+    mv(5.4,.7,c(B1),1.0,{dip:.28}), mv(6.55,.5,c(B2),1.16,{dip:.08}),
+    mv(7.95,.65,c(B3),1.0,{dip:.22}), mv(10.3,.65,mid(B3,B4),0.6),
+    mv(11.4,.6,c(B5),1.06,{dip:.2}), mv(12.6,.5,c(B6),1.12,{dip:.08}),
+    mv(14.0,0.8,[fitR.x,fitR.y],fitR.z,{ease:eio}),
+    mv(14.85,0.75,[(C1.x+C1.w/2),(C0.y+C1.y)/2-C1.size*0.35],Math.min(1.1,W*0.82/C1.w),{ease:eio}),
+    mv(16.2,0.85,dot,34,{ease:x=>ei(x)*0.5+eio5(x)*0.5,anchor:1})];
+  const fit2=fitBox(S2.filter(e=>e.kind!=='end'));
+  const tile=[L.x+150,L.y];
+  CAM2=[mv(17.0,0,tile,1.0),
+    mv(17.9,.6,[ (L.x+D1.x+D1.w)/2, L.y],0.86),
+    mv(19.1,.6,c(D2),1.0,{dip:.12}), mv(20.35,.5,c(D3),1.12,{dip:.08}),
+    mv(21.85,.7,c(E1),1.02,{dip:.26}), mv(23.35,.6,c(E2),0.98,{dip:.15}), mv(25.25,.6,c(E3),1.04,{dip:.15}),
+    mv(27.25,1.0,[fit2.x,fit2.y],fit2.z,{ease:eio}),
+    mv(28.55,0.8,[(G0.x+G1.x+G1.w)/2,G0.y-110],Math.min(0.62,W*0.84/(G1.x+G1.w-G0.x)),{ease:eio}),
+    mv(30.15,1.0,[END.x,END.y],1.0,{ease:eio,dip:.0})];
+}
+function camAt(moves,t){
+  let px=moves[0].x,py=moves[0].y,pz=Math.log(moves[0].z),end=moves[0].t;
+  const drifted=(dt)=>[px+DRIFT_X*dt,py,pz+Math.log(1+DRIFT_Z*dt)];
+  for(let i=1;i<moves.length;i++){const m=moves[i];
+    if(t<m.t)break;
+    const [bx,by,bz]=drifted(m.t-end);
+    if(t<m.t+m.d){const k=(m.ease||eio5)(P(t,m.t,m.t+m.d));
+      let z=lerp(bz,Math.log(m.z),k); if(m.dip)z+=Math.log(1-m.dip*Math.sin(Math.PI*k));
+      if(m.anchor){ // zoom about the target: its screen position glides to centre while scale grows
+        const bzE=Math.exp(bz), ox=(m.x-bx)*bzE, oy=(m.y-by)*bzE, a=1-eo(P(t,m.t,m.t+m.d*0.6)), Z=Math.exp(z);
+        return {x:m.x-ox*a/Z,y:m.y-oy*a/Z,z:Z}}
+      return {x:lerp(bx,m.x,k),y:lerp(by,m.y,k),z:Math.exp(z)}}
+    px=m.x;py=m.y;pz=Math.log(m.z);end=m.t+m.d;
+  }
+  const [x,y,z]=drifted(Math.max(0,t-end)); return {x,y,z:Math.exp(z)};
+}
+
+/* ================= element renderers ================= */
+function hlBox(c,x,y,w,size,k,col){ if(k<=0)return; c.fillStyle=col; rr(c,x-size*0.08,y-size*0.8,(w+size*0.16)*k,size*0.98,size*0.12); c.fill(); }
+function drawText(c,t,el,g){
+  const st=el.stagger??0.08; let x=el.x; const base=el.color||C.ink;
+  font(c,el.size,el.weight); c.textBaseline='alphabetic'; c.textAlign='left';
+  el.parts.forEach((p,i)=>{
+    const t0=el.t+i*st, k=P(t,t0,t0+0.7), e=eo5(k);
+    if(k>0){
+      c.save();
+      const dx=(1-e)*el.size*1.6, sc=lerp(1.25,1,e);
+      if(p.hl){const hk=eio(P(t,el.hlAt??el.t+0.4,(el.hlAt??el.t+0.4)+0.45)); hlBox(c,x,el.y,p.w,el.size,hk,mixc(C.limeHi,'#eeeeea',g))}
+      c.globalAlpha=e; c.fillStyle=mixc(base,C.ghost,g);
+      c.translate(x+dx,el.y); c.scale(sc,sc); c.fillText(p.s,0,0);
+      c.restore();
+    }
+    x+=p.w+el.sp;
+  });
+  if(el.dot){ // the full stop is a lime tile — the camera dives into it
+    const k=back(P(t,el.t+3*st+0.35,el.t+3*st+0.85)); const s=el.size*0.22*k;
+    const dx=x-el.sp+el.size*0.05, cy=el.y-el.size*0.11;
+    if(k>0){c.fillStyle=C.lime;rr(c,dx+el.size*0.11-s/2,cy-s/2,s,s,s*0.24);c.fill()}
+  }
+  if(el.chip){const k=eo5(P(t,el.t+0.6,el.t+1.1)); if(k>0){
+    c.save();c.globalAlpha=k*(1-g*0.7);font(c,40,500,0);const tw=c.measureText(el.chip).width;const px=el.x, py=el.y+70+(1-k)*30, ph=78, pw=tw+(el.live?100:70);
+    rr(c,px,py,pw,ph,ph/2);c.strokeStyle='#e2e2dc';c.lineWidth=3;c.stroke();
+    if(el.live){const pulse=0.5+0.5*Math.sin(t*6);c.fillStyle=C.green;c.beginPath();c.arc(px+42,py+ph/2,9,0,7);c.fill();
+      c.globalAlpha*=0.35*pulse;c.beginPath();c.arc(px+42,py+ph/2,18,0,7);c.fill();c.globalAlpha=k*(1-g*0.7)}
+    c.fillStyle=C.grey;c.textBaseline='middle';c.fillText(el.chip,px+(el.live?70:35),py+ph/2+2);c.restore()}}
+  if(el.bar){const k=eo5(P(t,el.t+0.35,el.t+0.8)); if(k>0){
+    c.save();c.globalAlpha=k*(1-g*0.7);const bx=el.x,by=el.y+90,bw=760,bh=16;
+    font(c,34,500,4);c.fillStyle=C.grey;c.textBaseline='alphabetic';c.fillText('LOCK-UP',bx,by+80);c.textAlign='right';c.fillText('10 YRS',bx+bw,by+80);
+    rr(c,bx,by,bw,bh,bh/2);c.fillStyle='#efefea';c.fill();
+    for(let i=1;i<10;i++){c.fillStyle='#ffffff';c.fillRect(bx+bw*i/10-2,by,4,bh)}
+    const f=0.08+0.62*eio(P(t,el.t+0.5,el.t+2.4));rr(c,bx,by,bw*f*k,bh,bh/2);c.fillStyle=C.ink;c.fill();c.restore()}}
+  if(el.invest){const k=eo5(P(t,el.t+0.95,el.t+1.45)); if(k>0){
+    c.save();c.globalAlpha=k*(1-g*0.7);const px=el.x,py=el.y+70+(1-k)*30,pw=760,ph=130;
+    rr(c,px,py,pw,ph,ph/2);c.fillStyle='#fafaf7';c.fill();c.strokeStyle='#e2e2dc';c.lineWidth=3;c.stroke();
+    font(c,56,600);c.fillStyle=C.ink;c.textBaseline='middle';c.fillText('$1.00',px+56,py+ph/2+3);
+    const press=1-0.06*Math.sin(Math.PI*P(t,el.t+1.75,el.t+1.95));
+    const bw=270,bh=98;c.save();c.translate(px+pw-bw/2-16,py+ph/2);c.scale(press,press);
+    rr(c,-bw/2,-bh/2,bw,bh,bh/2);c.fillStyle=C.lime;c.fill();font(c,44,600);c.fillStyle=C.ink;c.textAlign='center';c.fillText('Invest',0,3);c.restore();
+    c.restore()}}
+}
+function drawPill(c,t,el,g){
+  const k=P(t,el.t,el.t+0.6); if(k<=0)return; const s=lerp(0.5,1,back(k)), a=eo(k);
+  const h=el.size*1.35, w=el.w, x=el.x, y=el.y-el.size*0.34;
+  c.save();c.globalAlpha=a;c.translate(x+w/2+(1-eo5(k))*el.size*1.4,y);c.scale(s,s);c.rotate((1-eo5(k))*-0.08);
+  rr(c,-w/2,-h/2,w,h,h/2);c.fillStyle=mixc(C.ink,C.ghost,g);c.fill();
+  // lock icon
+  const ix=-w/2+h*0.62, iy=4, r=el.size*0.17;
+  c.strokeStyle=mixc(C.lime,'#f4f4f0',g);c.lineWidth=el.size*0.075;c.beginPath();c.arc(ix,iy-r*0.5,r,Math.PI,0);c.stroke();
+  c.fillStyle=mixc(C.lime,'#f4f4f0',g);rr(c,ix-r*1.4,iy-r*0.5,r*2.8,r*2.2,r*0.4);c.fill();
+  font(c,el.size,600);c.fillStyle='#ffffff';c.textBaseline='middle';c.textAlign='left';c.fillText(el.s,ix+r*2.2,8);
+  c.restore();
+}
+function drawMoney(c,t,el,g){
+  const k=P(t,el.t,el.t+0.6); if(k<=0)return; const e=eo5(k);
+  const v=Math.round(250000*eio(P(t,el.t+0.15,el.t+1.25))/1000)*1000;
+  const s='$'+v.toLocaleString('en-US');
+  c.save();c.globalAlpha=e;
+  font(c,44,500,6);c.fillStyle=mixc(C.grey,C.ghost,g);c.textBaseline='alphabetic';c.fillText('MINIMUM TO INVEST',el.x+(1-e)*300,el.y-el.size*0.82);
+  font(c,el.size,700);c.fillStyle=mixc(C.ink,C.ghost,g);
+  const sc=lerp(1.35,1,e);c.translate(el.x+(1-e)*el.size*1.4,el.y);c.scale(sc,sc);c.fillText(s,0,0);
+  c.restore();
+}
+function lockupRect(t,cam){ // tile rect in screen space: full-screen lime -> logo tile
+  const S=L.size, wx=L.x, wy=L.y-S/2;
+  const sx=(wx-cam.x)*cam.z+CX, sy=(wy-cam.y)*cam.z+CY, ss=S*cam.z;
+  const k=eio(P(t,17.55,18.15));
+  return {x:lerp(-20,sx,k),y:lerp(-20,sy,k),w:lerp(W+40,ss,k),h:lerp(H+40,ss,k),r:lerp(0,ss*0.24,k),k};
+}
+function drawLockupScreen(c,t,cam,g){
+  const R=lockupRect(t,cam);
+  c.fillStyle=mixc(C.lime,'#f0f7e4',g*0.6);rr(c,R.x,R.y,R.w,R.h,R.r);c.fill();
+  const msz=lerp(420,R.w*0.74,R.k);
+  mark(c,R.x+R.w/2,R.y+R.h/2,msz,P(t,17.05,17.75),C.mark);
+  // wordmark (world → screen)
+  const k=eo5(P(t,17.95,18.6)); if(k>0){const ws=300*0.62*cam.z;
+    wordmark(c,R.x+R.w+70*cam.z+(1-k)*400*cam.z,R.y+R.h/2+ws*0.36,ws,k*(1-g*0.6))}
+}
+function drawEnd(c,t,el){
+  const k=P(t,el.t,el.t+0.9); if(k<=0)return;
+  const S=el.size, a=eo(k);
+  // tile + wordmark lockup, centred at END
+  font(c,S*0.62,700,-S*0.62*0.04); const ww=c.measureText('tessera.').width; const tot=S+80+ww; const x0=el.x-tot/2, cy=el.y-60;
+  c.save();c.globalAlpha=a; const s=lerp(0.7,1,back(P(t,el.t,el.t+0.8)));
+  c.translate(x0+S/2,cy);c.scale(s,s);rr(c,-S/2,-S/2,S,S,S*0.24);c.fillStyle=C.lime;c.fill();
+  mark(c,0,0,S*0.74,P(t,el.t+0.05,el.t+0.95));c.restore();
+  const wk=eo5(P(t,el.t+0.3,el.t+1.0)); wordmark(c,x0+S+80+(1-wk)*300,cy+S*0.62*0.36,S*0.62,wk);
+  const tk=eo5(P(t,el.t+0.9,el.t+1.5)); if(tk>0){c.save();c.globalAlpha=tk;font(c,64,500,-1);c.fillStyle=C.grey;c.textAlign='center';c.textBaseline='alphabetic';
+    c.fillText('Private markets, open to all.',el.x,cy+S*0.5+170+(1-tk)*30);
+    font(c,44,500,2);c.fillStyle=C.ink;c.fillText('app.tessera.fun',el.x,cy+S*0.5+260+(1-tk)*30);c.restore()}
+}
+
+/* ================= world rendering ================= */
+function drawWorld(c,t,which){
+  const moves=which===1?CAM1:CAM2, cam=camAt(moves,t), list=which===1?S1:S2;
+  c.fillStyle=C.bg;c.fillRect(0,0,W,H);
+  c.save(); c.setTransform(cam.z,0,0,cam.z,CX-cam.x*cam.z,CY-cam.y*cam.z);
+  const g1=eio(P(t,14.05,14.7)), g2=eio(P(t,27.3,27.9));
+  for(const el of list){
+    const g = which===1 ? ((el===C0||el===C1)?0:g1) : ((el===G0||el===G1||el===END)?0:g2);
+    if(el.kind==='text')drawText(c,t,el,g);
+    else if(el.kind==='pill')drawPill(c,t,el,g);
+    else if(el.kind==='money')drawMoney(c,t,el,g);
+    else if(el.kind==='end')drawEnd(c,t,el);
+  }
+  c.restore();
+  if(which===2) drawLockupScreen(c,t,cam,g2);
+  return cam;
+}
+const SWITCH=17.05;
+const off=document.createElement('canvas');off.width=W;off.height=H;const O=off.getContext('2d');
+function speed(t){const w=t<SWITCH?1:2, m=w===1?CAM1:CAM2, a=camAt(m,t-1/240), b=camAt(m,t+1/240);
+  const z=(a.z+b.z)/2; return Math.hypot((b.x-a.x)*z,(b.y-a.y)*z)/2 + Math.abs(Math.log(b.z/a.z))*900;}
+function renderFrame(t){
+  X.setTransform(1,0,0,1,0,0);X.globalAlpha=1;
+  const which=t<SWITCH?1:2;
+  const v=speed(t); // px per half-frame-ish
+  const n=v>3?(v>40?12:v>14?7:4):1;
+  if(n===1){drawWorld(X,t,which);}
+  else{ // motion blur: average n sub-frames across a 180° shutter
+    for(let i=0;i<n;i++){const ts=t+((i+0.5)/n-0.5)/60*0.5; const w=ts<SWITCH?1:2;
+      O.setTransform(1,0,0,1,0,0);O.globalAlpha=1;drawWorld(O,ts,w);
+      X.globalAlpha=1/(i+1);X.drawImage(off,0,0);}
+    X.globalAlpha=1;
+  }
+  // fade in / out
+  const f=Math.max(1-P(t,0,0.25),P(t,DUR-0.6,DUR));
+  if(f>0){X.fillStyle=`rgba(255,255,255,${f})`;X.fillRect(0,0,W,H)}
+}
+window.renderFrame=renderFrame; window.DUR=DUR;
+window.ready=Promise.all([400,500,600,700,800].map(w=>document.fonts.load(`${w} 100px Outfit`))).then(()=>{layout1();layout2();buildCams();});
+window.ready.then(()=>{const q=new URLSearchParams(location.search);
+  if(q.has('render'))return;
+  if(q.has('t')){renderFrame(parseFloat(q.get('t')));return}
+  const s=performance.now();(function loop(){renderFrame(((performance.now()-s)/1000)%DUR);requestAnimationFrame(loop)})()});
+</script></body></html>
