@@ -2,10 +2,8 @@ import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {KineticLine} from '../components/Kinetic';
 import {Lock} from '../components/Lock';
-import {LogoTile, Monogram, Wordmark} from '../components/Brand';
-import {TOKENS} from '../components/Explorer';
 import {Sfx} from '../components/Sfx';
-import {C, eIn, eInOut, eSoft, mix, money, p, sp, SNAP} from '../theme';
+import {C, eIn, eInOut, eSoft, mix, p, sp, SNAP} from '../theme';
 
 // Local timeline (60fps)
 const A_EXIT = 92; // "$7T market" leaves
@@ -81,7 +79,6 @@ export const Hook: React.FC = () => {
   // Phase A
   const ghostX = mix(f / 300, 120, -380);
   const ghostOp = 1 - p(f, A_EXIT - 4, A_EXIT + 20, eIn);
-  const brandOut = p(f, A_EXIT - 10, A_EXIT + 8, eIn);
   const sheen = p(f, 18, 70, eSoft);
 
   // Phase B: lock
@@ -117,87 +114,8 @@ export const Hook: React.FC = () => {
           $7,000,000,000,000
         </div>
 
-        {/* Eyebrow */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 300,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            opacity: 1 - brandOut,
-            transform: `translateY(${-30 * brandOut}px)`,
-            filter: `blur(${brandOut * 8}px)`,
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 14,
-              padding: '12px 24px 12px 16px',
-              borderRadius: 999,
-              background: '#fff',
-              border: `1.5px solid ${C.line}`,
-              boxShadow: '0 10px 30px -12px rgba(17,17,17,0.15)',
-              fontSize: 30,
-              fontWeight: 600,
-              letterSpacing: '-0.02em',
-              color: C.ink,
-            }}
-          >
-            <LogoTile size={42} />
-            <Wordmark size={32} />
-            <span style={{width: 1.5, height: 26, background: C.lineStrong, margin: '0 4px'}} />
-            <span style={{color: C.mute, fontWeight: 500}}>Private markets, opened</span>
-          </div>
-        </div>
-
-        {/* Live price row: product proof on the cover */}
-        <div
-          style={{
-            position: 'absolute',
-            top: 842,
-            left: 0,
-            right: 0,
-            display: 'flex',
-            justifyContent: 'center',
-            gap: 20,
-          }}
-        >
-          {TOKENS.map((t, i) => {
-            const o = p(f, A_EXIT - 12 + i * 3, A_EXIT + 6 + i * 3, eIn);
-            return (
-              <div
-                key={t.name}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 16,
-                  padding: '12px 26px 12px 12px',
-                  borderRadius: 999,
-                  background: '#fff',
-                  border: `1.5px solid ${C.line}`,
-                  boxShadow: '0 14px 34px -16px rgba(17,17,17,0.2)',
-                  fontSize: 30,
-                  fontWeight: 650,
-                  letterSpacing: '-0.02em',
-                  opacity: 1 - o,
-                  transform: `translateY(${o * 40}px)`,
-                  filter: `blur(${o * 8}px)`,
-                }}
-              >
-                <Monogram letter={t.letter} size={46} active={i === 2} />
-                {t.name}
-                <span style={{fontWeight: 800, fontVariantNumeric: 'tabular-nums'}}>{money(t.price)}</span>
-              </div>
-            );
-          })}
-        </div>
-
         {/* Headline A — fully composed on frame 0 (cover) */}
-        <div style={{position: 'absolute', top: 430, left: 0, right: 0}}>
+        <div style={{position: 'absolute', top: 372, left: 0, right: 0}}>
           <KineticLine words={['Private', 'equity', 'is', 'a']} start={-200} exit={A_EXIT} size={150} />
           <div style={{height: 26}} />
           <div style={{position: 'relative'}}>
