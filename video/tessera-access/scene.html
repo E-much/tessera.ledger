@@ -114,6 +114,8 @@ function layout2(){
   const gw=G0.w+G0.sp*1.4+G1.w; G0.x=mid-gw/2;G0.y=1880;G1.x=G0.x+G0.w+G0.sp*1.4;G1.y=G0.y;
   END.x=mid;END.y=G0.y+1500; END.w=0;
   S2.push(L,D1,D2,D3,E1,E2,E3,G0,G1,END);
+  // hits land on the 16th-note grid so text arrives with the drums
+  for(const el of [...S1,...S2]){ if(el===L)continue; el.t=q(el.t,BEAT/4); if(el.hlAt)el.hlAt=q(el.hlAt,BEAT/4); }
 }
 
 /* ================= camera ================= */
@@ -123,7 +125,16 @@ const DRIFT_X=26, DRIFT_Z=0.02;
 let CAM1=[],CAM2=[];
 function fitBox(list){let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;for(const e of list){x0=Math.min(x0,e.x);x1=Math.max(x1,e.x+e.w);y0=Math.min(y0,e.y-e.size);y1=Math.max(y1,e.y+e.size*0.5)}
   return {x:(x0+x1)/2,y:(y0+y1)/2,z:Math.min(W*0.84/(x1-x0),H*0.80/(y1-y0))}}
-function mv(t,d,[x,y],z,o={}){return Object.assign({t,d,x,y,z},o)}
+/* ---- beat grid shared with audio.py: 140 BPM, a downbeat lands on the drop (17.05s) ---- */
+const BPM=140, BEAT=60/BPM, BAR=4*BEAT, DROP=17.05, GRID0=DROP-10*BAR;
+const q=(t,g=BEAT/2)=>DROP+Math.round((t-DROP)/g)*g;   // snap to the 8th-note grid
+function beatBump(t){ // camera punch on kick (beat 1), snare (beat 3) and the syncopated kick (1.75)
+  const k=Math.floor((t-GRID0)/BAR), b=(t-GRID0)/BEAT-k*4;
+  const amp=(k>=2&&k<=8)?0.007:(k>=10&&k<=15)?0.016:0; if(!amp)return 0;
+  let v=0; for(const [at,w] of [[0,1],[1.75,0.5],[2,0.85]]){const dt=(b-at)*BEAT; if(dt>=0&&dt<0.35)v=Math.max(v,w*Math.exp(-dt*14))}
+  return amp*v;
+}
+function mv(t,d,[x,y],z,o={}){return Object.assign({t:t?q(t):0,d,x,y,z},o)}
 function buildCams(){
   const c=ctr, mid=(a,b)=>[(a.x+b.x+b.w)/2,(a.y+b.y)/2-a.size*0.3];
   const fitR=fitBox(S1.filter(e=>e!==C0&&e!==C1));
@@ -260,6 +271,7 @@ function drawEnd(c,t,el){
 /* ================= world rendering ================= */
 function drawWorld(c,t,which){
   const moves=which===1?CAM1:CAM2, cam=camAt(moves,t), list=which===1?S1:S2;
+  cam.z*=1+beatBump(t);
   c.fillStyle=C.bg;c.fillRect(0,0,W,H);
   c.save(); c.setTransform(cam.z,0,0,cam.z,CX-cam.x*cam.z,CY-cam.y*cam.z);
   const g1=eio(P(t,14.05,14.7)), g2=eio(P(t,27.3,27.9));
