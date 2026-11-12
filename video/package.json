@@ -5,6 +5,7 @@
   "scripts": {
     "studio": "remotion studio",
     "sfx": "node scripts/sfx.mjs",
+    "music": "node scripts/music.mjs",
     "render": "remotion render TesseraLaunch out/tessera-pe-launch.mp4",
     "still": "remotion still TesseraLaunch out/cover.png --frame=0"
   },

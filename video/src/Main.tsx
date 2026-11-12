@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, Sequence, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Html5Audio, Sequence, staticFile, useCurrentFrame} from 'remotion';
 import {Backdrop} from './components/Backdrop';
 import {Sfx} from './components/Sfx';
 import {Hook} from './scenes/Hook';
@@ -11,6 +11,8 @@ import {C, eInOut, FONT, mix, p, sec} from './theme';
 
 /** Product starts early so the browser rises under the outgoing "No accreditation." */
 export const PRODUCT_LEAD = 14;
+
+export const MUSIC_VOLUME = 0.42;
 
 export const SCENES = {
   hook: [0, sec(5)],
@@ -38,6 +40,8 @@ export const Main: React.FC = () => {
   return (
     <AbsoluteFill style={{fontFamily: FONT, color: C.ink, background: C.bg, WebkitFontSmoothing: 'antialiased'}}>
       <Backdrop />
+      {/* Original 96 BPM score (scripts/music.mjs); bars are 2.5s so every 5s cut hits a downbeat */}
+      <Html5Audio src={staticFile('music/score.wav')} volume={MUSIC_VOLUME} />
       <Sequence from={SCENES.hook[0]} durationInFrames={SCENES.hook[1]}>
         <Hook />
       </Sequence>
