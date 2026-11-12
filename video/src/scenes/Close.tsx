@@ -1,19 +1,20 @@
 import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {KineticLine} from '../components/Kinetic';
-import {Mark} from '../components/Brand';
+import {LogoTile, Wordmark} from '../components/Brand';
 import {Sfx} from '../components/Sfx';
 import {C, eInOut, eOut, eSoft, mix, p, sp, SNAP} from '../theme';
 
-const ASSEMBLE = [0, 36];
-const SETTLE = [40, 76];
+const ASSEMBLE = [6, 52];
+const SETTLE = [50, 84];
 const WORD = 62;
 const TAG = 96;
 const URL = 140;
 
 export const Close: React.FC = () => {
   const f = useCurrentFrame();
-  const asm = p(f, ASSEMBLE[0], ASSEMBLE[1], eOut);
+  const asm = p(f, ASSEMBLE[0], ASSEMBLE[1], eSoft);
+  const pop = sp(f, 0, SNAP);
   const settle = p(f, SETTLE[0], SETTLE[1], eInOut);
   const word = p(f, WORD, WORD + 30, eOut);
   const url = sp(f, URL, SNAP);
@@ -21,14 +22,14 @@ export const Close: React.FC = () => {
 
   // Lockup geometry: mark + wordmark centred as a group
   const markSize = 168;
-  const wordW = 650;
+  const wordW = 640;
   const gap = 34;
   const groupW = markSize + gap + wordW;
   const markFinalX = 960 - groupW / 2 + markSize / 2;
   const markX = mix(settle, 960, markFinalX);
   const markY = mix(settle, 540, 360);
   const markScale = mix(settle, 1.7, 1);
-  const spin = mix(asm, -120, 0);
+  const spin = mix(asm, -8, 0);
 
   const flash = 1 - p(f, 0, 26, eOut);
 
@@ -48,10 +49,10 @@ export const Close: React.FC = () => {
           position: 'absolute',
           left: markX,
           top: markY,
-          transform: `translate(-50%,-50%) scale(${markScale}) rotate(${spin}deg)`,
+          transform: `translate(-50%,-50%) scale(${markScale * mix(pop, 0.35, 1)}) rotate(${spin}deg)`,
         }}
       >
-        <Mark size={markSize} assemble={asm} gap={0.06} />
+        <LogoTile size={markSize} assemble={asm} radius={0.26} style={{boxShadow: '0 40px 80px -30px rgba(42,106,20,0.45)'}} />
       </div>
 
       {/* wordmark, revealed from behind the mark */}
@@ -68,16 +69,11 @@ export const Close: React.FC = () => {
       >
         <div
           style={{
-            fontSize: 176,
-            fontWeight: 800,
-            letterSpacing: '-0.055em',
-            lineHeight: 1,
-            color: C.ink,
             transform: `translateX(${mix(word, -110, 0)}%)`,
             filter: `blur(${mix(word, 8, 0)}px)`,
           }}
         >
-          Tessera
+          <Wordmark size={176} />
         </div>
       </div>
 

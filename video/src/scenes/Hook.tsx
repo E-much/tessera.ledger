@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, useCurrentFrame} from 'remotion';
 import {KineticLine} from '../components/Kinetic';
 import {Lock} from '../components/Lock';
-import {Mark, Monogram} from '../components/Brand';
+import {LogoTile, Monogram, Wordmark} from '../components/Brand';
 import {TOKENS} from '../components/Explorer';
 import {Sfx} from '../components/Sfx';
 import {C, eIn, eInOut, eSoft, mix, money, p, sp, SNAP} from '../theme';
@@ -147,8 +147,8 @@ export const Hook: React.FC = () => {
               color: C.ink,
             }}
           >
-            <Mark size={38} />
-            Tessera PE
+            <LogoTile size={42} />
+            <Wordmark size={32} />
             <span style={{width: 1.5, height: 26, background: C.lineStrong, margin: '0 4px'}} />
             <span style={{color: C.mute, fontWeight: 500}}>Private markets, opened</span>
           </div>

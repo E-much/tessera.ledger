@@ -2,7 +2,7 @@ import React from 'react';
 import {useCurrentFrame} from 'remotion';
 import {C, eIn, eOut, mix, p} from '../theme';
 
-export type Highlight = 'pill' | 'marker' | 'ink' | undefined;
+export type Highlight = 'pill' | 'marker' | 'ink' | 'brand' | undefined;
 
 export type Word = {text: string; hl?: Highlight};
 
@@ -122,6 +122,11 @@ export const KineticLine: React.FC<{
                   }}
                 >
                   {w.text}
+                </span>
+              ) : w.hl === 'brand' ? (
+                <span style={{position: 'relative', zIndex: 1}}>
+                  {w.text.replace(/\.$/, '')}
+                  <span style={{color: C.green}}>.</span>
                 </span>
               ) : (
                 <span style={{position: 'relative', zIndex: 1}}>{w.text}</span>

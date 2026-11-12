@@ -1,6 +1,6 @@
 import React from 'react';
 import {C, money} from '../theme';
-import {Mark, Monogram} from './Brand';
+import {LogoTile, Monogram, Wordmark} from './Brand';
 
 export const BW = 1680; // browser width
 export const BH = 960; // browser height
@@ -267,8 +267,8 @@ export const AppHeader: React.FC<{positions: number}> = ({positions}) => (
     }}
   >
     <div style={{display: 'flex', alignItems: 'center', gap: 14}}>
-      <Mark size={40} />
-      <span style={{fontSize: 30, fontWeight: 800, letterSpacing: '-0.045em'}}>Tessera</span>
+      <LogoTile size={46} />
+      <Wordmark size={32} />
     </div>
     <div style={{display: 'flex', gap: 6, padding: 5, borderRadius: 16, background: C.soft}}>
       {['Explorer', 'Portfolio', 'Activity'].map((n, i) => (

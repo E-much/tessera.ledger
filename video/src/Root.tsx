@@ -4,10 +4,10 @@ import {Main} from './Main';
 import {FPS, H, W} from './theme';
 
 const weights = [400, 500, 600, 700, 800, 900];
-const handle = delayRender('Loading Inter');
+const handle = delayRender('Loading Outfit');
 Promise.all(
   weights.map((w) => {
-    const face = new FontFace('Inter', `url(${staticFile(`fonts/inter-latin-${w}-normal.woff2`)}) format('woff2')`, {
+    const face = new FontFace('Outfit', `url(${staticFile(`fonts/outfit-latin-${w}-normal.woff2`)}) format('woff2')`, {
       weight: String(w),
       style: 'normal',
     });

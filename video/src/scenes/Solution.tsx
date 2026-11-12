@@ -111,7 +111,7 @@ export const Solution: React.FC = () => {
       </div>
       <div style={{position: 'absolute', left: MARK_POS.x + 140, top: MARK_POS.y - 70}}>
         <KineticLine
-          words={['Tessera', {text: 'opens', hl: 'marker'}, 'it.']}
+          words={[{text: 'tessera.', hl: 'brand'}, {text: 'opens', hl: 'marker'}, 'it.']}
           start={TITLE}
           exit={TITLE_EXIT}
           size={140}

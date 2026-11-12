@@ -16,9 +16,10 @@ export const C = {
   lineStrong: 'rgba(17,17,17,0.14)',
   card: '#FFFFFF',
   soft: '#F2F2F0',
+  green: '#2A6A14', // brand deep green (wordmark full stop, highlights)
 };
 
-export const FONT = "'Inter', system-ui, sans-serif";
+export const FONT = "'Outfit', system-ui, sans-serif";
 
 // Easings
 export const eOut = Easing.bezier(0.16, 1, 0.3, 1); // expo-out, the house curve
