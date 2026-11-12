@@ -30,7 +30,7 @@ const KEYS = [342, 351, 360, 369];
 const CURSOR_TO_BTN = [378, 414];
 const CLICK_BTN = 424;
 const SUCCESS = 466;
-const TOAST = 480;
+const TOAST = 536;
 
 const Cursor: React.FC<{x: number; y: number; press: number; op: number}> = ({x, y, press, op}) => (
   <div
@@ -65,7 +65,7 @@ const Ripple: React.FC<{x: number; y: number; at: number}> = ({x, y, at}) => {
         height: 40,
         borderRadius: 20,
         border: `4px solid ${C.lime}`,
-        background: 'rgba(198,255,0,0.25)',
+        background: 'rgba(207,249,145,0.25)',
         transform: `translate(-50%,-50%) scale(${mix(t, 0.4, 3.2)})`,
         opacity: 1 - t,
         zIndex: 49,
@@ -100,7 +100,7 @@ export const Product: React.FC = () => {
   const typedFull = '1.00';
   const nTyped = KEYS.filter((k) => f >= k).length;
   const receiveIn = p(f, KEYS[0], KEYS[0] + 22, eOut);
-  const receive = (1 / 812.79) * (f >= KEYS[0] ? mix(receiveIn, 0.2, 1) : 0);
+  const receive = (1 / 1280.32) * (f >= KEYS[0] ? mix(receiveIn, 0.2, 1) : 0);
   const caret = f < CURSOR_TO_BTN[0] + 8 && Math.floor(f / 16) % 2 === 0;
   const btnHover = p(f, CURSOR_TO_BTN[1] - 8, CURSOR_TO_BTN[1] + 4);
   const pressBtn = f >= CLICK_BTN - 2 && f < CLICK_BTN + 8 ? Math.sin(((f - CLICK_BTN + 2) / 10) * Math.PI) : 0;
@@ -251,7 +251,7 @@ export const Product: React.FC = () => {
                 </span>
                 <span style={{display: 'flex', flexDirection: 'column', gap: 4}}>
                   <span style={{fontWeight: 800}}>Purchase complete</span>
-                  <span style={{color: C.lime, fontWeight: 600, fontSize: 21}}>0.001230 T-OpenAI in your wallet</span>
+                  <span style={{color: C.lime, fontWeight: 600, fontSize: 21}}>{(1 / 1280.32).toFixed(6)} T-OpenAI in your wallet</span>
                 </span>
               </div>
             )}

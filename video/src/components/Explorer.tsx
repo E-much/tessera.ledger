@@ -19,6 +19,8 @@ export type Token = {
   letter: string;
   price: number;
   valuation: string;
+  change: number; // 24h %, as shown on app.tessera.fun
+  tint: string; // pastel card colour from the site
   spark: number[];
 };
 
@@ -28,8 +30,10 @@ export const TOKENS: Token[] = [
     company: 'SpaceX',
     sector: 'Aerospace',
     letter: 'S',
-    price: 423.0,
+    price: 590.96,
     valuation: '$800B',
+    change: 10.9,
+    tint: '#F7E78C',
     spark: [0.3, 0.34, 0.31, 0.42, 0.4, 0.5, 0.47, 0.58, 0.55, 0.66, 0.63, 0.74, 0.8],
   },
   {
@@ -37,8 +41,10 @@ export const TOKENS: Token[] = [
     company: 'Kalshi',
     sector: 'Fintech',
     letter: 'K',
-    price: 413.8,
+    price: 1040.54,
     valuation: '$14B',
+    change: 1.2,
+    tint: '#C8E0E8',
     spark: [0.42, 0.38, 0.45, 0.43, 0.52, 0.48, 0.56, 0.6, 0.57, 0.66, 0.7, 0.68, 0.76],
   },
   {
@@ -46,9 +52,11 @@ export const TOKENS: Token[] = [
     company: 'OpenAI',
     sector: 'Artificial Intelligence',
     letter: 'O',
-    price: 812.79,
+    price: 1280.32,
     valuation: '$950B',
-    spark: [0.22, 0.28, 0.26, 0.36, 0.44, 0.4, 0.52, 0.6, 0.56, 0.7, 0.76, 0.82, 0.88],
+    change: -0.8,
+    tint: '#DDF3B3',
+    spark: [0.3, 0.36, 0.33, 0.44, 0.5, 0.47, 0.58, 0.66, 0.62, 0.74, 0.8, 0.78, 0.74],
   },
 ];
 
@@ -75,8 +83,8 @@ const Spark: React.FC<{data: number[]; draw: number; id: string; w: number; h: n
     <svg width={w} height={h} style={{overflow: 'visible', display: 'block'}}>
       <defs>
         <linearGradient id={`g${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={C.lime} stopOpacity={0.75} />
-          <stop offset="1" stopColor={C.lime} stopOpacity={0} />
+          <stop offset="0" stopColor="#FFFFFF" stopOpacity={0.85} />
+          <stop offset="1" stopColor="#FFFFFF" stopOpacity={0} />
         </linearGradient>
         <clipPath id={`c${id}`}>
           <rect x={-10} y={-20} width={(w + 20) * draw} height={h + 40} />
@@ -88,7 +96,7 @@ const Spark: React.FC<{data: number[]; draw: number; id: string; w: number; h: n
       </g>
       {draw > 0.98 && (
         <>
-          <circle cx={last[0]} cy={last[1]} r={13} fill={C.lime} opacity={0.55} />
+          <circle cx={last[0]} cy={last[1]} r={13} fill="#FFFFFF" opacity={0.8} />
           <circle cx={last[0]} cy={last[1]} r={6.5} fill={C.ink} />
         </>
       )}
@@ -117,9 +125,9 @@ export const TokenCard: React.FC<{t: Token; i: number; s: CardState}> = ({t, i, 
         width: CARD_W,
         height: CARD_H,
         borderRadius: 30,
-        background: C.card,
-        border: `2px solid ${hover > 0.01 ? `rgba(141,184,0,${0.25 + hover * 0.75})` : C.line}`,
-        boxShadow: `0 ${30 + hover * 30}px ${70 + hover * 40}px -30px rgba(17,17,17,${0.18 + hover * 0.14}), 0 0 0 ${hover * 6}px rgba(198,255,0,${hover * 0.35})`,
+        background: t.tint,
+        border: `2px solid ${hover > 0.01 ? `rgba(74,140,30,${0.25 + hover * 0.75})` : C.line}`,
+        boxShadow: `0 ${30 + hover * 30}px ${70 + hover * 40}px -30px rgba(17,17,17,${0.18 + hover * 0.14}), 0 0 0 ${hover * 6}px rgba(207,249,145,${hover * 0.35})`,
         padding: 34,
         boxSizing: 'border-box',
         display: 'flex',
@@ -132,7 +140,7 @@ export const TokenCard: React.FC<{t: Token; i: number; s: CardState}> = ({t, i, 
         <Monogram letter={t.letter} size={68} active={hover > 0.5} />
         <div style={{flex: 1}}>
           <div style={{fontSize: 34, fontWeight: 800, letterSpacing: '-0.035em', lineHeight: 1.1}}>{t.name}</div>
-          <div style={{fontSize: 19, fontWeight: 500, color: C.mute, marginTop: 4}}>{t.sector}</div>
+          <div style={{fontSize: 19, fontWeight: 500, color: 'rgba(15,15,13,0.55)', marginTop: 4}}>{t.sector}</div>
         </div>
         <div
           style={{
@@ -141,18 +149,18 @@ export const TokenCard: React.FC<{t: Token; i: number; s: CardState}> = ({t, i, 
             gap: 8,
             padding: '8px 14px',
             borderRadius: 999,
-            background: C.soft,
+            background: 'rgba(255,255,255,0.65)',
             fontSize: 16,
             fontWeight: 700,
             letterSpacing: '0.06em',
           }}
         >
-          <span style={{width: 9, height: 9, borderRadius: 9, background: C.limeDeep, boxShadow: `0 0 0 4px rgba(198,255,0,0.45)`}} />
+          <span style={{width: 9, height: 9, borderRadius: 9, background: C.limeDeep, boxShadow: `0 0 0 4px rgba(207,249,145,0.45)`}} />
           LIVE
         </div>
       </div>
 
-      <div style={{marginTop: 34, fontSize: 17, fontWeight: 700, letterSpacing: '0.08em', color: C.mute}}>AUCTION PRICE</div>
+      <div style={{marginTop: 34, fontSize: 17, fontWeight: 700, letterSpacing: '0.08em', color: 'rgba(15,15,13,0.55)'}}>PRICE</div>
       <div
         style={{
           fontSize: 78,
@@ -163,7 +171,22 @@ export const TokenCard: React.FC<{t: Token; i: number; s: CardState}> = ({t, i, 
           marginTop: 6,
         }}
       >
-        {money(price)}
+        {money(price).split('.')[0]}
+        <span style={{color: 'rgba(15,15,13,0.38)'}}>.{money(price).split('.')[1]}</span>
+        <span
+          style={{
+            marginLeft: 16,
+            fontSize: 24,
+            fontWeight: 700,
+            letterSpacing: '-0.01em',
+            color: t.change >= 0 ? C.green : '#B3261E',
+            opacity: s.count > 0.9 ? 1 : 0,
+            verticalAlign: 'middle',
+          }}
+        >
+          {t.change >= 0 ? '↑ +' : '↓ '}
+          {t.change.toFixed(1)}%
+        </span>
       </div>
 
       <div style={{marginTop: 20}}>
@@ -175,8 +198,8 @@ export const TokenCard: React.FC<{t: Token; i: number; s: CardState}> = ({t, i, 
           ['Valuation', t.valuation],
           ['Minimum', '$1'],
         ].map(([k, v]) => (
-          <div key={k} style={{flex: 1, padding: '14px 18px', borderRadius: 18, background: C.soft}}>
-            <div style={{fontSize: 18, fontWeight: 600, color: C.mute}}>{k}</div>
+          <div key={k} style={{flex: 1, padding: '14px 18px', borderRadius: 18, background: 'rgba(255,255,255,0.6)'}}>
+            <div style={{fontSize: 18, fontWeight: 600, color: 'rgba(15,15,13,0.55)'}}>{k}</div>
             <div style={{fontSize: 38, fontWeight: 800, letterSpacing: '-0.035em', marginTop: 0, opacity: s.count > 0.6 ? 1 : 0.15}}>
               {v}
             </div>
@@ -198,7 +221,7 @@ export const TokenCard: React.FC<{t: Token; i: number; s: CardState}> = ({t, i, 
           fontWeight: 700,
           letterSpacing: '-0.02em',
           transform: `scale(${1 - press * 0.05})`,
-          boxShadow: hover > 0.5 ? '0 14px 30px -12px rgba(141,184,0,0.9)' : 'none',
+          boxShadow: hover > 0.5 ? '0 14px 30px -12px rgba(74,140,30,0.9)' : 'none',
         }}
       >
         Buy {t.name}
@@ -356,7 +379,7 @@ export const ExplorerHead: React.FC<{reveal: number}> = ({reveal}) => (
     <div>
       <div style={{fontSize: 60, fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1}}>Explorer</div>
       <div style={{fontSize: 23, fontWeight: 500, color: C.mute, marginTop: 14}}>
-        Tokenized pre-IPO companies · live auction prices
+        Tokenised private companies · live prices
       </div>
     </div>
     <div style={{flex: 1}} />

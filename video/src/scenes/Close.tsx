@@ -38,7 +38,7 @@ export const Close: React.FC = () => {
       {/* soft centre glow */}
       <AbsoluteFill
         style={{
-          background: 'radial-gradient(ellipse 50% 45% at 50% 46%, rgba(198,255,0,0.28), rgba(198,255,0,0) 70%)',
+          background: 'radial-gradient(ellipse 50% 45% at 50% 46%, rgba(207,249,145,0.28), rgba(207,249,145,0) 70%)',
           opacity: p(f, 10, 80),
         }}
       />

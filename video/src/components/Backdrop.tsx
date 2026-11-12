@@ -27,7 +27,7 @@ export const Backdrop: React.FC<{glow?: number; drift?: number}> = ({glow = 1, d
           borderRadius: '50%',
           left: 1250 + Math.sin(t * 0.6) * 80,
           top: -420 + Math.cos(t * 0.5) * 60,
-          background: 'radial-gradient(circle, rgba(198,255,0,0.42) 0%, rgba(198,255,0,0) 65%)',
+          background: 'radial-gradient(circle, rgba(207,249,145,0.75) 0%, rgba(207,249,145,0) 65%)',
           opacity: glow,
         }}
       />
@@ -39,7 +39,7 @@ export const Backdrop: React.FC<{glow?: number; drift?: number}> = ({glow = 1, d
           borderRadius: '50%',
           left: -520 + Math.cos(t * 0.45) * 70,
           top: 560 + Math.sin(t * 0.55) * 60,
-          background: 'radial-gradient(circle, rgba(198,255,0,0.30) 0%, rgba(198,255,0,0) 65%)',
+          background: 'radial-gradient(circle, rgba(207,249,145,0.6) 0%, rgba(207,249,145,0) 65%)',
           opacity: glow,
         }}
       />

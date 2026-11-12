@@ -152,7 +152,7 @@ const Wallet: React.FC<{start: number; out: number}> = ({start, out}) => {
                 gap: 10,
                 padding: '12px 20px 12px 12px',
                 borderRadius: 999,
-                background: chk > 0 ? 'rgba(198,255,0,0.45)' : C.soft,
+                background: chk > 0 ? 'rgba(207,249,145,0.45)' : C.soft,
                 fontSize: 23,
                 fontWeight: 700,
               }}
@@ -312,7 +312,7 @@ const Swap: React.FC<{start: number; out: number}> = ({start, out}) => {
           </svg>
         </div>
       </div>
-      {row(<Monogram letter="S" size={40} active />, 'T-SpaceX', (1 / 423).toFixed(6), 'b')}
+      {row(<Monogram letter="S" size={40} active />, 'T-SpaceX', (1 / 590.96).toFixed(6), 'b')}
     </div>
   );
 };

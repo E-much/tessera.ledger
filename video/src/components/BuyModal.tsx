@@ -102,7 +102,7 @@ export const BuyModal: React.FC<{s: ModalState}> = ({s}) => {
         <Monogram letter="O" size={64} active />
         <div style={{flex: 1}}>
           <div style={{fontSize: 36, fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1}}>Buy T-OpenAI</div>
-          <div style={{fontSize: 20, fontWeight: 500, color: C.mute, marginTop: 4}}>$950B valuation · $812.79 auction price</div>
+          <div style={{fontSize: 20, fontWeight: 500, color: C.mute, marginTop: 4}}>$950B valuation · $1,280.32 per token</div>
         </div>
         <div
           style={{
@@ -177,9 +177,9 @@ export const BuyModal: React.FC<{s: ModalState}> = ({s}) => {
 
       <div style={{display: 'flex', flexDirection: 'column', gap: 14, padding: '10px 6px 0'}}>
         {[
-          ['Rate', '1 T-OpenAI = $812.79'],
+          ['Rate', '1 T-OpenAI = $1,280.32'],
           ['Settlement', 'Instant · on Solana'],
-          ['KYC', 'Not required'],
+          ['Accreditation', 'Not required'],
         ].map(([k, v]) => (
           <div key={k} style={{display: 'flex', alignItems: 'center', fontSize: 22, fontWeight: 500}}>
             <span style={{color: C.mute}}>{k}</span>
@@ -222,7 +222,7 @@ export const BuyModal: React.FC<{s: ModalState}> = ({s}) => {
           fontWeight: 800,
           letterSpacing: '-0.025em',
           transform: `scale(${1 - s.press * 0.04 + s.hover * 0.01})`,
-          boxShadow: ok ? '0 20px 40px -16px rgba(17,17,17,0.5)' : `0 ${14 + s.hover * 10}px ${32 + s.hover * 10}px -14px rgba(141,184,0,0.95)`,
+          boxShadow: ok ? '0 20px 40px -16px rgba(17,17,17,0.5)' : `0 ${14 + s.hover * 10}px ${32 + s.hover * 10}px -14px rgba(74,140,30,0.95)`,
           position: 'relative',
           overflow: 'hidden',
         }}

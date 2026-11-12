@@ -6,16 +6,16 @@ export const H = 1080;
 export const sec = (s: number) => Math.round(s * FPS);
 
 export const C = {
-  bg: '#FAFAFA',
-  ink: '#111111',
-  lime: '#C6FF00',
-  limeDeep: '#8DB800',
-  mute: '#6E6E73',
+  bg: '#F7F7F0', // warm cream, as app.tessera.fun
+  ink: '#0F0F0D',
+  lime: '#CFF991', // site's soft lime
+  limeDeep: '#5FA82E',
+  mute: '#6B6E64',
   faint: '#A1A1A6',
   line: 'rgba(17,17,17,0.08)',
   lineStrong: 'rgba(17,17,17,0.14)',
   card: '#FFFFFF',
-  soft: '#F2F2F0',
+  soft: '#F0F1E6',
   green: '#2A6A14', // brand deep green (wordmark full stop, highlights)
 };
 

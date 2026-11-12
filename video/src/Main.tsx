@@ -9,7 +9,7 @@ import {Benefits} from './scenes/Benefits';
 import {Close} from './scenes/Close';
 import {C, eInOut, FONT, mix, p, sec} from './theme';
 
-/** Product starts early so the browser rises under the outgoing "No KYC." */
+/** Product starts early so the browser rises under the outgoing "No accreditation." */
 export const PRODUCT_LEAD = 14;
 
 export const SCENES = {

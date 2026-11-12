@@ -129,7 +129,7 @@ export const KineticLine: React.FC<{
                   <span style={{color: C.green}}>.</span>
                 </span>
               ) : (
-                <span style={{position: 'relative', zIndex: 1}}>{w.text}</span>
+                <span style={{position: 'relative', zIndex: 1, color: w.hl === 'marker' ? C.green : undefined}}>{w.text}</span>
               )}
             </span>
           </span>

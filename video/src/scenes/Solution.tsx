@@ -17,7 +17,7 @@ const ODO_EXIT = 194;
 const ROWS = 200;
 const STRIKES = [216, 223, 230];
 const ROWS_EXIT = 240;
-const NOKYC = 246;
+const NO_ACCRED = 246;
 const OUT = 288;
 
 const MARK_POS = {x: 400, y: 540};
@@ -45,10 +45,10 @@ export const Solution: React.FC = () => {
   const odoOut = p(f, ODO_EXIT, ODO_EXIT + 14, eIn);
   const pillGrow = p(f, COUNT[1], COUNT[1] + 18, eOut);
 
-  // --- KYC
-  const rows = ['Accreditation checks', 'Brokerage paperwork', 'Weeks of approvals'];
+  // --- Paperwork → No accreditation
+  const rows = ['Net-worth checks', 'Brokerage paperwork', 'Weeks of approvals'];
   const rowsOut = p(f, ROWS_EXIT, ROWS_EXIT + 14, eIn);
-  const slam = sp(f, NOKYC, {damping: 13, stiffness: 210, mass: 0.9});
+  const slam = sp(f, NO_ACCRED, {damping: 13, stiffness: 210, mass: 0.9});
   const out = p(f, OUT, 300, eIn);
 
   const ticks: number[] = [];
@@ -164,7 +164,7 @@ export const Solution: React.FC = () => {
                   borderRadius: 48,
                   transform: `scale(${mix(pillGrow, 0.3, 1)})`,
                   opacity: pillGrow,
-                  boxShadow: '0 40px 90px -30px rgba(141,184,0,0.7)',
+                  boxShadow: '0 40px 90px -30px rgba(74,140,30,0.7)',
                 }}
               />
             )}
@@ -188,7 +188,7 @@ export const Solution: React.FC = () => {
         </AbsoluteFill>
       )}
 
-      {/* KYC rows */}
+      {/* Paperwork rows */}
       {f >= ROWS && rowsOut < 1 && (
         <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center', gap: 30}}>
           {rows.map((r, i) => {
@@ -231,22 +231,22 @@ export const Solution: React.FC = () => {
         </AbsoluteFill>
       )}
 
-      {/* No KYC. */}
-      {f >= NOKYC && (
+      {/* No accreditation. */}
+      {f >= NO_ACCRED && (
         <AbsoluteFill style={{alignItems: 'center', justifyContent: 'center'}}>
           <div
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 52,
+              gap: 36,
               transform: `scale(${mix(slam, 1.6, 1)})`,
               filter: `blur(${mix(Math.min(1, slam * 1.3), 18, 0)}px)`,
-              opacity: Math.min(1, (f - NOKYC) / 5),
+              opacity: Math.min(1, (f - NO_ACCRED) / 5),
             }}
           >
             <span
               style={{
-                fontSize: 230,
+                fontSize: 156,
                 fontWeight: 800,
                 letterSpacing: '-0.055em',
                 lineHeight: 1,
@@ -257,17 +257,17 @@ export const Solution: React.FC = () => {
             </span>
             <span
               style={{
-                fontSize: 230,
+                fontSize: 156,
                 fontWeight: 800,
                 letterSpacing: '-0.055em',
                 lineHeight: 1,
                 background: C.lime,
                 color: C.ink,
                 padding: '0.02em 0.18em 0.08em',
-                borderRadius: 44,
+                borderRadius: 32,
               }}
             >
-              KYC.
+              accreditation.
             </span>
           </div>
           <div
@@ -277,8 +277,8 @@ export const Solution: React.FC = () => {
               fontWeight: 600,
               letterSpacing: '-0.025em',
               color: C.mute,
-              opacity: p(f, NOKYC + 10, NOKYC + 26),
-              transform: `translateY(${mix(p(f, NOKYC + 10, NOKYC + 30), 24, 0)}px)`,
+              opacity: p(f, NO_ACCRED + 10, NO_ACCRED + 26),
+              transform: `translateY(${mix(p(f, NO_ACCRED + 10, NO_ACCRED + 30), 24, 0)}px)`,
             }}
           >
             Connect a wallet. Buy in seconds.
@@ -300,7 +300,7 @@ export const Solution: React.FC = () => {
       {STRIKES.map((s) => (
         <Sfx key={s} at={s} name="swipe" volume={0.7} />
       ))}
-      <Sfx at={NOKYC + 2} name="impact" volume={0.85} />
+      <Sfx at={NO_ACCRED + 2} name="impact" volume={0.85} />
       <Sfx at={OUT - 4} name="whoosh" volume={0.55} />
     </AbsoluteFill>
   );
