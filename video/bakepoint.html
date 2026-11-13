@@ -11,51 +11,84 @@
 @font-face{font-family:"Mono";src:url(fonts/jetbrains-mono-latin-500-normal.woff2) format("woff2");font-weight:500}
 @font-face{font-family:"Mono";src:url(fonts/jetbrains-mono-latin-700-normal.woff2) format("woff2");font-weight:700}
 :root{
-  --bg:#050705; --lime:#c3ea6e; --ink:#f0f5ec; --mute:#8b9986;
-  --line:rgba(195,234,110,.14); --line-strong:rgba(195,234,110,.4);
+  --bg:#050705; --lime:#c3ea6e; --ink:#f0f5ec; --mute:#8b9986; --red:#f26a57;
+  --cream:#f3f1ea; --dark-ink:#0d110d; --line-strong:rgba(195,234,110,.4);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:1920px;height:1080px;overflow:hidden;background:var(--bg)}
 body{font-family:"Grotesk",sans-serif;color:var(--ink)}
 #stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:var(--bg)}
 .abs{position:absolute}
+.layer{position:absolute;inset:0;overflow:hidden}
 .center{left:0;right:0;display:flex;justify-content:center;align-items:center}
 .mono{font-family:"Mono",monospace;letter-spacing:.22em;text-transform:uppercase}
 .mask{overflow:hidden;display:inline-block;vertical-align:top;padding:0 .06em .08em;margin:0 -.06em -.08em}
 .mask>span{display:inline-block;will-change:transform}
+.w{display:inline-block;white-space:pre}
 
-#grid{inset:-80px;background-image:
-  linear-gradient(var(--line) 1px,transparent 1px),
-  linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:80px 80px}
-#vignette{inset:0;background:radial-gradient(ellipse at center,transparent 35%,rgba(5,7,5,.92) 85%)}
+/* ---------- DARK BACKGROUND: drifting glows + grain ---------- */
+.glow{position:absolute;border-radius:50%;filter:blur(90px)}
+#glowA{width:1100px;height:1100px;background:radial-gradient(circle,rgba(195,234,110,.55),rgba(195,234,110,0) 65%)}
+#glowB{width:900px;height:900px;background:radial-gradient(circle,rgba(46,120,70,.6),rgba(46,120,70,0) 65%)}
+#glowC{width:1400px;height:700px;background:radial-gradient(ellipse,rgba(195,234,110,.35),rgba(195,234,110,0) 65%)}
+#rings{left:960px;top:540px;width:2400px;height:2400px;margin:-1200px 0 0 -1200px;border-radius:50%;
+  background:repeating-radial-gradient(circle,rgba(195,234,110,.05) 0 2px,transparent 2px 90px)}
+#grain{inset:-200px;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
 
-/* HUD */
-.hud{font-size:18px;color:var(--mute)}
-.hud b{color:var(--lime);font-weight:500}
-#hudTL{left:64px;top:52px}
-#hudTR{right:64px;top:52px;text-align:right}
-#hudBL{left:64px;bottom:52px}
-#hudBR{right:64px;bottom:52px;text-align:right}
-.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--lime);box-shadow:0 0 14px var(--lime);margin-right:14px;vertical-align:1px}
+/* ---------- LIGHT LAYER ---------- */
+#light{background:radial-gradient(ellipse at 50% 45%,#fdfcf8 0%,var(--cream) 55%,#e9e6dc 100%);color:var(--dark-ink)}
+#lglow{width:1000px;height:1000px;border-radius:50%;filter:blur(110px);background:radial-gradient(circle,rgba(195,234,110,.55),rgba(195,234,110,0) 65%)}
 
-/* Scene A */
-#aLine{top:539px;left:960px;height:2px;background:var(--lime);box-shadow:0 0 12px rgba(195,234,110,.6)}
-#aText{top:575px;font-size:26px;color:var(--ink)}
+/* S1 hook */
+.s1Line{font-weight:500;font-size:118px;letter-spacing:-.04em;line-height:1.1;gap:.26em}
+#s1a{top:360px}
+#s1b{top:500px}
+.hlWrap{position:relative;display:inline-block}
+.hl{position:absolute;left:-.12em;right:-.12em;top:.12em;bottom:.02em;background:var(--lime);border-radius:.18em;transform-origin:left center;z-index:-1}
+#s1b{isolation:isolate}
 
-/* Scene B */
+/* S2 chips */
+#s2Lab{top:250px;font-size:22px;color:#7b8075}
+.chip{position:absolute;left:960px;top:0;height:112px;padding:0 50px;border-radius:999px;background:#e5e3da;
+  display:flex;align-items:center;font-weight:500;font-size:56px;letter-spacing:-.03em;color:#6a6e66;white-space:nowrap;
+  box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 18px 40px rgba(0,0,0,.06)}
+.chip b{color:#e2483a;font-weight:700;margin-left:.28em}
+.strike{position:absolute;left:36px;right:36px;top:54px;height:6px;border-radius:3px;background:#e2483a;transform-origin:left center}
+
+/* S6 code card */
+#card{left:410px;top:215px;width:1100px;height:650px;border-radius:24px;background:#0b0f0b;
+  border:1px solid rgba(195,234,110,.22);box-shadow:0 70px 140px rgba(20,30,10,.28),0 10px 30px rgba(0,0,0,.18);
+  transform-origin:50% 60%;overflow:hidden}
+#cardHead{height:64px;border-bottom:1px solid rgba(195,234,110,.12);display:flex;align-items:center;padding:0 26px;gap:10px}
+#cardHead i{width:14px;height:14px;border-radius:50%;background:#2a322a;display:block}
+#cardHead span{margin-left:18px;font-family:"Mono";font-size:20px;color:var(--mute)}
+#code{padding:38px 56px;font-family:"Mono";font-size:37px;line-height:1.6;color:var(--ink);white-space:pre}
+#code .k{color:var(--lime)} #code .s{color:#e9e2c8} #code .n{color:var(--red)} #code .c{color:#5f6b5b} #code .p{color:#8b9986}
+.caret{display:inline-block;width:.55em;height:1.05em;background:var(--lime);vertical-align:-.15em}
+#bakeBtn{position:absolute;right:44px;bottom:40px;height:74px;padding:0 34px;border-radius:16px;background:var(--lime);color:#0b0f0b;
+  font-weight:700;font-size:30px;display:flex;align-items:center;gap:14px;letter-spacing:-.01em}
+#cardFlash{inset:0;border-radius:24px;box-shadow:0 0 0 3px var(--lime) inset,0 0 120px rgba(195,234,110,.6) inset;pointer-events:none}
+
+/* ---------- DARK SCENES ---------- */
+/* S3 less talk / more baking */
+#s3a{top:420px;font-weight:500;font-size:96px;letter-spacing:-.04em;color:var(--mute);gap:.26em}
+#s3b{top:300px;left:0;white-space:nowrap;font-weight:700;font-size:400px;letter-spacing:-.05em;line-height:1;color:var(--lime);
+  text-shadow:0 0 40px rgba(195,234,110,.55),0 0 120px rgba(195,234,110,.45)}
+
+/* S4 wordmark + dial */
 #dial{left:960px;top:540px;width:1040px;height:1040px;margin:-520px 0 0 -520px}
 #bWord{top:0;bottom:0;font-weight:700;font-size:172px;letter-spacing:-.045em;line-height:1}
-#bWord .lime{color:var(--lime)}
+#bWord .lime,#fWord .lime{color:var(--lime)}
 #bTemp{top:660px;font-size:24px;color:var(--mute)}
 
-/* Scene C */
+/* S5 tagline */
 .cLine{font-weight:500;font-size:112px;letter-spacing:-.035em;line-height:1.08}
 #c1{top:380px}
 #c2{top:510px;color:var(--mute)}
 #c2 .lime{color:var(--lime)}
 
-/* Scene D */
+/* S7 details */
 #dRow{top:330px;left:160px;right:160px;height:420px;display:flex}
 .dCol{flex:1;position:relative;padding:44px 48px}
 .dBorder{position:absolute;left:0;top:0;width:2px;background:var(--line-strong)}
@@ -64,80 +97,114 @@ body{font-family:"Grotesk",sans-serif;color:var(--ink)}
 .dVal{margin-top:110px;font-weight:700;font-size:118px;letter-spacing:-.04em;line-height:1}
 .dSub{margin-top:22px;font-size:20px;color:var(--mute)}
 
-/* Scene E */
+/* S8 hosts */
 #eLab{top:360px;font-size:22px;color:var(--mute)}
 #eRow{top:440px;height:200px;gap:70px}
 .eWord{font-weight:700;font-size:136px;letter-spacing:-.04em;line-height:1}
 #eX{font-weight:400;font-size:110px;color:var(--lime);line-height:1}
 
-/* Scene F */
+/* S9 end card */
 #fWord{top:330px;font-weight:700;font-size:230px;letter-spacing:-.045em;line-height:1}
-#fWord .lime{color:var(--lime)}
 #fRule{top:620px;left:960px;height:2px;background:var(--lime)}
 #fMeta{top:666px;font-size:28px;color:var(--ink)}
 #fMeta i{font-style:normal;color:var(--lime);padding:0 22px}
 #fTag{top:760px;font-size:20px;color:var(--mute)}
-#fade{inset:0;background:var(--bg);pointer-events:none}
+
+/* cursor + fades */
+#cursor{left:0;top:0;width:58px;height:58px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.28));transform-origin:8px 6px}
+#ripple{width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:3px solid var(--lime)}
+#fadeIn{inset:0;background:var(--cream)}
+#fadeOut{inset:0;background:var(--bg)}
 </style>
 </head>
 <body>
 <div id="stage">
-  <div id="grid" class="abs"></div>
-  <div id="vignette" class="abs"></div>
 
-  <!-- HUD -->
-  <div id="hudTL" class="abs mono hud"><span class="dot"></span><b>BAKEPOINT</b> // TEASER</div>
-  <div id="hudTR" class="abs mono hud">LONDON <b>51.50°N</b> 0.12°W</div>
-  <div id="hudBL" class="abs mono hud">SOLANA BREAKPOINT 2026</div>
-  <div id="hudBR" class="abs mono hud">T-<b id="hudT">000.00</b></div>
+  <!-- ================= DARK LAYER ================= -->
+  <div id="dark" class="layer">
+    <div id="rings" class="abs"></div>
+    <div id="glowA" class="glow"></div>
+    <div id="glowB" class="glow"></div>
+    <div id="glowC" class="glow"></div>
 
-  <!-- A: intro line -->
-  <div id="aLine" class="abs"></div>
-  <div id="aText" class="abs center mono"></div>
+    <!-- S3 -->
+    <div id="s3a" class="abs center"><span class="w">Less</span><span class="w">talk.</span></div>
+    <div id="s3b" class="abs">More baking. More baking.</div>
 
-  <!-- B: wordmark + dial -->
-  <svg id="dial" class="abs" viewBox="-380 -380 760 760">
-    <circle id="dialRing" r="360" fill="none" stroke="rgba(195,234,110,.22)" stroke-width="2"
-      stroke-dasharray="2262" stroke-dashoffset="2262" transform="rotate(-90)"/>
-    <g id="ticks"></g>
-    <g id="needle"><line x1="0" y1="-300" x2="0" y2="-345" stroke="#c3ea6e" stroke-width="5" stroke-linecap="round"/></g>
-  </svg>
-  <div id="bWord" class="abs center"></div>
-  <div id="bTemp" class="abs center mono">OVEN&nbsp;·&nbsp;<span id="bDeg" style="color:var(--lime)">0</span>°C</div>
+    <!-- S4 -->
+    <svg id="dial" class="abs" viewBox="-380 -380 760 760">
+      <circle id="dialRing" r="360" fill="none" stroke="rgba(195,234,110,.22)" stroke-width="2"
+        stroke-dasharray="2262" stroke-dashoffset="2262" transform="rotate(-90)"/>
+      <g id="ticks"></g>
+      <g id="needle"><line x1="0" y1="-300" x2="0" y2="-345" stroke="#c3ea6e" stroke-width="5" stroke-linecap="round"/></g>
+    </svg>
+    <div id="bWord" class="abs center"></div>
+    <div id="bTemp" class="abs center mono">OVEN&nbsp;·&nbsp;<span id="bDeg" style="color:var(--lime)">0</span>°C</div>
 
-  <!-- C: tagline -->
-  <div id="c1" class="abs center cLine"><span class="mask"><span>A baking showdown</span></span></div>
-  <div id="c2" class="abs center cLine"><span class="mask"><span>for the <span class="lime">Solana</span> community.</span></span></div>
+    <!-- S5 -->
+    <div id="c1" class="abs center cLine"><span class="mask"><span>A baking showdown</span></span></div>
+    <div id="c2" class="abs center cLine"><span class="mask"><span>for the <span class="lime">Solana</span> community.</span></span></div>
 
-  <!-- D: details -->
-  <div id="dRow" class="abs">
-    <div class="dCol"><div class="dTop"></div><div class="dBorder"></div>
-      <div class="dLab mono">01 / Date</div><div class="mask dVal"><span id="dDate">16 NOV</span></div><div class="dSub mono">During Breakpoint</div></div>
-    <div class="dCol"><div class="dTop"></div><div class="dBorder"></div>
-      <div class="dLab mono">02 / City</div><div class="mask dVal"><span>LONDON</span></div><div class="dSub mono">United Kingdom</div></div>
-    <div class="dCol"><div class="dTop"></div><div class="dBorder"></div><div class="dBorder" style="left:auto;right:0"></div>
-      <div class="dLab mono">03 / Access</div><div class="mask dVal"><span>INVITE</span></div><div class="dSub mono">Invite only</div></div>
+    <!-- S7 -->
+    <div id="dRow" class="abs">
+      <div class="dCol"><div class="dTop"></div><div class="dBorder"></div>
+        <div class="dLab mono">01 / Date</div><div class="mask dVal"><span id="dDate">16 NOV</span></div><div class="dSub mono">During Breakpoint</div></div>
+      <div class="dCol"><div class="dTop"></div><div class="dBorder"></div>
+        <div class="dLab mono">02 / City</div><div class="mask dVal"><span>LONDON</span></div><div class="dSub mono">United Kingdom</div></div>
+      <div class="dCol"><div class="dTop"></div><div class="dBorder"></div><div class="dBorder" style="left:auto;right:0"></div>
+        <div class="dLab mono">03 / Access</div><div class="mask dVal"><span>INVITE</span></div><div class="dSub mono">Invite only</div></div>
+    </div>
+
+    <!-- S8 -->
+    <div id="eLab" class="abs center mono">Brought to you by</div>
+    <div id="eRow" class="abs center">
+      <div class="mask eWord"><span id="eL">Tessera</span></div>
+      <div id="eX">×</div>
+      <div class="mask eWord"><span id="eR">Meteora</span></div>
+    </div>
+
+    <!-- S9 -->
+    <div id="fWord" class="abs center"></div>
+    <div id="fRule" class="abs"></div>
+    <div id="fMeta" class="abs center mono"><span>16 NOV</span><i>/</i><span>LONDON</span><i>/</i><span>INVITE ONLY</span></div>
+    <div id="fTag" class="abs center mono">Filmed in full · Coming soon</div>
   </div>
 
-  <!-- E: hosts -->
-  <div id="eLab" class="abs center mono">Brought to you by</div>
-  <div id="eRow" class="abs center">
-    <div class="mask eWord"><span id="eL">Tessera</span></div>
-    <div id="eX">×</div>
-    <div class="mask eWord"><span id="eR">Meteora</span></div>
+  <!-- ================= LIGHT LAYER (circle-wiped) ================= -->
+  <div id="light" class="layer">
+    <div id="lglow" class="abs"></div>
+
+    <!-- S1 -->
+    <div id="s1a" class="abs center s1Line"><span class="w">This</span><span class="w">Breakpoint,</span></div>
+    <div id="s1b" class="abs center s1Line"><span class="w">we’re</span><span class="w">doing</span><span class="w">something</span><span class="w hlWrap"><span class="hl" id="hl"></span>different.</span></div>
+
+    <!-- S2 -->
+    <div id="s2Lab" class="abs center mono">Breakpoint week, usually</div>
+    <div class="chip" id="ch0">Too many<b>panels</b><div class="strike"></div></div>
+    <div class="chip" id="ch1">Too many<b>pitch decks</b><div class="strike"></div></div>
+    <div class="chip" id="ch2">Too many<b>side events</b><div class="strike"></div></div>
+
+    <!-- S6 -->
+    <div id="card" class="abs">
+      <div id="cardHead"><i></i><i></i><i></i><span>bakepoint.config.ts</span></div>
+      <div id="code"></div>
+      <div id="bakeBtn"><span id="bakeTxt">Bake</span><span id="bakeIcon">▶</span></div>
+      <div id="cardFlash" class="abs"></div>
+    </div>
   </div>
 
-  <!-- F: end card -->
-  <div id="fWord" class="abs center"></div>
-  <div id="fRule" class="abs"></div>
-  <div id="fMeta" class="abs center mono"><span>16 NOV</span><i>/</i><span>LONDON</span><i>/</i><span>INVITE ONLY</span></div>
-  <div id="fTag" class="abs center mono">Filmed in full · Coming soon</div>
+  <div id="grain" class="abs"></div>
 
-  <div id="fade" class="abs"></div>
+  <!-- cursor -->
+  <div id="ripple" class="abs"></div>
+  <svg id="cursor" class="abs" viewBox="0 0 32 32"><path d="M5 3 L5 25 L11 19.5 L15 28.5 L19 26.8 L15 18 L23 18 Z" fill="#0d110d" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+
+  <div id="fadeIn" class="abs"></div>
+  <div id="fadeOut" class="abs"></div>
 </div>
 
 <script>
-const DURATION = 18;          // seconds
+const DURATION = 30;
 const $ = id => document.getElementById(id);
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const prog = (t, a, b) => clamp((t - a) / (b - a));
@@ -145,148 +212,263 @@ const eOut = p => 1 - Math.pow(1 - p, 3);
 const eOut5 = p => 1 - Math.pow(1 - p, 5);
 const eInOut = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
 const eIn = p => p * p * p;
+const eBack = p => { const c1 = 1.9, c3 = c1 + 1; return p <= 0 ? 0 : 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
 const lerp = (a, b, p) => a + (b - a) * p;
+function vis(el, o) { el.style.opacity = o; el.style.visibility = o <= 0.001 ? 'hidden' : 'visible'; }
+const live = (t, a, b) => t >= a && t <= b;
 
-// Letter-split wordmarks
+// ---------- one-time setup ----------
 function splitWord(el, parts) {
-  el.innerHTML = '';
-  const spans = [];
-  parts.forEach(([txt, cls]) => {
-    [...txt].forEach(ch => {
-      const m = document.createElement('span'); m.className = 'mask';
-      const s = document.createElement('span'); s.textContent = ch; if (cls) s.className = cls;
-      m.appendChild(s); el.appendChild(m); spans.push(s);
-    });
-  });
+  el.innerHTML = ''; const spans = [];
+  parts.forEach(([txt, cls]) => [...txt].forEach(ch => {
+    const m = document.createElement('span'); m.className = 'mask';
+    const s = document.createElement('span'); s.textContent = ch; if (cls) s.className = cls;
+    m.appendChild(s); el.appendChild(m); spans.push(s);
+  }));
   return spans;
 }
 const bLetters = splitWord($('bWord'), [['BAKE', ''], ['POINT', 'lime']]);
 const fLetters = splitWord($('fWord'), [['BAKE', ''], ['POINT', 'lime']]);
-
-// Dial ticks
 (() => {
-  const g = $('ticks'); let h = '';
+  let h = '';
   for (let i = 0; i < 72; i++) {
-    const a = i * 5, big = i % 6 === 0, r1 = big ? 318 : 328;
-    h += `<line data-i="${i}" x1="0" y1="-${r1}" x2="0" y2="-340" transform="rotate(${a})"
+    const big = i % 6 === 0;
+    h += `<line x1="0" y1="-${big ? 318 : 328}" x2="0" y2="-340" transform="rotate(${i * 5})"
       stroke="${big ? '#c3ea6e' : 'rgba(195,234,110,.35)'}" stroke-width="${big ? 3 : 2}" opacity="0"/>`;
   }
-  g.innerHTML = h;
+  $('ticks').innerHTML = h;
 })();
 const ticks = [...document.querySelectorAll('#ticks line')];
 const dCols = [...document.querySelectorAll('.dCol')];
-const aFull = 'Solana Breakpoint · London';
+const s1Words = [...document.querySelectorAll('#s1a .w, #s1b .w')];
+const s3Words = [...document.querySelectorAll('#s3a .w')];
+const chips = [0, 1, 2].map(i => $('ch' + i));
+const chipW = chips.map(c => c.offsetWidth);
 
-function vis(el, o) { el.style.opacity = o; el.style.visibility = o <= 0.001 ? 'hidden' : 'visible'; }
+// code tokens: [text, class]
+const TOKENS = [
+  ['const ', 'p'], ['showdown', 'k'], [' = {\n', 'p'],
+  ['  city', 'k'], [':   ', 'p'], ['"London"', 's'], [',\n', 'p'],
+  ['  date', 'k'], [':   ', 'p'], ['"Nov 16"', 's'], [',\n', 'p'],
+  ['  bakers', 'k'], [': ', 'p'], ['"Solana builders"', 's'], [',\n', 'p'],
+  ['  oven', 'k'], [':   ', 'p'], ['180', 'n'], [', ', 'p'], ['// °C', 'c'], ['\n', 'p'],
+  ['  access', 'k'], [': ', 'p'], ['"invite-only"', 's'], [',\n', 'p'],
+  ['};', 'p'],
+];
+const CODE_LEN = TOKENS.reduce((a, [s]) => a + s.length, 0);
+const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+function codeHTML(n, caret) {
+  let out = '', left = n;
+  for (const [s, c] of TOKENS) { if (left <= 0) break; out += `<span class="${c}">${esc(s.slice(0, left))}</span>`; left -= s.length; }
+  return out + (caret ? '<span class="caret"></span>' : '');
+}
 
+// ---------- light-layer wipe ----------
+const BTN = [1388, 798];   // bake button centre on screen (end of card motion)
+function lightClip(t) {
+  const R = 2300;
+  if (t < 6.35) return [R, 960, 540];
+  if (t < 6.95) return [R * (1 - eIn(prog(t, 6.35, 6.95))), 960, 600];
+  if (t < 16.3) return [0, 960, 540];
+  if (t < 16.95) return [R * eInOut(prog(t, 16.3, 16.95)), 960, 540];
+  if (t < 20.25) return [R, 960, 540];
+  if (t < 20.85) return [R * (1 - eIn(prog(t, 20.25, 20.85))), BTN[0], BTN[1]];
+  return [0, 960, 540];
+}
+
+// ---------- cursor keyframes ----------
+const CUR = [
+  [4.75, 1980, 1000], [5.35, 1150, 712], [5.55, 1150, 712], [6.4, 1150, 712],
+  [18.6, 1990, 1100], [19.45, BTN[0] - 10, BTN[1] - 8], [20.4, BTN[0] - 10, BTN[1] - 8],
+];
+const CLICKS = [5.42, 19.55];
+function cursorAt(t) {
+  if (!(live(t, 4.75, 6.45) || live(t, 18.6, 20.45))) return null;
+  for (let i = 0; i < CUR.length - 1; i++) {
+    const [t0, x0, y0] = CUR[i], [t1, x1, y1] = CUR[i + 1];
+    if (t >= t0 && t <= t1) { const p = eInOut(prog(t, t0, t1)); return [lerp(x0, x1, p), lerp(y0, y1, p)]; }
+  }
+  return null;
+}
+
+// ================= render(t) =================
 function render(t) {
-  // Background grid: fade in, slow drift
-  vis($('grid'), eOut(prog(t, 0, 1.6)) * .9);
-  $('grid').style.transform = `translate(${-t * 6}px, ${-t * 3}px)`;
+  // ---- dark background: drifting glows
+  const gA = .55 + .2 * Math.sin(t * .9);
+  $('glowA').style.transform = `translate(${410 + Math.sin(t * .35) * 260}px, ${-10 + Math.cos(t * .28) * 160}px)`;
+  $('glowA').style.opacity = gA * (live(t, 9, 13.3) || t > 24.4 ? 1 : .65);
+  $('glowB').style.transform = `translate(${-200 + Math.cos(t * .3) * 180}px, ${420 + Math.sin(t * .4) * 120}px)`;
+  $('glowB').style.opacity = .8;
+  $('glowC').style.transform = `translate(${1100 + Math.sin(t * .25 + 1) * 220}px, ${-280 + Math.cos(t * .33) * 120}px)`;
+  $('glowC').style.opacity = .5;
+  $('rings').style.transform = `scale(${1 + (t % 6) / 60})`;
+  $('rings').style.opacity = .9;
+  $('grain').style.transform = `translate(${(Math.floor(t * 24) * 37) % 200 - 100}px, ${(Math.floor(t * 24) * 53) % 200 - 100}px)`;
 
-  // HUD
-  const hud = eOut(prog(t, 1.4, 2.2));
-  ['hudTL', 'hudTR', 'hudBL', 'hudBR'].forEach((id, i) => {
-    const p = eOut(prog(t, 1.4 + i * .08, 2.2 + i * .08));
-    vis($(id), p); $(id).style.transform = `translateY(${(1 - p) * (i < 2 ? -14 : 14)}px)`;
+  // ---- light layer clip + bg glow
+  const [r, cx, cy] = lightClip(t);
+  $('light').style.clipPath = `circle(${r}px at ${cx}px ${cy}px)`;
+  vis($('light'), r > 0.5 ? 1 : 0);
+  $('lglow').style.transform = `translate(${460 + Math.sin(t * .5) * 200}px, ${40 + Math.cos(t * .4) * 120}px)`;
+
+  // ================= S1 (light) 0.2 – 3.7 : hook =================
+  s1Words.forEach((w, i) => {
+    const s = .35 + i * .16 + (i >= 2 ? .25 : 0);
+    const p = eOut(prog(t, s, s + .7));
+    const q = eIn(prog(t, 3.25 + i * .03, 3.65 + i * .03));
+    w.style.opacity = p * (1 - q);
+    w.style.filter = `blur(${(1 - p) * 16 + q * 14}px)`;
+    w.style.transform = `translateY(${(1 - p) * 46 - q * 40}px)`;
   });
-  document.querySelector('#hudTL .dot').style.opacity = .45 + .55 * (0.5 + 0.5 * Math.cos(t * Math.PI * 1.6));
-  $('hudT').textContent = Math.max(0, DURATION - t).toFixed(2).padStart(6, '0');
+  vis($('s1a'), t < 3.8 ? 1 : 0); vis($('s1b'), t < 3.8 ? 1 : 0);
+  $('hl').style.transform = `scaleX(${eInOut(prog(t, 1.75, 2.3)) * (1 - eIn(prog(t, 3.2, 3.5)))})`;
 
-  // ---- A: line + typed label (0 – 2.5)
-  const aIn = eInOut(prog(t, .3, 1.3)), aOut = eIn(prog(t, 2.1, 2.6));
-  const w = 1100 * aIn * (1 - aOut);
-  $('aLine').style.width = w + 'px'; $('aLine').style.marginLeft = (-w / 2) + 'px';
-  vis($('aLine'), w > 1 ? 1 : 0);
-  const n = Math.round(aFull.length * prog(t, .9, 1.9));
-  const cursor = (t < 2.1 && Math.floor(t * 4) % 2 === 0) ? '▍' : ' ';
-  $('aText').textContent = aFull.slice(0, n) + cursor;
-  vis($('aText'), 1 - aOut); $('aText').style.transform = `translateY(${aOut * 20}px)`;
-
-  // ---- B: BAKEPOINT + dial (2.4 – 6.2)
-  const bOut = eIn(prog(t, 5.7, 6.2));
-  bLetters.forEach((s, i) => {
-    const p = eOut5(prog(t, 2.5 + i * .045, 3.3 + i * .045));
-    const q = eIn(prog(t, 5.6 + i * .02, 6.0 + i * .02));
-    s.style.transform = `translateY(${(1 - p) * 135 - q * 135}%)`;
+  // ================= S2 (light) 3.7 – 6.4 : chips =================
+  const lab = eOut(prog(t, 3.75, 4.2));
+  vis($('s2Lab'), live(t, 3.7, 6.5) ? lab : 0);
+  $('s2Lab').style.transform = `translateY(${(1 - lab) * 14}px)`;
+  const appear = chips.map((c, i) => prog(t, 3.9 + i * .42, 4.45 + i * .42));
+  const count = appear.reduce((a, p) => a + eOut(p), 0);
+  chips.forEach((c, i) => {
+    const p = appear[i];
+    const y = 560 + (i - (Math.max(count, 1) - 1) / 2) * 136 - 56;
+    c.style.top = y + 'px';
+    c.style.marginLeft = (-chipW[i] / 2) + 'px';
+    c.style.transform = `scale(${lerp(.6, 1, eBack(p))})`;
+    vis(c, live(t, 3.8, 6.5) ? clamp(p * 3) : 0);
+    c.querySelector('.strike').style.transform = `scaleX(${eInOut(prog(t, 5.5 + i * .12, 5.85 + i * .12))})`;
+    c.style.color = t > 5.6 + i * .12 ? '#a3a69e' : '#6a6e66';
   });
-  vis($('bWord'), t > 2.4 && t < 6.3 ? 1 : 0);
-  const ring = eInOut(prog(t, 2.4, 3.6));
-  $('dialRing').setAttribute('stroke-dashoffset', 2262 * (1 - ring));
-  ticks.forEach((l, i) => l.setAttribute('opacity', eOut(prog(t, 2.6 + i * .012, 3.0 + i * .012)) * (1 - bOut)));
-  const heat = eInOut(prog(t, 3.2, 5.4));
-  $('needle').setAttribute('transform', `rotate(${lerp(-120, 120, heat)})`);
-  $('needle').setAttribute('opacity', eOut(prog(t, 3.0, 3.4)) * (1 - bOut));
-  $('bDeg').textContent = Math.round(180 * heat);
-  vis($('dial'), (t > 2.4 ? 1 : 0) * (1 - bOut));
-  $('dial').style.transform = `scale(${lerp(.94, 1.02, eOut(prog(t, 2.4, 6.2))) + bOut * .12}) rotate(${t * 2}deg)`;
-  const bt = eOut(prog(t, 3.3, 3.9)) * (1 - bOut);
-  vis($('bTemp'), bt); $('bTemp').style.transform = `translateY(${(1 - bt) * 16}px)`;
 
-  // ---- C: tagline (6.1 – 9.6)
-  [['c1', 6.15], ['c2', 6.4]].forEach(([id, s0], i) => {
-    const p = eOut5(prog(t, s0, s0 + .8)), q = eIn(prog(t, 9.0 + i * .08, 9.5 + i * .08));
-    const inner = $(id).querySelector('.mask>span');
-    inner.style.transform = `translateY(${(1 - p) * 135 - q * 135}%)`;
-    vis($(id), t > 6 && t < 9.8 ? 1 : 0);
+  // ================= S3 (dark) 6.8 – 9.6 : less talk / more baking =================
+  s3Words.forEach((w, i) => {
+    const p = eOut(prog(t, 6.9 + i * .18, 7.5 + i * .18));
+    const q = eIn(prog(t, 7.85, 8.2));
+    w.style.opacity = p * (1 - q);
+    w.style.filter = `blur(${(1 - p) * 16 + q * 18}px)`;
+    w.style.transform = `translateY(${(1 - p) * 40}px) scale(${1 - q * .1})`;
   });
-  // "Solana" word lights up
-  $('c2').querySelector('.lime').style.color = `rgba(195,234,110,${lerp(.35, 1, eOut(prog(t, 7.2, 7.8)))})`;
+  vis($('s3a'), live(t, 6.8, 8.3) ? 1 : 0);
+  const sb = prog(t, 7.85, 9.75);
+  const sbx = lerp(1960, -3300, sb * .55 + eInOut(sb) * .45);
+  $('s3b').style.transform = `translateX(${sbx}px)`;
+  vis($('s3b'), live(t, 7.85, 9.75) ? 1 : 0);
 
-  // ---- D: details grid (9.5 – 13.4)
-  const dOut = eIn(prog(t, 12.9, 13.4));
-  vis($('dRow'), t > 9.4 && t < 13.5 ? 1 : 0);
-  dCols.forEach((c, i) => {
-    const s = 9.5 + i * .18;
-    const lineP = eInOut(prog(t, s, s + .7));
-    c.querySelectorAll('.dBorder').forEach(b => b.style.height = (420 * lineP * (1 - dOut)) + 'px');
-    c.querySelector('.dTop').style.width = (100 * lineP * (1 - dOut)) + '%';
-    const lab = eOut(prog(t, s + .3, s + .8)) * (1 - dOut);
-    vis(c.querySelector('.dLab'), lab);
-    const v = eOut5(prog(t, s + .45, s + 1.2)), vq = eIn(prog(t, 12.8 + i * .05, 13.3 + i * .05));
-    c.querySelector('.dVal>span').style.transform = `translateY(${(1 - v) * 135 - vq * 135}%)`;
-    const sub = eOut(prog(t, s + .8, s + 1.3)) * (1 - dOut);
-    vis(c.querySelector('.dSub'), sub);
-    c.querySelector('.dSub').style.transform = `translateY(${(1 - sub) * 12}px)`;
-  });
-  // Date counts up to 16
-  const day = Math.max(1, Math.round(16 * eOut(prog(t, 9.95, 11.0))));
-  $('dDate').textContent = String(day).padStart(2, '0') + ' NOV';
+  // ================= S4 (dark) 9.2 – 13.0 : BAKEPOINT + dial =================
+  { const u = t - 6.8;  // original timings 2.4 – 6.2
+    const bOut = eIn(prog(u, 5.7, 6.2));
+    bLetters.forEach((s, i) => {
+      const p = eOut5(prog(u, 2.5 + i * .045, 3.3 + i * .045));
+      const q = eIn(prog(u, 5.6 + i * .02, 6.0 + i * .02));
+      s.style.transform = `translateY(${(1 - p) * 135 - q * 135}%)`;
+    });
+    vis($('bWord'), live(u, 2.4, 6.3) ? 1 : 0);
+    $('dialRing').setAttribute('stroke-dashoffset', 2262 * (1 - eInOut(prog(u, 2.4, 3.6))));
+    ticks.forEach((l, i) => l.setAttribute('opacity', eOut(prog(u, 2.6 + i * .012, 3.0 + i * .012)) * (1 - bOut)));
+    const heat = eInOut(prog(u, 3.2, 5.4));
+    $('needle').setAttribute('transform', `rotate(${lerp(-120, 120, heat)})`);
+    $('needle').setAttribute('opacity', eOut(prog(u, 3.0, 3.4)) * (1 - bOut));
+    $('bDeg').textContent = Math.round(180 * heat);
+    vis($('dial'), (live(u, 2.4, 6.3) ? 1 : 0) * (1 - bOut));
+    $('dial').style.transform = `scale(${lerp(.94, 1.02, eOut(prog(u, 2.4, 6.2))) + bOut * .12}) rotate(${u * 2}deg)`;
+    const bt = eOut(prog(u, 3.3, 3.9)) * (1 - bOut);
+    vis($('bTemp'), bt); $('bTemp').style.transform = `translateY(${(1 - bt) * 16}px)`;
+  }
 
-  // ---- E: hosts (13.3 – 15.6)
-  const eOutP = eIn(prog(t, 15.1, 15.6));
-  const el = eOut5(prog(t, 13.4, 14.2)), er = eOut5(prog(t, 13.6, 14.4));
-  $('eL').style.transform = `translateY(${(1 - el) * 135 + eOutP * -110}%)`;
-  $('eR').style.transform = `translateY(${(1 - er) * 135 + eOutP * -110}%)`;
-  const xp = eOut(prog(t, 13.8, 14.5));
-  $('eX').style.transform = `rotate(${(1 - xp) * -180}deg) scale(${xp * (1 - eOutP)})`;
-  vis($('eX'), xp * (1 - eOutP));
-  vis($('eRow'), t > 13.3 && t < 15.7 ? 1 : 0);
-  const lab = eOut(prog(t, 13.5, 14.0)) * (1 - eOutP);
-  vis($('eLab'), lab); $('eLab').style.transform = `translateY(${(1 - lab) * 12}px)`;
+  // ================= S5 (dark) 13.0 – 16.5 : tagline =================
+  { const u = t - 7.0;  // original 6.0 – 9.5
+    [['c1', 6.15], ['c2', 6.4]].forEach(([id, s0], i) => {
+      const p = eOut5(prog(u, s0, s0 + .8)), q = eIn(prog(u, 9.0 + i * .08, 9.5 + i * .08));
+      $(id).querySelector('.mask>span').style.transform = `translateY(${(1 - p) * 135 - q * 135}%)`;
+      vis($(id), live(u, 6, 9.8) ? 1 : 0);
+    });
+    $('c2').querySelector('.lime').style.color = `rgba(195,234,110,${lerp(.35, 1, eOut(prog(u, 7.2, 7.8)))})`;
+  }
 
-  // ---- F: end card (15.5 – 18)
-  fLetters.forEach((s, i) => {
-    const p = eOut5(prog(t, 15.6 + i * .04, 16.4 + i * .04));
-    s.style.transform = `translateY(${(1 - p) * 135}%)`;
-  });
-  vis($('fWord'), t > 15.5 ? 1 : 0);
-  const r = eInOut(prog(t, 16.1, 16.9)), rw = 1240 * r;
-  $('fRule').style.width = rw + 'px'; $('fRule').style.marginLeft = (-rw / 2) + 'px';
-  vis($('fRule'), rw > 1 ? 1 : 0);
-  const m = eOut(prog(t, 16.5, 17.1));
-  vis($('fMeta'), m); $('fMeta').style.transform = `translateY(${(1 - m) * 16}px)`;
-  const tg = eOut(prog(t, 16.8, 17.4));
-  vis($('fTag'), tg);
+  // ================= S6 (light) 16.6 – 20.4 : recipe-as-code card =================
+  { const p = eOut(prog(t, 16.6, 18.3));
+    $('card').style.transform =
+      `perspective(1800px) translateY(${lerp(170, 0, p)}px) rotateX(${lerp(26, 5, p)}deg) rotateY(${lerp(-22, -4, p)}deg) rotateZ(${lerp(5, 0, p)}deg) scale(${lerp(.86, 1, p)})`;
+    vis($('card'), live(t, 16.4, 20.9) ? clamp(p * 2.5) : 0);
+    const n = Math.round(CODE_LEN * prog(t, 17.3, 19.25));
+    const caretOn = t < 19.5 && Math.floor(t * 3.5) % 2 === 0;
+    $('code').innerHTML = codeHTML(n, caretOn || (t < 19.25 && t > 17.3));
+    const press = prog(t, 19.55, 19.7) - prog(t, 19.7, 19.9);
+    $('bakeBtn').style.transform = `scale(${1 - press * .07})`;
+    const done = t > 19.7;
+    $('bakeTxt').textContent = done ? 'Baking' : 'Bake';
+    $('bakeIcon').textContent = done ? '●' : '▶';
+    $('bakeBtn').style.boxShadow = `0 0 ${done ? 60 : 0}px rgba(195,234,110,${done ? .8 : 0})`;
+    vis($('cardFlash'), done ? (1 - prog(t, 19.7, 20.3)) : 0);
+  }
 
-  // Fade in from black at start, out at end
-  vis($('fade'), Math.max(1 - prog(t, 0, .25), eIn(prog(t, DURATION - .35, DURATION))));
+  // ================= S7 (dark) 20.7 – 24.8 : details =================
+  { const u = t - 11.3;  // original 9.4 – 13.5
+    const dOut = eIn(prog(u, 12.9, 13.4));
+    vis($('dRow'), live(u, 9.4, 13.5) ? 1 : 0);
+    dCols.forEach((c, i) => {
+      const s = 9.5 + i * .18, lineP = eInOut(prog(u, s, s + .7));
+      c.querySelectorAll('.dBorder').forEach(b => b.style.height = (420 * lineP * (1 - dOut)) + 'px');
+      c.querySelector('.dTop').style.width = (100 * lineP * (1 - dOut)) + '%';
+      vis(c.querySelector('.dLab'), eOut(prog(u, s + .3, s + .8)) * (1 - dOut));
+      const v = eOut5(prog(u, s + .45, s + 1.2)), vq = eIn(prog(u, 12.8 + i * .05, 13.3 + i * .05));
+      c.querySelector('.dVal>span').style.transform = `translateY(${(1 - v) * 135 - vq * 135}%)`;
+      const sub = eOut(prog(u, s + .8, s + 1.3)) * (1 - dOut);
+      vis(c.querySelector('.dSub'), sub); c.querySelector('.dSub').style.transform = `translateY(${(1 - sub) * 12}px)`;
+    });
+    $('dDate').textContent = String(Math.max(1, Math.round(16 * eOut(prog(u, 9.95, 11.0))))).padStart(2, '0') + ' NOV';
+  }
+
+  // ================= S8 (dark) 24.7 – 27.1 : hosts =================
+  { const u = t - 11.4;  // original 13.3 – 15.7
+    const out = eIn(prog(u, 15.1, 15.6));
+    const el = eOut5(prog(u, 13.4, 14.2)), er = eOut5(prog(u, 13.6, 14.4));
+    $('eL').style.transform = `translateY(${(1 - el) * 135 - out * 135}%)`;
+    $('eR').style.transform = `translateY(${(1 - er) * 135 - out * 135}%)`;
+    const xp = eOut(prog(u, 13.8, 14.5));
+    $('eX').style.transform = `rotate(${(1 - xp) * -180}deg) scale(${xp * (1 - out)})`;
+    vis($('eX'), xp * (1 - out));
+    vis($('eRow'), live(u, 13.3, 15.7) ? 1 : 0);
+    const l = eOut(prog(u, 13.5, 14.0)) * (1 - out);
+    vis($('eLab'), l); $('eLab').style.transform = `translateY(${(1 - l) * 12}px)`;
+  }
+
+  // ================= S9 (dark) 27.1 – 30 : end card =================
+  { const u = t - 11.6;  // original 15.5 – 18
+    fLetters.forEach((s, i) => s.style.transform = `translateY(${(1 - eOut5(prog(u, 15.6 + i * .04, 16.4 + i * .04))) * 135}%)`);
+    vis($('fWord'), u > 15.5 ? 1 : 0);
+    const rw = 1240 * eInOut(prog(u, 16.1, 16.9));
+    $('fRule').style.width = rw + 'px'; $('fRule').style.marginLeft = (-rw / 2) + 'px';
+    vis($('fRule'), rw > 1 ? 1 : 0);
+    const m = eOut(prog(u, 16.5, 17.1));
+    vis($('fMeta'), m); $('fMeta').style.transform = `translateY(${(1 - m) * 16}px)`;
+    vis($('fTag'), eOut(prog(u, 16.8, 17.4)));
+  }
+
+  // ---- cursor + click ripple
+  const c = cursorAt(t);
+  if (c) {
+    const click = CLICKS.reduce((a, ct) => Math.max(a, prog(t, ct, ct + .08) - prog(t, ct + .08, ct + .2)), 0);
+    $('cursor').style.transform = `translate(${c[0] - 8}px, ${c[1] - 6}px) scale(${1 - click * .18})`;
+    vis($('cursor'), 1);
+  } else vis($('cursor'), 0);
+  let rp = -1, rpos = null;
+  CLICKS.forEach((ct, i) => { const p = prog(t, ct, ct + .55); if (p > 0 && p < 1) { rp = p; rpos = i === 0 ? [1150, 712] : [BTN[0] - 10, BTN[1] - 8]; } });
+  if (rp >= 0) {
+    $('ripple').style.left = rpos[0] + 'px'; $('ripple').style.top = rpos[1] + 'px';
+    $('ripple').style.transform = `scale(${lerp(.2, 1.4, eOut(rp))})`;
+    $('ripple').style.borderColor = rpos[0] === 1150 ? '#e2483a' : '#c3ea6e';
+    vis($('ripple'), 1 - rp);
+  } else vis($('ripple'), 0);
+
+  // ---- fades
+  vis($('fadeIn'), 1 - eOut(prog(t, 0, .35)));
+  vis($('fadeOut'), eIn(prog(t, DURATION - .4, DURATION)));
 }
 
 window.DURATION = DURATION;
 window.render = render;
 
-// Live preview: open the file in a browser to watch it loop (?t=8 freezes a frame)
 const q = new URLSearchParams(location.search);
 if (!navigator.webdriver) {
   if (q.has('t')) render(parseFloat(q.get('t')));
