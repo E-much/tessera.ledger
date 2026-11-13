@@ -324,8 +324,12 @@ def whoosh(dur=0.8, f0=300, f1=4000, peak=0.6, level=1.0):
     return w / (np.abs(w).max() + 1e-9) * level
 
 
+WHOOSH_GAIN = 10 ** (-10 / 20)
+
+
 def whoosh_st(dur, f0, f1, level, pan_from, pan_to, peak=0.6):
-    w = whoosh(dur, f0, f1, peak, level)
+    # whooshes sit well under the music: -10 dB and rounded-off top end
+    w = lp(whoosh(dur, min(f0, 2500), min(f1, 2500), peak, level), 2800) * WHOOSH_GAIN
     pan = np.linspace(pan_from, pan_to, len(w))
     return np.vstack([w * np.cos((pan + 1) * np.pi / 4) * np.sqrt(2), w * np.sin((pan + 1) * np.pi / 4) * np.sqrt(2)])
 
@@ -433,7 +437,7 @@ for t0, d, depth in duck_points:
     i0, i1 = int(t0 * SR), int((t0 + d) * SR)
     seg = np.linspace(0, 1, i1 - i0)
     shape = np.sin(np.pi * seg) ** 1.2
-    duck[i0:i1] = np.minimum(duck[i0:i1], 1 - depth * 0.85 * shape)   # up to ~-4 dB
+    duck[i0:i1] = np.minimum(duck[i0:i1], 1 - depth * 0.35 * shape)   # gentle dip, up to ~-1.5 dB
 
 musicL *= duck; musicR *= duck
 
@@ -450,7 +454,7 @@ def rms_db(x, a, b):
     return 20 * np.log10(np.sqrt(np.mean(seg ** 2)) + 1e-12)
 ref_m = rms_db((musicL + musicR) / 2, 16.2, 17.0)
 ref_s = rms_db((sfx.L + sfx.R) / 2, 16.2, 17.0)
-k = 10 ** ((ref_m - 3 - ref_s) / 20)
+k = 10 ** (1.1 / 20)   # fixed SFX bus gain (whoosh level is set by WHOOSH_GAIN)
 sfxL, sfxR = sfx.L * k, sfx.R * k
 print(f'sfx gain {20*np.log10(k):+.1f} dB')
 
