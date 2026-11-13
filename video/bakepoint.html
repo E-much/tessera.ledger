@@ -278,12 +278,12 @@ function lightClip(t) {
 
 // ---------- cursor keyframes ----------
 const CUR = [
-  [4.75, 1980, 1000], [5.35, 1150, 712], [5.55, 1150, 712], [6.4, 1150, 712],
+  [4.75, 1980, 1000], [5.35, 1150, 712], [5.55, 1150, 712], [6.9, 1150, 712],
   [18.6, 1990, 1100], [19.45, BTN[0] - 10, BTN[1] - 8], [20.4, BTN[0] - 10, BTN[1] - 8],
 ];
 const CLICKS = [5.42, 19.55];
 function cursorAt(t) {
-  if (!(live(t, 4.75, 6.45) || live(t, 18.6, 20.45))) return null;
+  if (!(live(t, 4.75, 6.95) || live(t, 18.6, 20.45))) return null;
   for (let i = 0; i < CUR.length - 1; i++) {
     const [t0, x0, y0] = CUR[i], [t1, x1, y1] = CUR[i + 1];
     if (t >= t0 && t <= t1) { const p = eInOut(prog(t, t0, t1)); return [lerp(x0, x1, p), lerp(y0, y1, p)]; }
@@ -325,7 +325,7 @@ function render(t) {
 
   // ================= S2 (light) 3.7 – 6.4 : chips =================
   const lab = eOut(prog(t, 3.75, 4.2));
-  vis($('s2Lab'), live(t, 3.7, 6.5) ? lab : 0);
+  vis($('s2Lab'), live(t, 3.7, 7.0) ? lab : 0);
   $('s2Lab').style.transform = `translateY(${(1 - lab) * 14}px)`;
   const appear = chips.map((c, i) => prog(t, 3.9 + i * .42, 4.45 + i * .42));
   const count = appear.reduce((a, p) => a + eOut(p), 0);
@@ -335,7 +335,7 @@ function render(t) {
     c.style.top = y + 'px';
     c.style.marginLeft = (-chipW[i] / 2) + 'px';
     c.style.transform = `scale(${lerp(.6, 1, eBack(p))})`;
-    vis(c, live(t, 3.8, 6.5) ? clamp(p * 3) : 0);
+    vis(c, live(t, 3.8, 7.0) ? clamp(p * 3) : 0);
     c.querySelector('.strike').style.transform = `scaleX(${eInOut(prog(t, 5.5 + i * .12, 5.85 + i * .12))})`;
     c.style.color = t > 5.6 + i * .12 ? '#a3a69e' : '#6a6e66';
   });
@@ -386,10 +386,10 @@ function render(t) {
   }
 
   // ================= S6 (light) 16.6 – 20.4 : recipe-as-code card =================
-  { const p = eOut(prog(t, 16.6, 18.3));
+  { const p = eOut(prog(t, 16.3, 18.1));
     $('card').style.transform =
       `perspective(1800px) translateY(${lerp(170, 0, p)}px) rotateX(${lerp(26, 5, p)}deg) rotateY(${lerp(-22, -4, p)}deg) rotateZ(${lerp(5, 0, p)}deg) scale(${lerp(.86, 1, p)})`;
-    vis($('card'), live(t, 16.4, 20.9) ? clamp(p * 2.5) : 0);
+    vis($('card'), live(t, 16.2, 20.9) ? clamp(p * 2.5) : 0);
     const n = Math.round(CODE_LEN * prog(t, 17.3, 19.25));
     const caretOn = t < 19.5 && Math.floor(t * 3.5) % 2 === 0;
     $('code').innerHTML = codeHTML(n, caretOn || (t < 19.25 && t > 17.3));
