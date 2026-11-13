@@ -3,3 +3,4 @@ frames/
 out/*.png
 out/*.wav
 out/*-silent*
+out/*.log
