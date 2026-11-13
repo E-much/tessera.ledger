@@ -53,8 +53,11 @@ body{font-family:"Grotesk",sans-serif;color:var(--ink)}
 .chip{position:absolute;left:960px;top:0;height:112px;padding:0 50px;border-radius:999px;background:#e5e3da;
   display:flex;align-items:center;font-weight:500;font-size:56px;letter-spacing:-.03em;color:#6a6e66;white-space:nowrap;
   box-shadow:0 1px 0 rgba(255,255,255,.8) inset,0 18px 40px rgba(0,0,0,.06)}
-.chip b{color:#e2483a;font-weight:700;margin-left:.28em}
-.strike{position:absolute;left:36px;right:36px;top:54px;height:6px;border-radius:3px;background:#e2483a;transform-origin:left center}
+.chip{padding-left:30px !important}
+.chip b{color:#3f6e0c;font-weight:700;margin-right:.28em}
+.box{width:58px;height:58px;border-radius:50%;border:3px solid #c9c6ba;margin-right:26px;position:relative;flex:none;background:#f6f5f0}
+.tick{position:absolute;inset:-3px;border-radius:50%;background:var(--lime);display:flex;align-items:center;justify-content:center}
+.tick svg{width:34px;height:34px}
 
 /* S6 code card */
 #card{left:410px;top:215px;width:1100px;height:650px;border-radius:24px;background:#0b0f0b;
@@ -128,8 +131,8 @@ body{font-family:"Grotesk",sans-serif;color:var(--ink)}
     <div id="glowC" class="glow"></div>
 
     <!-- S3 -->
-    <div id="s3a" class="abs center"><span class="w">Less</span><span class="w">talk.</span></div>
-    <div id="s3b" class="abs">More baking. More baking.</div>
+    <div id="s3a" class="abs center"><span class="w">Preheat</span><span class="w">the</span><span class="w">oven.</span></div>
+    <div id="s3b" class="abs">Let’s bake. Let’s bake. Let’s bake.</div>
 
     <!-- S4 -->
     <svg id="dial" class="abs" viewBox="-380 -380 760 760">
@@ -179,10 +182,10 @@ body{font-family:"Grotesk",sans-serif;color:var(--ink)}
     <div id="s1b" class="abs center s1Line"><span class="w">we’re</span><span class="w">doing</span><span class="w">something</span><span class="w hlWrap"><span class="hl" id="hl"></span>different.</span></div>
 
     <!-- S2 -->
-    <div id="s2Lab" class="abs center mono">Breakpoint week, usually</div>
-    <div class="chip" id="ch0">Too many<b>panels</b><div class="strike"></div></div>
-    <div class="chip" id="ch1">Too many<b>pitch decks</b><div class="strike"></div></div>
-    <div class="chip" id="ch2">Too many<b>side events</b><div class="strike"></div></div>
+    <div id="s2Lab" class="abs center mono">Today’s recipe</div>
+    <div class="chip" id="ch0"><div class="box"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#0d110d" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><b>500g</b>flour</div>
+    <div class="chip" id="ch1"><div class="box"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#0d110d" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><b>200g</b>sugar</div>
+    <div class="chip" id="ch2"><div class="box"><div class="tick"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#0d110d" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><b>A room full of</b>Solana builders</div>
 
     <!-- S6 -->
     <div id="card" class="abs">
@@ -243,7 +246,7 @@ const dCols = [...document.querySelectorAll('.dCol')];
 const s1Words = [...document.querySelectorAll('#s1a .w, #s1b .w')];
 const s3Words = [...document.querySelectorAll('#s3a .w')];
 const chips = [0, 1, 2].map(i => $('ch' + i));
-const chipW = chips.map(c => c.offsetWidth);
+let chipW = [0, 0, 0];
 
 // code tokens: [text, class]
 const TOKENS = [
@@ -277,10 +280,16 @@ function lightClip(t) {
 }
 
 // ---------- cursor keyframes ----------
-const CUR = [
-  [4.75, 1980, 1000], [5.35, 1150, 712], [5.55, 1150, 712], [6.9, 1150, 712],
+const BOX = [0, 696];
+let CUR = [];
+function buildCur() {
+  chipW = chips.map(c => c.offsetWidth);
+  BOX[0] = 960 - chipW[2] / 2 + 30 + 29;
+  CUR = [
+  [4.75, 1980, 1000], [5.35, BOX[0] + 4, BOX[1] + 6], [5.55, BOX[0] + 4, BOX[1] + 6], [6.9, BOX[0] + 4, BOX[1] + 6],
   [18.6, 1990, 1100], [19.45, BTN[0] - 10, BTN[1] - 8], [20.4, BTN[0] - 10, BTN[1] - 8],
 ];
+}
 const CLICKS = [5.42, 19.55];
 function cursorAt(t) {
   if (!(live(t, 4.75, 6.95) || live(t, 18.6, 20.45))) return null;
@@ -293,6 +302,7 @@ function cursorAt(t) {
 
 // ================= render(t) =================
 function render(t) {
+  buildCur();
   // ---- dark background: drifting glows
   const gA = .55 + .2 * Math.sin(t * .9);
   $('glowA').style.transform = `translate(${410 + Math.sin(t * .35) * 260}px, ${-10 + Math.cos(t * .28) * 160}px)`;
@@ -336,8 +346,11 @@ function render(t) {
     c.style.marginLeft = (-chipW[i] / 2) + 'px';
     c.style.transform = `scale(${lerp(.6, 1, eBack(p))})`;
     vis(c, live(t, 3.8, 7.0) ? clamp(p * 3) : 0);
-    c.querySelector('.strike').style.transform = `scaleX(${eInOut(prog(t, 5.5 + i * .12, 5.85 + i * .12))})`;
-    c.style.color = t > 5.6 + i * .12 ? '#a3a69e' : '#6a6e66';
+    const tickAt = i < 2 ? 4.3 + i * .42 + .35 : 5.45;
+    const tp = eBack(prog(t, tickAt, tickAt + .35));
+    c.querySelector('.tick').style.transform = `scale(${tp})`;
+    c.querySelector('.tick').style.opacity = clamp(tp * 3);
+    c.style.color = '#2b302a';
   });
 
   // ================= S3 (dark) 6.8 – 9.6 : less talk / more baking =================
@@ -452,12 +465,12 @@ function render(t) {
     $('cursor').style.transform = `translate(${c[0] - 8}px, ${c[1] - 6}px) scale(${1 - click * .18})`;
     vis($('cursor'), 1);
   } else vis($('cursor'), 0);
-  let rp = -1, rpos = null;
-  CLICKS.forEach((ct, i) => { const p = prog(t, ct, ct + .55); if (p > 0 && p < 1) { rp = p; rpos = i === 0 ? [1150, 712] : [BTN[0] - 10, BTN[1] - 8]; } });
+  let rp = -1, rpos = null, i0 = 0;
+  CLICKS.forEach((ct, i) => { const p = prog(t, ct, ct + .55); if (p > 0 && p < 1) { rp = p; i0 = i; rpos = i === 0 ? [BOX[0], BOX[1]] : [BTN[0] - 10, BTN[1] - 8]; } });
   if (rp >= 0) {
     $('ripple').style.left = rpos[0] + 'px'; $('ripple').style.top = rpos[1] + 'px';
     $('ripple').style.transform = `scale(${lerp(.2, 1.4, eOut(rp))})`;
-    $('ripple').style.borderColor = rpos[0] === 1150 ? '#e2483a' : '#c3ea6e';
+    $('ripple').style.borderColor = i0 === 0 ? '#7fae2e' : '#c3ea6e';
     vis($('ripple'), 1 - rp);
   } else vis($('ripple'), 0);
 
