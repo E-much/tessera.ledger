@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "render": "node render.js --fps 60 --out out/bakepoint-teaser-silent.mp4",
+    "audio": "python3 audio.py",
+    "mux": "ffmpeg -y -loglevel error -i out/bakepoint-teaser-silent.mp4 -i out/mix.wav -map 0:v -map 1:a -c:v copy -af loudnorm=I=-14:TP=-1.5:LRA=11 -ar 48000 -c:a aac -b:a 256k -shortest -movflags +faststart out/bakepoint-teaser.mp4",
+    "build": "npm run render && npm run audio && npm run mux"
   },
   "keywords": [],
   "author": "",
