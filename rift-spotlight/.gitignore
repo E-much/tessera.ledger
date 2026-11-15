@@ -1,0 +1,9 @@
+video/node_modules/
+video/out/
+research/*.html
+research/*.json
+research/*.png
+research/llms.txt
+!research/quotes/
+*.log
+audio/stems/

@@ -1,0 +1,37 @@
+01 Cross chain swap | 468 | 367 | 138 | 31 | "Neue Haas Display", s | 16px | 400 | normal | rgb(255, 255, 255) | rgba(255, 143, 40, 0.14) | 9999px | 1.17578px solid rgba(255, 143, 40, 0.7)
+01 | 482 | 376 | 14 | 13 | "Aux Mono", monospace | 10px | 400 | 1px | rgb(255, 143, 40) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+Cross chain swap | 502 | 374 | 90 | 18 | "Neue Haas Display" | 14px | 500 | normal | rgb(255, 255, 255) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+02 Tokenized stock | 613 | 367 | 132 | 31 | "Neue Haas Display", s | 16px | 400 | normal | rgb(255, 255, 255) | rgba(255, 255, 255, 0.03) | 9999px | 1.17578px solid rgba(255, 255, 255, 0.14
+02 | 626 | 376 | 14 | 13 | "Aux Mono", monospace | 10px | 400 | 1px | rgb(107, 107, 107) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+Tokenized stock | 647 | 374 | 84 | 18 | "Neue Haas Display" | 14px | 500 | normal | rgb(163, 163, 163) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+03 Vault deposit | 752 | 367 | 115 | 31 | "Neue Haas Display", s | 16px | 400 | normal | rgb(255, 255, 255) | rgba(255, 255, 255, 0.03) | 9999px | 1.17578px solid rgba(255, 255, 255, 0.14
+03 | 766 | 376 | 14 | 13 | "Aux Mono", monospace | 10px | 400 | 1px | rgb(107, 107, 107) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+Vault deposit | 786 | 374 | 67 | 18 | "Neue Haas Display" | 14px | 500 | normal | rgb(163, 163, 163) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+04 Universal payment | 874 | 367 | 144 | 31 | "Neue Haas Display", s | 16px | 400 | normal | rgb(255, 255, 255) | rgba(255, 255, 255, 0.03) | 9999px | 1.17578px solid rgba(255, 255, 255, 0.14
+04 | 887 | 376 | 14 | 13 | "Aux Mono", monospace | 10px | 400 | 1px | rgb(107, 107, 107) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+Universal payment | 908 | 374 | 96 | 18 | "Neue Haas Display" | 14px | 500 | normal | rgb(163, 163, 163) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+←EDIT ME  250,000 USDG | 194 | 423 | 514 | 74 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+←EDIT ME | 194 | 423 | 259 | 54 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+← | 397 | 442 | 7 | 15 | "Aux Mono", monospace | 11.7px | 400 | -0.4px | rgb(107, 114, 128) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+250,000 USDG | 203 | 478 | 505 | 19 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+robinhood.usdg | 718 | 443 | 178 | 35 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+robinhood.usdg | 733 | 443 | 164 | 33 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgb(46, 64, 183) | 9.75px | 1.17578px solid rgb(98, 126, 234)
+base.eth | 936 | 443 | 132 | 35 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+base.eth | 950 | 443 | 118 | 33 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgb(46, 64, 183) | 9.75px | 1.17578px solid rgb(98, 126, 234)
+TRADE | 1088 | 435 | 157 | 51 | SomeType | 17.6px | 400 | normal | rgb(255, 255, 255) | rgb(232, 124, 18) | 9999px | 0px solid rgba(255, 255, 255, 0.16)
+TRANSIT  VELORA  ACROSS | 194 | 577 | 846 | 56 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+TRANSIT  VELORA  ACROSS | 387 | 577 | 653 | 56 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+TRANSIT | 470 | 577 | 122 | 56 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+TRANSIT | 490 | 590 | 83 | 21 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(255, 255, 255, 0.08) | 999px | 1.17578px solid rgba(255, 255, 255, 0.12
+VELORA | 655 | 577 | 118 | 56 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+VELORA | 675 | 590 | 78 | 21 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(255, 255, 255, 0.08) | 999px | 1.17578px solid rgba(255, 255, 255, 0.12
+ACROSS | 836 | 577 | 120 | 56 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+ACROSS | 856 | 590 | 81 | 21 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(255, 255, 255, 0.08) | 999px | 1.17578px solid rgba(255, 255, 255, 0.12
+$0.00  -100.00% | 182 | 682 | 265 | 78 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(239, 68, 68, 0.12) | 12px | 0px none rgb(227, 227, 227)
+$0.00  -100.00% | 378 | 699 | 58 | 44 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+$0.00  -100.00% | 454 | 682 | 265 | 78 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(239, 68, 68, 0.12) | 12px | 0px none rgb(227, 227, 227)
+$0.00  -100.00% | 650 | 699 | 58 | 44 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+$0.00  -100.00% | 726 | 682 | 265 | 78 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(239, 68, 68, 0.12) | 12px | 0px none rgb(227, 227, 227)
+$0.00  -100.00% | 921 | 699 | 58 | 44 | SomeType | 17.6px | 400 | -0.3px | rgb(227, 227, 227) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
+SHOW ALL (32) | 998 | 682 | 265 | 78 | SomeType | 17.6px | 400 | normal | rgb(156, 163, 175) | rgba(255, 255, 255, 0.02) | 12px | 1.17578px dashed rgba(255, 255, 255, 0.1
+ROUTING ACROSS 20+ VENUES | 0 | 772 | 1440 | 130 | "Neue Haas Display", s | 16px | 400 | normal | rgb(255, 255, 255) | rgba(0, 0, 0, 0) | 0px | 0px solid rgba(255, 255, 255, 0.16)
