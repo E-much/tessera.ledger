@@ -27,7 +27,7 @@ E = {
     "riftIn": w("rift", 0), "venues": w("rift", 7), "venuesEnd": w("rift", 13), "route": w("rift", 14),
     "chains": w("rift", 23), "result": round(end("rift") - 0.05, 3),
     # 6. click + fees
-    "click": w("click", 1), "fees": w("click", 2),
+    "phoneIn": round(w("click", 1) - 0.5, 3), "click": w("click", 1), "fees": w("click", 2),
     # 7. close
     "closeLogo": w("close", 0), "headline": w("close", 1), "card": round(end("close") + 0.5, 3),
 }

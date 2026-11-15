@@ -314,6 +314,7 @@ for t in np.arange(EV["venues"], EV["venuesEnd"], 1 / 10):
 for k in range(4):
     add_sfx(None, tick(L_TICK * 1.1, 1900), EV["route"] + k * (EV["chains"] - 0.1 - EV["route"]) / 4)
 add_sfx(None, lock(L_LOCK), EV["result"])
+add_sfx(None, whoosh(0.45, L_WHOOSH * 0.9), EV["phoneIn"] - 0.1)  # phone swings in
 add_sfx(None, click(L_CLICK), EV["click"])
 # fees / close / card
 add_sfx(None, whoosh(0.4, L_WHOOSH * 0.8), EV["fees"] - 0.2)

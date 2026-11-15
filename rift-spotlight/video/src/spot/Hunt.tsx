@@ -159,9 +159,9 @@ const HOPS = ["UNIT", "HYPERLIQUID", "CCTP", "COW SWAP"];
 const RiftUI: React.FC = () => {
   const f = useCurrentFrame();
   const t = sec(f);
-  if (t < EV.sweep || t > EV.fees + 0.5) return null;
+  if (t < EV.sweep || t > EV.phoneIn + 0.5) return null;
   const rise = p(f, EV.sweep + 0.32, 0.6, E.snap);
-  const out = p(f, EV.fees - 0.12, 0.35, E.exit);
+  const out = p(f, EV.phoneIn - 0.05, 0.35, E.exit);
   const row = p(f, EV.route - 0.1, 0.5, E.snap);
   const draw = p(f, EV.route, EV.chains - EV.route - 0.1, E.inOut) * 4; // hops drawn
   const ch = p(f, EV.chains - 0.05, 0.4, E.snap);
@@ -170,8 +170,6 @@ const RiftUI: React.FC = () => {
   const keys = [
     { t: EV.riftIn, x: 960, y: 540, s: 1 },
     { t: EV.route, x: 960, y: 640, s: 1.16 },
-    { t: EV.click - 0.45, x: 1590, y: 330, s: 1.55 },
-    { t: EV.click + 0.35, x: 960, y: 540, s: 1.05 },
   ];
   let cx = 960, cy = 540, cs = 1;
   for (let i = 1; i < keys.length; i++) {
@@ -183,7 +181,7 @@ const RiftUI: React.FC = () => {
   const bx = (1 - rise) * 0 + out * 70;
   return (
     <Blur id="rift" x={bx}>
-      <div style={{ position: "absolute", inset: 0, opacity: rise * (1 - out), transform: `translate(${960 - cx}px, ${540 - cy + (1 - rise) * 500}px) scale(${cs})`, transformOrigin: `${cx}px ${cy}px` }}>
+      <div style={{ position: "absolute", inset: 0, opacity: rise * (1 - out), transform: `translate(${960 - cx - out * 1100}px, ${540 - cy + (1 - rise) * 500}px) scale(${cs})`, transformOrigin: `${cx}px ${cy}px` }}>
         {/* input bar — as on rift.trade */}
         <div style={{ position: "absolute", left: RX, top: 250, width: RW, height: 160, borderRadius: 54, background: DARK, boxShadow: "0 50px 100px rgba(70,25,0,0.35)" }}>
           <div style={{ position: "absolute", left: 30, top: 32, height: 96, padding: "0 28px", borderRadius: 20, background: "rgba(255,255,255,0.07)", display: "flex", alignItems: "center", fontFamily: F.mono, fontSize: 56, color: C.white }}>10 BTC</div>
@@ -243,7 +241,6 @@ const RiftUI: React.FC = () => {
             <div style={{ fontFamily: F.mono, fontSize: 20, color: C.mute, marginTop: 6 }}>USDT · ethereum</div>
           </div>
         </div>
-        {t >= EV.click - 0.8 && <Cursor x={lerp(1560, RX + 1290 + 120, cur)} y={lerp(640, 250 + 40 + 44, cur)} press={press} />}
       </div>
     </Blur>
   );
@@ -255,15 +252,82 @@ const Fees: React.FC = () => {
   const t = sec(f);
   if (t < EV.fees - 0.1 || t > EV.closeLogo + 0.2) return null;
   const k = p(f, EV.fees - 0.08, 0.45, E.snap);
+  // (phone sits on the left; this sits on the right)
   const o = p(f, EV.closeLogo - 0.2, 0.3, E.exit);
   return (
     <Blur id="fees" x={(1 - k) * 40 + o * 50}>
       <div style={{ position: "absolute", inset: 0, opacity: Math.min(1, k * 2) * (1 - o), transform: `translateX(${(1 - k) * 300 - o * 500}px)` }}>
-        <div style={{ position: "absolute", left: 0, width: 1920, top: 230, display: "flex", justifyContent: "center", alignItems: "baseline", gap: 40 }}>
-          <Big size={460} style={{ transform: `scale(${lerp(1.4, 1, k)})`, display: "inline-block" }}>0</Big>
+        <div style={{ position: "absolute", left: 960, width: 900, top: 250, display: "flex", justifyContent: "center", alignItems: "baseline", gap: 34 }}>
+          <Big size={400} style={{ transform: `scale(${lerp(1.4, 1, k)})`, display: "inline-block" }}>0</Big>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <Big size={120} color={ON.accent}>added</Big>
             <Big size={120}>fees.</Big>
+          </div>
+        </div>
+      </div>
+    </Blur>
+  );
+};
+
+// Rift on a phone — tilts in, settles, the tap lands on TRADE on "click"
+const Phone: React.FC = () => {
+  const f = useCurrentFrame();
+  const t = sec(f);
+  if (t < EV.phoneIn - 0.05 || t > EV.closeLogo + 0.2) return null;
+  const k = p(f, EV.phoneIn, 0.7, E.snap);
+  const o = p(f, EV.closeLogo - 0.22, 0.32, E.exit);
+  const toLeft = p(f, EV.fees - 0.15, 0.55, E.inOut); // slides left to make room for "0 added fees"
+  const tap = p(f, EV.click - 0.04, 0.4, E.settle);
+  const press = p(f, EV.click - 0.05, 0.05, E.exit) * (1 - p(f, EV.click + 0.03, 0.2, E.settle));
+  const done = p(f, EV.click + 0.08, 0.35, E.snap);
+  const ry = lerp(38, -10, k) + lerp(0, 4, toLeft);
+  const x = lerp(960, 560, toLeft) + (1 - k) * 380 - o * 900;
+  const PW = 430, PH = 880;
+  return (
+    <Blur id="phone" x={(1 - k) * 18 + o * 60}>
+      <div style={{ position: "absolute", inset: 0, perspective: 1600, opacity: Math.min(1, k * 2) * (1 - o) }}>
+        <div
+          style={{
+            position: "absolute",
+            left: x - PW / 2,
+            top: 540 - PH / 2 + (1 - k) * 80,
+            width: PW,
+            height: PH,
+            borderRadius: 70,
+            background: "#0A0A0A",
+            boxShadow: "0 60px 120px rgba(70,25,0,0.45), inset 0 0 0 3px #2A2A2A",
+            transform: `rotateY(${ry}deg) rotateZ(${lerp(-6, 0, k)}deg)`,
+            transformStyle: "preserve-3d",
+          }}
+        >
+          {/* screen */}
+          <div style={{ position: "absolute", inset: 14, borderRadius: 58, background: "#050506", overflow: "hidden" }}>
+            <div style={{ position: "absolute", left: "50%", top: 16, width: 120, height: 34, borderRadius: 17, background: "#000", transform: "translateX(-50%)" }} />
+            <div style={{ position: "absolute", left: 30, top: 74, display: "flex", alignItems: "center", gap: 12 }}>
+              <Logo size={46} />
+              <span style={{ fontFamily: F.sans, fontWeight: 600, fontSize: 26, color: C.white, letterSpacing: "-0.02em" }}>Swap</span>
+            </div>
+            {/* you pay / you get */}
+            <div style={{ position: "absolute", left: 24, right: 24, top: 150, borderRadius: 26, background: "#121214", padding: "22px 24px" }}>
+              <div style={{ fontFamily: F.mono, fontSize: 15, color: C.mute }}>You send</div>
+              <div style={{ fontFamily: F.mono, fontSize: 44, color: C.white, marginTop: 6 }}>10 BTC</div>
+              <div style={{ marginTop: 12, height: 52, borderRadius: 12, background: C.pillBlue, border: `2px solid ${C.pillBlueBorder}`, display: "flex", alignItems: "center", paddingLeft: 14, fontFamily: F.mono, fontSize: 22, color: C.ink }}>bitcoin.btc</div>
+            </div>
+            <div style={{ position: "absolute", left: "50%", top: 352, width: 44, height: 44, borderRadius: 22, background: "#1C1C20", transform: "translateX(-50%)", display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 20 }}>↓</div>
+            <div style={{ position: "absolute", left: 24, right: 24, top: 384, borderRadius: 26, background: "#0E1A12", border: "2px solid rgba(34,197,94,0.5)", padding: "20px 24px" }}>
+              <div style={{ fontFamily: F.mono, fontSize: 15, color: C.mute }}>You get · best price</div>
+              <div style={{ fontFamily: F.mono, fontSize: 42, color: C.green, marginTop: 6 }}>645,331.16</div>
+              <div style={{ fontFamily: F.mono, fontSize: 16, color: C.green, marginTop: 4 }}>+1,165.27 vs. your best tab</div>
+              <div style={{ marginTop: 12, height: 52, borderRadius: 12, background: C.pillBlue, border: `2px solid ${C.pillBlueBorder}`, display: "flex", alignItems: "center", paddingLeft: 14, fontFamily: F.mono, fontSize: 22, color: C.ink }}>ethereum.usdt</div>
+            </div>
+            {/* TRADE */}
+            <div style={{ position: "absolute", left: 24, right: 24, bottom: 54, height: 92, borderRadius: 999, background: press > 0.3 ? "#B85E08" : C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.mono, fontSize: 32, fontWeight: 600, color: C.white, transform: `scale(${1 - 0.05 * press})` }}>
+              {done > 0.5 ? "✓ ORDER PLACED" : "TRADE →"}
+            </div>
+            {/* tap */}
+            {t >= EV.click - 0.04 && tap < 1 && (
+              <div style={{ position: "absolute", left: "50%", bottom: 100, width: 40 + 160 * tap, height: 40 + 160 * tap, borderRadius: 999, border: `3px solid rgba(255,255,255,${0.9 * (1 - tap)})`, transform: "translate(-50%, 50%)" }} />
+            )}
           </div>
         </div>
       </div>
@@ -329,6 +393,7 @@ export const Hunt: React.FC = () => {
       <Window i={2} />
       <Marquee />
       <RiftUI />
+      <Phone />
       <Fees />
       <Close />
       <Card />
