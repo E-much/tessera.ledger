@@ -1,7 +1,7 @@
 import React from "react";
 import { useCurrentFrame } from "remotion";
 import EV from "../events.json";
-import { C, E, F, p, wt } from "../theme";
+import { C, E, F, p, wt, ON } from "../theme";
 import { Key, Label, Scramble } from "../ui";
 
 // VO: "Last time you swapped across chains, did you get the best price? Honestly, you can't tell."
@@ -25,7 +25,7 @@ export const Hook: React.FC = () => {
   return (
     <div style={{ position: "absolute", inset: 0, opacity: 1 - out }}>
       <Key text="Across chains" t0={T(4)} t1={T(10) - 0.2} y={440} size={170} mode="right" />
-      <Key text={<span>Best price<span style={{ color: C.orange }}>?</span></span>} t0={T(10)} t1={T(12) - 0.2} y={440} size={190} mode="zoom" />
+      <Key text={<span>Best price<span style={{ color: ON.accent }}>?</span></span>} t0={T(10)} t1={T(12) - 0.2} y={440} size={190} mode="zoom" />
 
       {/* a settled swap — and no way to know if it was the best price */}
       <div

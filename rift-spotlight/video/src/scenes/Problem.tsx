@@ -2,7 +2,7 @@ import React from "react";
 import { useCurrentFrame } from "remotion";
 import EV from "../events.json";
 import { PATHS_PRICED, QUOTE, SINGLE_HOP, fmt } from "../data";
-import { C, E, F, p, wt } from "../theme";
+import { C, E, F, ON, p, wt } from "../theme";
 import { Blocks, Key, Label, Scramble } from "../ui";
 
 // "Every route has a different price. On ten bitcoin today, the quotes were over four thousand dollars apart."
@@ -30,7 +30,7 @@ export const Problem: React.FC = () => {
       {/* keywords only */}
       <Key text="Different price" t0={T(4) - 0.1} t1={beat2} y={450} size={180} mode="zoom" />
       <Key
-        text={<span>$4,000<br /><span style={{ color: C.orangeHi }}>apart</span></span>}
+        text={<span>$4,000<br /><span style={{ color: ON.accent }}>apart</span></span>}
         t0={T(14)}
         t1={OUT + 0.3}
         x={1000}
@@ -43,6 +43,7 @@ export const Problem: React.FC = () => {
 
       {/* live single-hop quotes for the same order */}
       <div style={{ position: "absolute", inset: 0, opacity: tab, transform: `translateX(${(1 - tab) * -140}px)` }}>
+        <div style={{ position: "absolute", left: TX - 36, top: TY - 90, width: TW + 72, height: 3 * RH + 170, borderRadius: 24, background: "rgba(14,9,5,0.94)" }} />
         <div style={{ position: "absolute", left: TX, top: TY - 54, width: TW, display: "flex", justifyContent: "space-between" }}>
           <Label size={16}>Quote · {QUOTE.amountIn} BTC → ethereum.usdt</Label>
           <Label size={16}>USDT out</Label>
@@ -83,11 +84,11 @@ export const Problem: React.FC = () => {
 
         {/* spread between best and worst quote */}
         <svg width={1920} height={1080} style={{ position: "absolute", inset: 0, opacity: gap }}>
-          <path d={`M${TX + TW + 16} ${TY + RH / 2} H${TX + TW + 36} V${TY + RH / 2 + 2 * RH * gap} H${TX + TW + 16}`} fill="none" stroke={C.orange} strokeWidth={2} />
+          <path d={`M${TX + TW + 52} ${TY + RH / 2} H${TX + TW + 72} V${TY + RH / 2 + 2 * RH * gap} H${TX + TW + 52}`} fill="none" stroke={ON.ink} strokeWidth={2.5} />
         </svg>
-        <div style={{ position: "absolute", left: TX + TW + 56, top: TY + RH * 1.5 - 30, opacity: gap, transform: `translateX(${(1 - gap) * 16}px)` }}>
-          <div style={{ fontFamily: F.mono, fontSize: 30, color: C.orangeHi }}>Δ {fmt(max - min)}</div>
-          <Label size={14} style={{ marginTop: 6 }}>
+        <div style={{ position: "absolute", left: TX + TW + 92, top: TY + RH * 1.5 - 30, opacity: gap, transform: `translateX(${(1 - gap) * 16}px)` }}>
+          <div style={{ fontFamily: F.mono, fontSize: 32, color: ON.ink }}>Δ {fmt(max - min)}</div>
+          <Label size={14} color={ON.soft} style={{ marginTop: 6 }}>
             USDT apart
           </Label>
         </div>

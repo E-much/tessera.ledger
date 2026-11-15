@@ -2,7 +2,7 @@ import React from "react";
 import { useCurrentFrame } from "remotion";
 import { CHAINS } from "../data";
 import EV from "../events.json";
-import { C, E, F, FPS, lerp, p, wt } from "../theme";
+import { C, E, F, FPS, lerp, p, wt, ON } from "../theme";
 import { Key, Label, Words } from "../ui";
 
 // "Bitcoin, Ethereum, Base, Arbitrum, Polygon, and more. Zero added fees."
@@ -51,13 +51,13 @@ export const Coverage: React.FC = () => {
               fontSize: 230,
               letterSpacing: "-0.055em",
               lineHeight: 1,
-              color: C.white,
+              color: ON.ink,
               opacity: Math.min(1, k * 1.5) * (1 - x),
               transform: tr,
             }}
           >
             {n}
-            <span style={{ color: C.orange }}>,</span>
+            <span style={{ color: ON.accent }}>,</span>
           </div>
         );
       })}
@@ -77,15 +77,15 @@ export const Coverage: React.FC = () => {
                 top: GY + row * (CH + GAP),
                 width: CW,
                 height: CH,
-                border: `1px solid ${spoken ? "rgba(255,255,255,0.22)" : C.lineSoft}`,
+                border: `1.5px solid ${spoken ? ON.ink : ON.line}`,
                 borderRadius: 14,
                 overflow: "hidden",
                 opacity: k,
                 transform: `translateY(${(1 - k) * 18}px)`,
               }}
             >
-              <div style={{ position: "absolute", left: 0, top: 0, height: 3, width: "100%", background: spoken ? C.orange : "rgba(255,255,255,0.3)" }} />
-              <div style={{ position: "absolute", left: 22, top: 18, fontFamily: F.mono, fontSize: 16, letterSpacing: "0.2em", color: C.dim }}>{String(i + 1).padStart(2, "0")}</div>
+              <div style={{ position: "absolute", left: 0, top: 0, height: 3, width: "100%", background: spoken ? ON.ink : ON.line }} />
+              <div style={{ position: "absolute", left: 22, top: 18, fontFamily: F.mono, fontSize: 16, letterSpacing: "0.2em", color: ON.soft }}>{String(i + 1).padStart(2, "0")}</div>
               <div
                 style={{
                   position: "absolute",
@@ -96,7 +96,7 @@ export const Coverage: React.FC = () => {
                   fontWeight: 600,
                   fontSize: 50,
                   letterSpacing: "-0.04em",
-                  color: spoken ? C.white : C.mute,
+                  color: spoken ? ON.ink : ON.soft,
                 }}
               >
                 {c.charAt(0) + c.slice(1).toLowerCase()}
@@ -105,8 +105,9 @@ export const Coverage: React.FC = () => {
           );
         })}
         <Words
-          words={[{ w: "and ", t: more }, { w: "more", t: more + 0.08 }, { w: ".", t: more + 0.2, color: C.orange }]}
+          words={[{ w: "and ", t: more }, { w: "more", t: more + 0.08 }, { w: ".", t: more + 0.2, color: ON.accent }]}
           size={64}
+          color={ON.ink}
           mode="right"
           align="right"
           style={{ position: "absolute", right: GX, top: GY + 2 * CH + GAP + 40 }}
@@ -134,16 +135,16 @@ const ZeroFees: React.FC = () => {
             fontSize: 400,
             letterSpacing: "-0.06em",
             lineHeight: 1,
-            color: C.white,
+            color: ON.ink,
             display: "inline-block",
             transform: `scale(${lerp(1.5, 1, zk)})`,
           }}
         >
           0
         </span>
-        <span style={{ fontFamily: F.mono, fontSize: 110, color: C.orangeHi, marginLeft: 28, opacity: p(f, T(7) + 0.1, 0.3) }}>bps</span>
+        <span style={{ fontFamily: F.mono, fontSize: 110, color: ON.accent, marginLeft: 28, opacity: p(f, T(7) + 0.1, 0.3) }}>bps</span>
       </div>
-      <Key text={<span>added fees<span style={{ color: C.orange }}>.</span></span>} t0={T(8)} t1={999} y={650} size={112} mode="zoom" />
+      <Key text={<span>added fees<span style={{ color: ON.accent }}>.</span></span>} t0={T(8)} t1={999} y={650} size={112} mode="zoom" />
     </div>
   );
 };

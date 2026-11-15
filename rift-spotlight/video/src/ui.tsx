@@ -1,6 +1,6 @@
 import React from "react";
 import { Img, random, staticFile, useCurrentFrame } from "remotion";
-import { C, E, F, FPS, p, TIMELINE } from "./theme";
+import { C, E, F, FPS, ON, p, TIMELINE } from "./theme";
 
 /** Faint static square grid, as on rift.trade's page background. */
 export const Grid: React.FC<{ opacity?: number }> = ({ opacity = 1 }) => (
@@ -203,7 +203,7 @@ export const Key: React.FC<{
   size?: number;
   mode?: "left" | "right" | "zoom" | "up";
   color?: string;
-}> = ({ text, t0, t1, x = 0, y, w = 1920, align = "center", size = 140, mode = "zoom", color = C.white }) => {
+}> = ({ text, t0, t1, x = 0, y, w = 1920, align = "center", size = 140, mode = "zoom", color = ON.ink }) => {
   const f = useCurrentFrame();
   const t = f / 60;
   if (t < t0 - 0.1 || t > t1 + 0.4) return null;

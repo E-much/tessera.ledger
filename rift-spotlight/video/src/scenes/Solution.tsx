@@ -3,7 +3,7 @@ import { useCurrentFrame } from "remotion";
 import { QUOTE, SINGLE_HOP, fmt } from "../data";
 import EV from "../events.json";
 import { W_Y } from "../geometry";
-import { C, E, F, lerp, p, wt } from "../theme";
+import { C, E, F, lerp, ON, p, wt } from "../theme";
 import { Label, Logo, Scramble } from "../ui";
 
 const T = (i: number) => wt("solution", i);
@@ -89,17 +89,17 @@ export const SolutionReveal: React.FC = () => {
       >
         <div
           style={{
-            border: `1px solid ${C.line}`,
+            border: `1.5px solid ${ON.line}`,
             borderRadius: 999,
             padding: "10px 22px",
             fontFamily: F.sans,
             fontSize: 22,
-            color: C.mute,
+            color: ON.soft,
             display: "flex",
             gap: 10,
           }}
         >
-          Backed by <span style={{ color: C.white, fontWeight: 600 }}>Paradigm</span>
+          Backed by <span style={{ color: ON.ink, fontWeight: 600 }}>Paradigm</span>
         </div>
       </div>
     </div>
@@ -162,7 +162,7 @@ export const Widget: React.FC = () => {
       >
         {/* use-case tabs, as on the site */}
         <div style={{ position: "absolute", top: 236, left: 160, width: 1600, display: "flex", justifyContent: "center", gap: 12, alignItems: "center" }}>
-          <span style={{ fontFamily: F.sans, fontSize: 21, color: C.mute, marginRight: 6 }}>Try a…</span>
+          <span style={{ fontFamily: F.sans, fontSize: 21, color: ON.ink, marginRight: 6 }}>Try a…</span>
           {["Cross chain swap", "Tokenized stock", "Vault deposit", "Universal payment"].map((s, i) => (
             <div
               key={s}
@@ -170,7 +170,7 @@ export const Widget: React.FC = () => {
                 borderRadius: 999,
                 padding: "8px 18px",
                 border: `1.2px solid ${i === 0 ? "rgba(255,143,40,0.7)" : "rgba(255,255,255,0.14)"}`,
-                background: i === 0 ? "rgba(255,143,40,0.14)" : "rgba(255,255,255,0.03)",
+                background: i === 0 ? "#2B1606" : "#14110E",
                 display: "flex",
                 gap: 10,
                 alignItems: "center",
@@ -212,13 +212,13 @@ export const Widget: React.FC = () => {
                 fontFamily: F.mono,
                 fontSize: 26,
                 letterSpacing: "0.3em",
-                color: C.white,
+                color: ON.ink,
                 opacity: k,
                 transform: `translateY(${(1 - k) * 14}px)`,
               }}
             >
               {g.label}
-              <div style={{ width: 2, height: 22, background: C.orange, margin: "0 auto 8px" }} />
+              <div style={{ width: 2, height: 22, background: ON.ink, margin: "0 auto 8px" }} />
             </div>
           );
         })}
@@ -279,7 +279,7 @@ export const Widget: React.FC = () => {
             overflow: "hidden",
             borderRadius: 44,
             border: `1px solid ${C.line}`,
-            background: "rgba(255,255,255,0.015)",
+            background: "#0D0A08",
             opacity: res > 0 ? 1 : 0,
           }}
         >
@@ -292,7 +292,7 @@ export const Widget: React.FC = () => {
               height: 210,
               borderRadius: 30,
               border: `2px solid rgba(34,197,94,0.5)`,
-              background: "rgba(34,197,94,0.05)",
+              background: "#0E1A12",
             }}
           />
           <div style={{ position: "absolute", right: 54, top: 48, display: "flex", justifyContent: "flex-end", opacity: p(f, EV.quoteSettle, 0.35) }}>
@@ -318,7 +318,7 @@ export const Widget: React.FC = () => {
                   width: 376,
                   height: 146,
                   borderRadius: 16,
-                  background: "rgba(239,68,68,0.12)",
+                  background: "#2A1414",
                   opacity: k,
                   transform: `translateY(${(1 - k) * 20}px)`,
                 }}
@@ -340,7 +340,7 @@ export const Widget: React.FC = () => {
               height: 146,
               borderRadius: 16,
               border: "1.2px dashed rgba(255,255,255,0.14)",
-              background: "rgba(255,255,255,0.02)",
+              background: "#14110E",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

@@ -23,8 +23,10 @@ export const C = {
 };
 
 // Orange → black gradient used for the whole piece (Rift Orange glowing up from below)
-export const BG =
-  "radial-gradient(130% 95% at 50% 118%, #E87C12 0%, #B9600E 22%, #5A2A07 48%, #1A0C04 72%, #080503 100%)";
+// Solid Rift Orange background for the whole piece
+export const BG = "#E87C12";
+// text that sits directly on the orange
+export const ON = { ink: "#140B04", soft: "rgba(20,11,4,0.55)", line: "rgba(20,11,4,0.28)", accent: "#FFFFFF" };
 
 export const F = {
   // Neue Haas Display (site headline face) is commercial; Inter Display (opsz 32) is the closest

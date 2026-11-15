@@ -3,7 +3,7 @@ import { useCurrentFrame } from "remotion";
 import { CHAINS, LAST_LEG, PATHS_PRICED, QUOTE, ROUTE, SINGLE_HOP, fmt } from "../data";
 import EV from "../events.json";
 import { BRIDGES, BRIDGE_X, FAN, FAN_X, G_Y, RAILS, STATIONS, W_Y, bridgePath, fanPath, pointAt, polyLen, railPath, toD } from "../geometry";
-import { C, E, F, FPS, lerp, p, wt } from "../theme";
+import { C, E, F, FPS, lerp, p, wt, ON } from "../theme";
 import { Blocks, Key, Label, Scramble } from "../ui";
 
 const RW = (i: number) => wt("routing", i);
@@ -344,10 +344,10 @@ export const Graph: React.FC = () => {
           ))}
           {/* input / output arrows */}
           <g opacity={p(f, EV.pullback + 0.4, 0.5)}>
-            <line x1={196} x2={232} y1={G_Y} y2={G_Y} stroke={C.mute} strokeWidth={1.5} />
-            <path d={`M226 ${G_Y - 6} L233 ${G_Y} L226 ${G_Y + 6}`} fill="none" stroke={C.mute} strokeWidth={1.5} />
-            <line x1={1688} x2={1722} y1={G_Y} y2={G_Y} stroke={C.mute} strokeWidth={1.5} />
-            <path d={`M1716 ${G_Y - 6} L1723 ${G_Y} L1716 ${G_Y + 6}`} fill="none" stroke={C.mute} strokeWidth={1.5} />
+            <line x1={196} x2={232} y1={G_Y} y2={G_Y} stroke={ON.ink} strokeWidth={2} />
+            <path d={`M226 ${G_Y - 6} L233 ${G_Y} L226 ${G_Y + 6}`} fill="none" stroke={ON.ink} strokeWidth={2} />
+            <line x1={1688} x2={1722} y1={G_Y} y2={G_Y} stroke={ON.ink} strokeWidth={2} />
+            <path d={`M1716 ${G_Y - 6} L1723 ${G_Y} L1716 ${G_Y + 6}`} fill="none" stroke={ON.ink} strokeWidth={2} />
           </g>
 
           {/* candidate routes: bridges via other chains */}
@@ -511,8 +511,8 @@ export const Graph: React.FC = () => {
                 {tk.top}
               </div>
               <div style={{ position: "absolute", top: 92, left: 38, transform: "translateX(-50%)", textAlign: "center", fontFamily: F.mono, whiteSpace: "nowrap" }}>
-                <div style={{ fontSize: 18, color: hot ? (delivered ? C.green : C.orangeHi) : C.ink }}>{tk.sub}</div>
-                <div style={{ fontSize: 13, letterSpacing: "0.18em", color: C.mute, marginTop: 4 }}>{tk.sub2.toUpperCase()}</div>
+                <div style={{ fontSize: 19, fontWeight: 600, color: hot ? ON.accent : ON.ink }}>{tk.sub}</div>
+                <div style={{ fontSize: 13, letterSpacing: "0.18em", color: ON.ink, marginTop: 4 }}>{tk.sub2.toUpperCase()}</div>
               </div>
             </div>
           );
@@ -586,12 +586,12 @@ export const Graph: React.FC = () => {
 
       {/* keywords only — swap in as each idea is spoken */}
       <div style={{ opacity: 1 - p(f, EV.cuts[3] - 0.3, 0.3, E.exit) }}>
-        <Key text={<span>20+ <span style={{ color: C.orangeHi }}>venues</span></span>} t0={RW(6)} t1={RW(9) - 0.18} y={46} size={100} mode="right" />
-        <Key text={<span>8 <span style={{ color: C.orangeHi }}>chains</span></span>} t0={RW(9)} t1={RW(16) - 0.18} y={46} size={100} mode="left" />
-        <Key text={<span>Every <span style={{ color: C.orangeHi }}>step</span></span>} t0={RW(16)} t1={RL(4) - 0.18} y={46} size={100} mode="zoom" />
-        <Key text={<span>Own <span style={{ color: C.orangeHi }}>address</span></span>} t0={RL(4)} t1={RL(10) - 0.18} y={46} size={100} mode="right" />
-        <Key text={<span>Venue <span style={{ color: "#FF8A80" }}>down</span></span>} t0={RL(10)} t1={RL(15) - 0.18} y={46} size={100} mode="zoom" />
-        <Key text={<span>Next <span style={{ color: C.orangeHi }}>venue</span></span>} t0={RL(15)} t1={EV.cuts[3] - 0.3} y={46} size={100} mode="left" />
+        <Key text={<span>20+ <span style={{ color: ON.accent }}>venues</span></span>} t0={RW(6)} t1={RW(9) - 0.18} y={46} size={100} mode="right" />
+        <Key text={<span>8 <span style={{ color: ON.accent }}>chains</span></span>} t0={RW(9)} t1={RW(16) - 0.18} y={46} size={100} mode="left" />
+        <Key text={<span>Every <span style={{ color: ON.accent }}>step</span></span>} t0={RW(16)} t1={RL(4) - 0.18} y={46} size={100} mode="zoom" />
+        <Key text={<span>Own <span style={{ color: ON.accent }}>address</span></span>} t0={RL(4)} t1={RL(10) - 0.18} y={46} size={100} mode="right" />
+        <Key text={<span>Venue <span style={{ color: ON.accent }}>down</span></span>} t0={RL(10)} t1={RL(15) - 0.18} y={46} size={100} mode="zoom" />
+        <Key text={<span>Next <span style={{ color: ON.accent }}>venue</span></span>} t0={RL(15)} t1={EV.cuts[3] - 0.3} y={46} size={100} mode="left" />
       </div>
 
       {/* order status meter */}
@@ -600,18 +600,19 @@ export const Graph: React.FC = () => {
           position: "absolute",
           left: 0,
           width: 1920,
-          top: 968,
+          top: 958,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          gap: 22,
           opacity: statusOn * (1 - p(f, EV.cuts[3] - 0.3, 0.3, E.exit)),
         }}
       >
+        <div style={{ display: "flex", alignItems: "center", gap: 22, background: "rgba(14,9,5,0.94)", borderRadius: 999, padding: "12px 28px" }}>
         <Label size={15}>Order</Label>
         <div style={{ fontFamily: F.mono, fontSize: 18, letterSpacing: "0.12em", color: statusColor, minWidth: 300, whiteSpace: "nowrap" }}>{status}</div>
         <Blocks n={12} filled={legsDone * 3} size={20} color={t >= EV.fail && t < EV.relock && Math.floor(f / 5) % 2 ? C.red : C.orange} />
         <Label size={15}>Leg {Math.min(4, Math.floor(legsDone) + (legsDone < 4 ? 1 : 0))}/4</Label>
+        </div>
       </div>
     </div>
   );
