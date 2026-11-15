@@ -11,7 +11,7 @@ import { C, E, FPS, p, wt } from "./theme";
 import { FontFaces, Grid, HUD } from "./ui";
 
 const SECTIONS: [number, string][] = [
-  [0, "The route"],
+  [0, "The question"],
   [EV.cuts[0], "The problem"],
   [EV.cuts[1], "One click"],
   [EV.cuts[2], "Routing"],

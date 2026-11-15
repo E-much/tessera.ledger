@@ -2,7 +2,7 @@ import React from "react";
 import { useCurrentFrame } from "remotion";
 import EV from "../events.json";
 import { PATHS_PRICED, QUOTE, SINGLE_HOP, fmt } from "../data";
-import { BEAT, C, E, F, lerp, p, wt } from "../theme";
+import { C, E, F, p, wt } from "../theme";
 import { Blocks, Label, Scramble, Words } from "../ui";
 
 // "Every route has a different price. And you never really know if you got the best one."
@@ -11,9 +11,10 @@ const OUT = EV.cuts[1] - 0.28;
 const ROWS = SINGLE_HOP.filter((r) => r.out !== null);
 const max = Math.max(...ROWS.map((r) => r.out!));
 const min = Math.min(...ROWS.map((r) => r.out!));
-const TX = 1010; // table x
+const TX = 880; // table x
 const TY = 300;
 const RH = 112;
+const T_APART = 17; // word index of "apart." (ElevenLabs tokenises on spaces)
 
 export const Problem: React.FC = () => {
   const f = useCurrentFrame();
@@ -30,35 +31,26 @@ export const Problem: React.FC = () => {
     { w: "different ", t: T(4) },
     { w: "price.", t: T(5) },
   ];
+  // "On ten bitcoin today, the quotes were over four thousand dollars apart."
   const w2 = [
-    { w: "And ", t: T(6) },
-    { w: "you ", t: T(7) },
-    { w: "never ", t: T(8) },
-    { w: "really ", t: T(9) },
+    { w: "On ", t: T(6) },
+    { w: "ten ", t: T(7) },
+    { w: "bitcoin ", t: T(8) },
+    { w: "today,", t: T(9) },
     { w: "\n", t: 0 },
-    { w: "know ", t: T(10) },
-    { w: "if ", t: T(11) },
-    { w: "you ", t: T(12) },
-    { w: "got ", t: T(13) },
+    { w: "the ", t: T(10) },
+    { w: "quotes ", t: T(11) },
+    { w: "were ", t: T(12) },
+    { w: "over", t: T(13) },
     { w: "\n", t: 0 },
-    { w: "the ", t: T(14) },
-    { w: "best ", t: T(15), color: C.orangeHi },
-    { w: "one", t: T(16) },
-    { w: ".", t: T(16) + 0.14, color: C.orange },
+    { w: "$4,000 ", t: T(14), color: C.orangeHi },
+    { w: "apart", t: T(T_APART) },
+    { w: ".", t: T(T_APART) + 0.14, color: C.orange },
   ];
 
-  // The selection bracket hunts between rows on the beat and never lands.
-  const hunt = [T(6) + 0.04, T(6) + BEAT, T(6) + 2 * BEAT, T(6) + 3 * BEAT, T(6) + 4 * BEAT];
-  const order = [0, 2, 1, 0, 2];
-  let hi = -1;
-  hunt.forEach((h, i) => {
-    if (t >= h) hi = i;
-  });
-  const prevRow = hi > 0 ? order[hi - 1] : order[0];
-  const curRow = hi >= 0 ? order[hi] : 0;
-  const mv = hi >= 0 ? p(f, hunt[hi], 0.28, E.snap) : 0;
-  const bracketY = lerp(TY + 60 + prevRow * RH, TY + 60 + curRow * RH, hi > 0 ? mv : 1);
-  const bracketOn = hi >= 0 ? p(f, hunt[0], 0.2) : 0;
+  // measured gap between the highest and lowest quote, drawn on "four thousand"
+  const gap = p(f, EV.gap, 0.55, E.snap);
+  const gapVal = max - min;
 
   return (
     <div style={{ position: "absolute", inset: 0, opacity: 1 - out, transform: `translateY(${-out * 30}px)` }}>
@@ -68,7 +60,7 @@ export const Problem: React.FC = () => {
       <Words words={w2} size={84} style={{ position: "absolute", left: 114, top: 520 }} />
 
       {/* live single-hop quotes for the same order */}
-      <div style={{ position: "absolute", left: TX, top: TY - 54, width: 790 }}>
+      <div style={{ position: "absolute", left: TX, top: TY - 54, width: 720 }}>
         <div style={{ display: "flex", justifyContent: "space-between", opacity: p(f, T(1), 0.4) }}>
           <Label size={16}>Quote · {QUOTE.amountIn} BTC → ethereum.usdt</Label>
           <Label size={16}>USDT out</Label>
@@ -84,7 +76,7 @@ export const Problem: React.FC = () => {
               position: "absolute",
               left: TX,
               top: TY + i * RH,
-              width: 790,
+              width: 720,
               height: RH,
               borderTop: `1px solid ${C.line}`,
               display: "flex",
@@ -104,7 +96,7 @@ export const Problem: React.FC = () => {
           </div>
         );
       })}
-      <div style={{ position: "absolute", left: TX, top: TY + 3 * RH, width: 790, borderTop: `1px solid ${C.line}`, opacity: p(f, T(1) + 0.6, 0.4) }} />
+      <div style={{ position: "absolute", left: TX, top: TY + 3 * RH, width: 720, borderTop: `1px solid ${C.line}`, opacity: p(f, T(1) + 0.6, 0.4) }} />
       <Label size={16} style={{ position: "absolute", left: TX, top: TY + 3 * RH + 26, opacity: p(f, T(5), 0.4) }}>
         + {PATHS_PRICED} multi-hop paths
       </Label>
@@ -112,32 +104,18 @@ export const Problem: React.FC = () => {
         Live quotes · api.rift.trade · {QUOTE.date} · indicative
       </Label>
 
-      {/* the bracket that can't decide */}
-      <div
-        style={{
-          position: "absolute",
-          left: TX - 22,
-          top: bracketY - 46,
-          width: 834,
-          height: 92,
-          border: `2px solid ${C.orange}`,
-          borderRadius: 12,
-          opacity: bracketOn * (1 - p(f, T(16) + 0.25, 0.3, E.exit)),
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            right: 852,
-            top: 34,
-            fontFamily: F.mono,
-            fontSize: 16,
-            letterSpacing: "0.24em",
-            color: C.orangeHi,
-          }}
-        >
-          BEST?
-        </div>
+      {/* the spread between best and worst quote */}
+      <svg width={1920} height={1080} style={{ position: "absolute", inset: 0, opacity: gap }}>
+        <path
+          d={`M${TX + 736} ${TY + RH / 2} H${TX + 756} V${TY + RH / 2 + 2 * RH * gap} H${TX + 736}`}
+          fill="none"
+          stroke={C.orange}
+          strokeWidth={2}
+        />
+      </svg>
+      <div style={{ position: "absolute", left: TX + 776, top: TY + RH * 1.5 - 30, opacity: gap, transform: `translateX(${(1 - gap) * 16}px)` }}>
+        <div style={{ fontFamily: F.mono, fontSize: 30, color: C.orangeHi }}>Δ {fmt(gapVal)}</div>
+        <Label size={14} style={{ marginTop: 6 }}>USDT apart</Label>
       </div>
     </div>
   );

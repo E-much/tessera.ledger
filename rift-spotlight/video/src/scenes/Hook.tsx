@@ -2,106 +2,109 @@ import React from "react";
 import { useCurrentFrame } from "remotion";
 import EV from "../events.json";
 import { C, E, F, FPS, p, wt } from "../theme";
-import { Blocks, Label, Words } from "../ui";
+import { Label, Scramble, Words } from "../ui";
 
-// "Ten bitcoin into USDT on Ethereum? Right now, that's four steps across three chains."
+// "Last time you swapped across chains, did you get the best price? Honestly, you can't tell."
 const T = (i: number) => wt("hook", i);
 const OUT = EV.cuts[0] - 0.28;
-
-// The real best route for this order (live quote, see data.ts) — venues are revealed later in the graph.
-const LEGS: [string, string, string, string][] = [
-  ["bitcoin", ".btc", "hyperliquid", ".btc"],
-  ["hyperliquid", ".btc", "hyperliquid", ".usdc"],
-  ["hyperliquid", ".usdc", "ethereum", ".usdc"],
-  ["ethereum", ".usdc", "ethereum", ".usdt"],
-];
-const CHAIN_ORDER = ["bitcoin", "hyperliquid", "ethereum"];
-const LX = 120, LY = 214, RH = 62, LW = 1680;
-
-const Asset: React.FC<{ chain: string; tok: string; f: number }> = ({ chain, tok, f }) => {
-  const lit = p(f, EV.chainsLit + CHAIN_ORDER.indexOf(chain) * 0.1, 0.3, E.snap);
-  return (
-    <span>
-      <span style={{ color: lit > 0.5 ? C.orangeHi : C.ink }}>{chain}</span>
-      <span style={{ color: C.mute }}>{tok}</span>
-    </span>
-  );
-};
+const CX = 1210, CY = 300, CW = 590;
 
 export const Hook: React.FC = () => {
   const f = useCurrentFrame();
+  const t = f / FPS;
   const out = p(f, OUT, 0.28, E.exit);
-  const dimFirst = p(f, T(6) - 0.05, 0.4, E.settle);
-  const legsDone = EV.legs.filter((t) => f / FPS >= t).length;
+  const dimQ = p(f, T(12) - 0.05, 0.4, E.settle);
+  const card = p(f, T(3), 0.6, E.snap); // "swapped" → a settled swap appears
+  const tell = p(f, EV.cantTell, 0.35, E.snap);
 
-  const w1 = [
-    { w: "Ten ", t: T(0) },
-    { w: "bitcoin ", t: T(1) },
-    { w: "into ", t: T(2) },
-    { w: "USDT ", t: T(3) },
-    { w: "on ", t: T(4) },
-    { w: "Ethereum?", t: T(5) },
-  ];
-  const w2 = [
-    { w: "Right ", t: T(6) },
-    { w: "now, ", t: T(7) },
-    { w: "that’s ", t: T(8) },
-    { w: "four ", t: T(9), color: C.orangeHi },
-    { w: "steps", t: T(10) },
+  const q = [
+    { w: "Last ", t: T(0) },
+    { w: "time ", t: T(1) },
+    { w: "you ", t: T(2) },
+    { w: "swapped", t: T(3) },
     { w: "\n", t: 0 },
-    { w: "across ", t: T(11) },
-    { w: "three ", t: T(12), color: C.orangeHi },
-    { w: "chains", t: T(13) },
-    { w: ".", t: T(13) + 0.16, color: C.orange },
+    { w: "across ", t: T(4) },
+    { w: "chains, ", t: T(5) },
+    { w: "did ", t: T(6) },
+    { w: "you ", t: T(7) },
+    { w: "get", t: T(8) },
+    { w: "\n", t: 0 },
+    { w: "the ", t: T(9) },
+    { w: "best ", t: T(10), color: C.orangeHi },
+    { w: "price?", t: T(11), color: C.orangeHi },
   ];
+  const a = [
+    { w: "Honestly, ", t: T(12) },
+    { w: "you ", t: T(13) },
+    { w: "can’t ", t: T(14) },
+    { w: "tell", t: T(15) },
+    { w: ".", t: T(15) + 0.16, color: C.orange },
+  ];
+
+  const Row: React.FC<{ k: string; children: React.ReactNode; top: number; op?: number }> = ({ k, children, top, op = 1 }) => (
+    <div style={{ position: "absolute", left: 28, right: 28, top, display: "flex", justifyContent: "space-between", alignItems: "baseline", opacity: op }}>
+      <Label size={15}>{k}</Label>
+      <div style={{ fontFamily: F.mono, fontSize: 28, color: C.white }}>{children}</div>
+    </div>
+  );
 
   return (
     <div style={{ position: "absolute", inset: 0, opacity: 1 - out, transform: `translateY(${-out * 30}px)` }}>
-      {/* the route, as plain legs */}
-      <div style={{ position: "absolute", left: LX, top: LY - 50, width: LW, display: "flex", justifyContent: "space-between", opacity: p(f, EV.legs[0] - 0.15, 0.4) }}>
-        <Label size={16}>Best route · 10 BTC → ethereum.usdt · live quote</Label>
-        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-          <Blocks n={4} filled={legsDone} size={18} />
-          <Label size={16} color={legsDone === 4 ? C.orangeHi : C.mute}>
-            {legsDone} steps{f / FPS >= EV.chainsLit ? " · 3 chains" : ""}
+      <div style={{ position: "absolute", left: 114, top: 300, opacity: 1 - 0.62 * dimQ }}>
+        <Words words={q} size={88} />
+      </div>
+      <Words words={a} size={88} style={{ position: "absolute", left: 114, top: 610 }} />
+
+      {/* a settled cross-chain swap — with no way to know if it was the best price */}
+      <div
+        style={{
+          position: "absolute",
+          left: CX,
+          top: CY,
+          width: CW,
+          height: 330,
+          borderRadius: 20,
+          border: `1px solid ${C.line}`,
+          background: C.panel,
+          opacity: card,
+          transform: `translateY(${(1 - card) * 24}px)`,
+        }}
+      >
+        <div style={{ position: "absolute", left: 28, right: 28, top: 26, display: "flex", justifyContent: "space-between" }}>
+          <Label size={15}>
+            <span style={{ color: C.orange }}>///</span> Swap settled
+          </Label>
+          <Label size={15} color={C.green}>
+            ✓ done
           </Label>
         </div>
+        <Row k="Sent" top={86}>10 BTC</Row>
+        <Row k="Received" top={140}>639,767.85 USDT</Row>
+        <div style={{ position: "absolute", left: 28, right: 28, top: 200, borderTop: `1px solid ${C.line}` }} />
+        <Row k="Best available" top={226} op={p(f, EV.doubt - 0.1, 0.35)}>
+          <span style={{ color: tell > 0.5 ? C.dim : C.orangeHi }}>
+            <Scramble text="645,331.16" settle={999} start={EV.doubt} seed="doubt" />
+          </span>
+        </Row>
+        <div
+          style={{
+            position: "absolute",
+            right: 28,
+            top: 276,
+            fontFamily: F.mono,
+            fontSize: 15,
+            letterSpacing: "0.2em",
+            color: C.orangeHi,
+            opacity: tell,
+          }}
+        >
+          ? UNKNOWN
+        </div>
       </div>
-      {LEGS.map((l, i) => {
-        const k = p(f, EV.legs[i], 0.45, E.snap);
-        return (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: LX,
-              top: LY + i * RH,
-              width: LW,
-              height: RH,
-              borderTop: `1px solid ${C.line}`,
-              display: "flex",
-              alignItems: "center",
-              gap: 28,
-              fontFamily: F.mono,
-              fontSize: 26,
-              opacity: k,
-              transform: `translateX(${(1 - k) * 40}px)`,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span style={{ color: C.dim, width: 40 }}>0{i + 1}</span>
-            <Asset chain={l[0]} tok={l[1]} f={f} />
-            <span style={{ color: C.dim }}>→</span>
-            <Asset chain={l[2]} tok={l[3]} f={f} />
-          </div>
-        );
-      })}
-      <div style={{ position: "absolute", left: LX, top: LY + 4 * RH, width: LW * p(f, EV.legs[3], 0.5, E.settle), borderTop: `1px solid ${C.line}` }} />
-
-      <div style={{ position: "absolute", left: 114, top: 560, opacity: 1 - 0.62 * dimFirst }}>
-        <Words words={w1} size={92} />
-      </div>
-      <Words words={w2} size={92} style={{ position: "absolute", left: 114, top: 668 }} />
+      <Label size={13} color={C.dim} style={{ position: "absolute", left: CX, top: CY + 350, letterSpacing: "0.18em", opacity: card * 0.9 }}>
+        Illustrative · amounts from a live quote, {""}
+        <span>15 Nov 2026</span>
+      </Label>
     </div>
   );
 };

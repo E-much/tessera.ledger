@@ -1,12 +1,12 @@
 import React from "react";
-import { useCurrentFrame } from "remotion";
+import { Img, staticFile, useCurrentFrame } from "remotion";
 import EV from "../events.json";
 import { C, E, F, FPS, lerp, p, wt } from "../theme";
 import { Label, Logo, Words } from "../ui";
 
 // "Rift. Best price execution, in one click."  → end card
 const T = (i: number) => wt("close", i);
-export const HANDLE = "@MYHANDLE";
+export const HANDLE = "@emuch4pf";
 
 export const Close: React.FC = () => {
   const f = useCurrentFrame();
@@ -61,7 +61,8 @@ export const Close: React.FC = () => {
           rift.trade
         </div>
       </div>
-      <div style={{ position: "absolute", left: 0, width: 1920, top: 700, textAlign: "center", opacity: credit, transform: `translateY(${(1 - credit) * 14}px)` }}>
+      <div style={{ position: "absolute", left: 0, width: 1920, top: 690, display: "flex", justifyContent: "center", alignItems: "center", gap: 18, opacity: credit, transform: `translateY(${(1 - credit) * 14}px)` }}>
+        <Img src={staticFile("pfp.jpg")} style={{ width: 48, height: 48, borderRadius: 24, border: `1px solid ${C.line}` }} />
         <Label size={20} color={C.mute} style={{ letterSpacing: "0.14em", textTransform: "none" }}>
           <span style={{ color: C.orange }}>///</span> Weekly Spotlight by <span style={{ color: C.white }}>{HANDLE}</span> · fan-made, not affiliated with RIFT
         </Label>

@@ -54,5 +54,8 @@ export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 export const line = (id: string) => TL.lines.find((l) => l.id === id)!;
 /** absolute time (s) of the n-th word of a line */
-export const wt = (id: string, n: number) => line(id).words[n].t;
+export const wt = (id: string, n: number) => {
+  const w = line(id).words;
+  return w[Math.min(n, w.length - 1)].t;
+};
 export const TIMELINE = TL;

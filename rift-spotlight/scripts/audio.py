@@ -18,7 +18,6 @@ BPM = TL["bpm"]
 BEAT = 60 / BPM
 BAR = 4 * BEAT
 rng = np.random.default_rng(7)
-SH = EV["shift"]  # the hook is one bar longer; the rest of the cue moves with it
 CUT = EV["cuts"]
 
 
@@ -91,14 +90,12 @@ CYCLE = ["Am", "F", "C", "G"]
 
 
 def chord_at(t):
-    if t < SH:
-        return "Am"
-    b = int((t - SH) // BAR)
-    if b >= 20:
+    """Am–F–C–G loop; G for the bar before the close, C (resolution) from "Rift." on."""
+    if t >= EV["closeLogo"] - 0.01:
         return "C"
-    if b == 19:
+    if t >= EV["closeLogo"] - BAR - 0.01:
         return "G"
-    return CYCLE[b % 4]
+    return CYCLE[int(t // BAR) % 4]
 
 
 # section intensity 0..1 over time (builds into the demo, resolves at close)
@@ -301,19 +298,17 @@ add_sfx(None, whoosh(0.5, L_WHOOSH * 0.8), EV["logoFly"] - 0.05)
 add_sfx(None, whoosh(0.6, L_WHOOSH * 0.8, up=False), EV["pullback"] + 0.05)
 add_sfx(None, whoosh(0.5, L_WHOOSH * 0.6), EV["endCard"] - 0.1)
 
-# hook: route legs type in, chains light
-for t in EV["legs"]:
-    add_sfx(None, click(L_CLICK * 0.45), t)
-for i in range(3):
-    add_sfx(None, tick(L_TICK * 1.2, 1800 + 200 * i), EV["chainsLit"] + i * 0.1)
+# hook: the 'best available' figure re-rolls, then lands on "can't tell"
+for t in np.arange(EV["doubt"], EV["cantTell"], 1 / 15):
+    add_sfx(None, tick(L_TICK * 0.5, 2300 + 600 * rng.random()), t)
+add_sfx(None, tick(L_TICK * 1.3, 1500), EV["cantTell"])
 
 # problem: rows, re-quote ticks, hunting bracket
 for t in EV["rows"]:
     add_sfx(None, click(L_CLICK * 0.35), t)
 for t in np.arange(EV["rows"][0], EV["rowSettle"][-1], 1 / 15):
     add_sfx(None, tick(L_TICK * 0.6, 2400 + 300 * rng.random()), t)
-for t in EV["hunt"]:
-    add_sfx(None, tick(L_TICK * 1.1, 1600), t)
+add_sfx(None, lock(L_LOCK * 0.5), EV["gap"])  # spread bracket snaps on
 
 # solution
 add_sfx(None, soft_hit(0.22), EV["logoIn"])
