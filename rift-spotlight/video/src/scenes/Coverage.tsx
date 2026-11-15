@@ -26,7 +26,7 @@ export const Coverage: React.FC = () => {
   return (
     <div style={{ position: "absolute", inset: 0, opacity: 1 - out }}>
       {names.map((n, i) => {
-        const t0 = EV.chainWords[i] - 0.06;
+        const t0 = i === 0 ? Math.min(EV.chainWords[0] - 0.06, EV.cuts[3] + 0.05) : EV.chainWords[i] - 0.06;
         const t1 = (i < 4 ? EV.chainWords[i + 1] : more) - 0.08;
         if (t < t0 - 0.05 || t > t1 + 0.25) return null;
         const k = p(f, t0, 0.32, E.snap);

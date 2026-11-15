@@ -79,10 +79,10 @@ export const Words: React.FC<{
               }
               const tr =
                 m === "zoom"
-                  ? `scale(${1 + 0.9 * (1 - k)})`
+                  ? `scale(${1 + 0.35 * (1 - k)})`
                   : `translateX(${(m === "left" ? -1 : 1) * (1 - k) * size * 1.4}px)`;
               return (
-                <span key={i} style={{ ...inner, verticalAlign: "top", opacity: Math.min(1, k * 1.6), transform: tr, transformOrigin: "50% 60%" }}>
+                <span key={i} style={{ ...inner, verticalAlign: "top", opacity: Math.min(1, k * (m === "zoom" ? 2.4 : 1.6)), transform: tr, transformOrigin: "50% 60%" }}>
                   {w.w}
                 </span>
               );

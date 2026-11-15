@@ -355,7 +355,7 @@ def true_peak(x):
     return 20 * np.log10(np.max(np.abs(up)) + 1e-12)
 
 
-def limiter(x, ceiling_db=-1.2, look=0.005, rel=0.08):
+def limiter(x, ceiling_db=-2.0, look=0.005, rel=0.08):
     c = 10 ** (ceiling_db / 20)
     la = int(look * SR)
     peak = np.abs(x)
@@ -479,15 +479,16 @@ mix = vo + music_d + sfx
 
 # ---------------------------------------------------------------- loudness + true-peak
 pre = mix.copy()
-gain = -14.0 - meter.integrated_loudness(pre)
+st = lambda x: meter.integrated_loudness(np.stack([x, x], 1))  # measure as the stereo file we write
+gain = -14.0 - st(pre)
 for _ in range(6):  # gain → limit → re-measure until integrated loudness lands on -14
     mix = limiter(pre * 10 ** (gain / 20))
-    err = -14.0 - meter.integrated_loudness(mix)
+    err = -14.0 - st(mix)
     if abs(err) < 0.05:
         break
     gain += err
 vo_s, music_s, sfx_s = vo * 10 ** (gain / 20), music_d * 10 ** (gain / 20), sfx * 10 ** (gain / 20)
-final_lufs = meter.integrated_loudness(mix)
+final_lufs = st(mix)
 tp = true_peak(mix)
 
 import os
