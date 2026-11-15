@@ -1,12 +1,13 @@
 import React from "react";
 import { useCurrentFrame } from "remotion";
+import EV from "../events.json";
 import { PATHS_PRICED, QUOTE, SINGLE_HOP, fmt } from "../data";
 import { BEAT, C, E, F, lerp, p, wt } from "../theme";
 import { Blocks, Label, Scramble, Words } from "../ui";
 
 // "Every route has a different price. And you never really know if you got the best one."
 const T = (i: number) => wt("problem", i);
-const OUT = 10.22;
+const OUT = EV.cuts[1] - 0.28;
 const ROWS = SINGLE_HOP.filter((r) => r.out !== null);
 const max = Math.max(...ROWS.map((r) => r.out!));
 const min = Math.min(...ROWS.map((r) => r.out!));

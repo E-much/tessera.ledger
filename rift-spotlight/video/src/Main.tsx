@@ -7,15 +7,15 @@ import { Graph, Spine } from "./scenes/Graph";
 import { Hook } from "./scenes/Hook";
 import { Problem } from "./scenes/Problem";
 import { LogoTile, SolutionReveal, Widget } from "./scenes/Solution";
-import { C, E, FPS, p } from "./theme";
+import { C, E, FPS, p, wt } from "./theme";
 import { FontFaces, Grid, HUD } from "./ui";
 
 const SECTIONS: [number, string][] = [
-  [0, "Status quo"],
+  [0, "The route"],
   [EV.cuts[0], "The problem"],
   [EV.cuts[1], "One click"],
   [EV.cuts[2], "Routing"],
-  [24.6, "Reliability"],
+  [wt("reliability", 0) - 0.2, "Reliability"],
   [EV.cuts[3], "Coverage"],
   [EV.cuts[4], "rift.trade"],
 ];

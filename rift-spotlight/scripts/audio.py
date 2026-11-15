@@ -18,6 +18,8 @@ BPM = TL["bpm"]
 BEAT = 60 / BPM
 BAR = 4 * BEAT
 rng = np.random.default_rng(7)
+SH = EV["shift"]  # the hook is one bar longer; the rest of the cue moves with it
+CUT = EV["cuts"]
 
 
 def t_(n):
@@ -89,7 +91,9 @@ CYCLE = ["Am", "F", "C", "G"]
 
 
 def chord_at(t):
-    b = int(t // BAR)
+    if t < SH:
+        return "Am"
+    b = int((t - SH) // BAR)
     if b >= 20:
         return "C"
     if b == 19:
@@ -99,7 +103,7 @@ def chord_at(t):
 
 # section intensity 0..1 over time (builds into the demo, resolves at close)
 def intensity(t):
-    pts = [(0, 0.25), (5, 0.35), (10.5, 0.5), (17, 0.75), (23, 0.9), (28.5, 0.9), (33, 0.85), (39.5, 0.6), (40, 0.5), (47, 0.2)]
+    pts = [(0, 0.25), (CUT[0], 0.35), (CUT[1], 0.5), (CUT[2], 0.75), (EV["lock"], 0.9), (EV["fail"], 0.9), (CUT[3], 0.85), (CUT[4], 0.6), (EV["closeLogo"], 0.5), (DUR, 0.2)]
     xs, ys = zip(*pts)
     return float(np.interp(t, xs, ys))
 
@@ -117,7 +121,7 @@ for b in range(nb):
     t = b * BEAT
     if EV["fail"] <= t < EV["relock"]:
         continue  # the beat drops out while the venue is down
-    if 39.5 <= t < 40.0:
+    if CUT[4] <= t < EV["closeLogo"]:
         continue  # breath before the resolve
     lvl = 0.55 * intensity(t)
     if b % 4 == 0:
@@ -130,7 +134,7 @@ add(music, kick * 0.6, EV["closeLogo"])
 bass_len = int(BEAT / 2 * SR)
 for k in range(int(DUR / (BEAT / 2))):
     t = k * BEAT / 2
-    if t < 10.5 or t >= 39.5 or (EV["fail"] <= t < EV["relock"]):
+    if t < CUT[1] or t >= CUT[4] or (EV["fail"] <= t < EV["relock"]):
         continue
     f0 = midi(ROOT[chord_at(t)])
     tt = t_(bass_len)
@@ -147,7 +151,7 @@ pad = np.zeros(N)
 for b in range(int(np.ceil(DUR / BAR))):
     t0 = b * BAR
     ch = chord_at(t0 + 0.01)
-    length = BAR + 0.4 if b < 20 else DUR - t0
+    length = BAR + 0.4 if t0 < EV["closeLogo"] - 0.01 else DUR - t0
     n = int(length * SR)
     tt = t_(n)
     x = np.zeros(n)
@@ -156,9 +160,10 @@ for b in range(int(np.ceil(DUR / BAR))):
         for det in (-0.07, 0.07):
             f = midi(m) * 2 ** (det / 12)
             x += 2 * ((tt * f + rng.random()) % 1) - 1
-    a = 0.35 if b < 20 else 0.05
+    late = t0 >= EV["closeLogo"] - 0.01
+    a = 0.35 if not late else 0.05
     e = np.minimum(tt / a, 1) * np.minimum(1, np.maximum(0, (length - tt) / 0.4))
-    if b >= 20:
+    if late:
         e *= np.exp(-tt / 3.2)
     add(pad, x * e * 0.02, t0)
 pad_cut = np.array([380 + 900 * intensity(i / SR) for i in range(0, N, 480)])
@@ -176,9 +181,9 @@ def pluck(f, n, dec):
 arp = np.zeros(N)
 pat = [0, 1, 2, 1, 2, 0, 1, 2]
 step = 0
-t = 5.0
-while t < 39.5:
-    sub = BEAT / 4 if 17.0 <= t < 33.0 else BEAT / 2
+t = CUT[0]
+while t < CUT[4]:
+    sub = BEAT / 4 if CUT[2] <= t < CUT[3] else BEAT / 2
     if not (EV["fail"] <= t < EV["relock"]):
         ch = CH[chord_at(t)]
         m = ch[pat[step % len(pat)]] + 12
@@ -192,10 +197,10 @@ music += arp
 # --- hats: quiet ticks on off-beats from the solution, 16ths in the demo
 hat_n = int(0.04 * SR)
 hat = hpf(rng.standard_normal(hat_n), 6500) * env_ad(hat_n, 0.0005, 0.008)
-t = 10.5
+t = CUT[1]
 k = 0
-while t < 39.5:
-    sub = BEAT / 4 if 17.0 <= t < 33.0 else BEAT / 2
+while t < CUT[4]:
+    sub = BEAT / 4 if CUT[2] <= t < CUT[3] else BEAT / 2
     if not (EV["fail"] <= t < EV["relock"]):
         on_off = (k % 2 == 1) if sub == BEAT / 2 else True
         if on_off:
@@ -296,11 +301,11 @@ add_sfx(None, whoosh(0.5, L_WHOOSH * 0.8), EV["logoFly"] - 0.05)
 add_sfx(None, whoosh(0.6, L_WHOOSH * 0.8, up=False), EV["pullback"] + 0.05)
 add_sfx(None, whoosh(0.5, L_WHOOSH * 0.6), EV["endCard"] - 0.1)
 
-# hook: tabs + bridges
-for i, t in enumerate(EV["tabs"]):
+# hook: route legs type in, chains light
+for t in EV["legs"]:
     add_sfx(None, click(L_CLICK * 0.45), t)
-for t in EV["bridges"]:
-    add_sfx(None, tick(L_TICK * 1.2, 1800), t)
+for i in range(3):
+    add_sfx(None, tick(L_TICK * 1.2, 1800 + 200 * i), EV["chainsLit"] + i * 0.1)
 
 # problem: rows, re-quote ticks, hunting bracket
 for t in EV["rows"]:

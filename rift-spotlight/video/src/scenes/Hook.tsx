@@ -1,117 +1,107 @@
 import React from "react";
 import { useCurrentFrame } from "remotion";
-import { C, E, F, p, wt } from "../theme";
-import { Words } from "../ui";
+import EV from "../events.json";
+import { C, E, F, FPS, p, wt } from "../theme";
+import { Blocks, Label, Words } from "../ui";
 
-// "Moving money across chains shouldn't take five tabs, three bridges, and a prayer."
+// "Ten bitcoin into USDT on Ethereum? Right now, that's four steps across three chains."
 const T = (i: number) => wt("hook", i);
-const OUT = 4.72; // exit, lands the cut on the beat at 5.0
+const OUT = EV.cuts[0] - 0.28;
 
-const TAB_W = 236;
-const TAB_X = (i: number) => 120 + i * (TAB_W + 24);
-const TAB_Y = 300;
+// The real best route for this order (live quote, see data.ts) — venues are revealed later in the graph.
+const LEGS: [string, string, string, string][] = [
+  ["bitcoin", ".btc", "hyperliquid", ".btc"],
+  ["hyperliquid", ".btc", "hyperliquid", ".usdc"],
+  ["hyperliquid", ".usdc", "ethereum", ".usdc"],
+  ["ethereum", ".usdc", "ethereum", ".usdt"],
+];
+const CHAIN_ORDER = ["bitcoin", "hyperliquid", "ethereum"];
+const LX = 120, LY = 214, RH = 62, LW = 1680;
 
-const Tab: React.FC<{ i: number }> = ({ i }) => {
-  const f = useCurrentFrame();
-  const k = p(f, T(6) + i * 0.075, 0.45, E.snap); // "five" → five tabs, staggered
-  const out = p(f, OUT + i * 0.02, 0.28, E.exit);
-  const fail = p(f, T(12), 0.2, E.settle); // "prayer" → everything greys out
+const Asset: React.FC<{ chain: string; tok: string; f: number }> = ({ chain, tok, f }) => {
+  const lit = p(f, EV.chainsLit + CHAIN_ORDER.indexOf(chain) * 0.1, 0.3, E.snap);
   return (
-    <g transform={`translate(${TAB_X(i)}, ${TAB_Y + (1 - k) * 26 - out * 40})`} opacity={k * (1 - out)}>
-      <path
-        d={`M0 56 L16 8 Q19 0 28 0 H${TAB_W - 28} Q${TAB_W - 19} 0 ${TAB_W - 16} 8 L${TAB_W} 56`}
-        fill={C.panel}
-        stroke={fail > 0.5 ? "rgba(255,255,255,0.16)" : "rgba(255,255,255,0.34)"}
-        strokeWidth={1.5}
-      />
-      <text x={38} y={36} fontFamily={F.mono} fontSize={17} letterSpacing="0.2em" fill={fail > 0.5 ? C.dim : C.ink}>
-        {`TAB 0${i + 1}`}
-      </text>
-      <text x={TAB_W - 46} y={36} fontFamily={F.mono} fontSize={17} fill={C.dim}>
-        ×
-      </text>
-    </g>
-  );
-};
-
-// three bridges arc between tabs (1→3, 2→4, 3→5), drawn on "three bridges"
-const Bridge: React.FC<{ i: number }> = ({ i }) => {
-  const f = useCurrentFrame();
-  const k = p(f, T(8) + i * 0.12, 0.55, E.settle);
-  const out = p(f, OUT, 0.28, E.exit);
-  const x1 = TAB_X(i) + TAB_W / 2;
-  const x2 = TAB_X(i + 2) + TAB_W / 2;
-  const top = 168 + i * 26;
-  const d = `M${x1} ${TAB_Y - 6} C${x1} ${top} ${x2} ${top} ${x2} ${TAB_Y - 6}`;
-  const len = (x2 - x1) * 1.35;
-  const fail = p(f, T(12), 0.2, E.settle);
-  return (
-    <g opacity={1 - out}>
-      <path
-        d={d}
-        fill="none"
-        stroke={fail > 0.5 ? "rgba(255,255,255,0.18)" : C.orange}
-        strokeWidth={2}
-        strokeDasharray={`${len}`}
-        strokeDashoffset={(1 - k) * len}
-      />
-      <text
-        x={(x1 + x2) / 2}
-        y={top + 26 - 12}
-        textAnchor="middle"
-        fontFamily={F.mono}
-        fontSize={15}
-        letterSpacing="0.24em"
-        fill={fail > 0.5 ? C.dim : C.orangeHi}
-        opacity={k}
-      >
-        {`BRIDGE 0${i + 1}`}
-      </text>
-    </g>
+    <span>
+      <span style={{ color: lit > 0.5 ? C.orangeHi : C.ink }}>{chain}</span>
+      <span style={{ color: C.mute }}>{tok}</span>
+    </span>
   );
 };
 
 export const Hook: React.FC = () => {
   const f = useCurrentFrame();
-  const words = [
-    { w: "Moving ", t: T(0) },
-    { w: "money ", t: T(1) },
-    { w: "across ", t: T(2) },
-    { w: "chains", t: T(3) },
-    { w: "\n", t: 0 },
-    { w: "shouldn’t ", t: T(4) },
-    { w: "take ", t: T(5) },
-    { w: "five ", t: T(6) },
-    { w: "tabs,", t: T(7) },
-    { w: "\n", t: 0 },
-    { w: "three ", t: T(8) },
-    { w: "bridges, ", t: T(9) },
-    { w: "and ", t: T(10) },
-    { w: "a ", t: T(11) },
-    { w: "prayer", t: T(12) },
-    { w: ".", t: T(12) + 0.18, color: C.orange },
+  const out = p(f, OUT, 0.28, E.exit);
+  const dimFirst = p(f, T(6) - 0.05, 0.4, E.settle);
+  const legsDone = EV.legs.filter((t) => f / FPS >= t).length;
+
+  const w1 = [
+    { w: "Ten ", t: T(0) },
+    { w: "bitcoin ", t: T(1) },
+    { w: "into ", t: T(2) },
+    { w: "USDT ", t: T(3) },
+    { w: "on ", t: T(4) },
+    { w: "Ethereum?", t: T(5) },
   ];
+  const w2 = [
+    { w: "Right ", t: T(6) },
+    { w: "now, ", t: T(7) },
+    { w: "that’s ", t: T(8) },
+    { w: "four ", t: T(9), color: C.orangeHi },
+    { w: "steps", t: T(10) },
+    { w: "\n", t: 0 },
+    { w: "across ", t: T(11) },
+    { w: "three ", t: T(12), color: C.orangeHi },
+    { w: "chains", t: T(13) },
+    { w: ".", t: T(13) + 0.16, color: C.orange },
+  ];
+
   return (
-    <>
-      <svg width={1920} height={1080} style={{ position: "absolute", inset: 0 }}>
-        {[0, 1, 2, 3, 4].map((i) => (
-          <Tab key={i} i={i} />
-        ))}
-        {[0, 1, 2].map((i) => (
-          <Bridge key={i} i={i} />
-        ))}
-        {/* tab bar baseline */}
-        <line
-          x1={120}
-          x2={120 + (1800 - 120) * p(f, T(6) - 0.1, 0.6, E.settle)}
-          y1={TAB_Y + 56}
-          y2={TAB_Y + 56}
-          stroke="rgba(255,255,255,0.16)"
-          strokeWidth={1.5}
-          opacity={1 - p(f, OUT, 0.28, E.exit)}
-        />
-      </svg>
-      <Words words={words} size={112} exitAt={OUT} style={{ position: "absolute", left: 114, top: 526 }} />
-    </>
+    <div style={{ position: "absolute", inset: 0, opacity: 1 - out, transform: `translateY(${-out * 30}px)` }}>
+      {/* the route, as plain legs */}
+      <div style={{ position: "absolute", left: LX, top: LY - 50, width: LW, display: "flex", justifyContent: "space-between", opacity: p(f, EV.legs[0] - 0.15, 0.4) }}>
+        <Label size={16}>Best route · 10 BTC → ethereum.usdt · live quote</Label>
+        <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+          <Blocks n={4} filled={legsDone} size={18} />
+          <Label size={16} color={legsDone === 4 ? C.orangeHi : C.mute}>
+            {legsDone} steps{f / FPS >= EV.chainsLit ? " · 3 chains" : ""}
+          </Label>
+        </div>
+      </div>
+      {LEGS.map((l, i) => {
+        const k = p(f, EV.legs[i], 0.45, E.snap);
+        return (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: LX,
+              top: LY + i * RH,
+              width: LW,
+              height: RH,
+              borderTop: `1px solid ${C.line}`,
+              display: "flex",
+              alignItems: "center",
+              gap: 28,
+              fontFamily: F.mono,
+              fontSize: 26,
+              opacity: k,
+              transform: `translateX(${(1 - k) * 40}px)`,
+              whiteSpace: "nowrap",
+            }}
+          >
+            <span style={{ color: C.dim, width: 40 }}>0{i + 1}</span>
+            <Asset chain={l[0]} tok={l[1]} f={f} />
+            <span style={{ color: C.dim }}>→</span>
+            <Asset chain={l[2]} tok={l[3]} f={f} />
+          </div>
+        );
+      })}
+      <div style={{ position: "absolute", left: LX, top: LY + 4 * RH, width: LW * p(f, EV.legs[3], 0.5, E.settle), borderTop: `1px solid ${C.line}` }} />
+
+      <div style={{ position: "absolute", left: 114, top: 560, opacity: 1 - 0.62 * dimFirst }}>
+        <Words words={w1} size={92} />
+      </div>
+      <Words words={w2} size={92} style={{ position: "absolute", left: 114, top: 668 }} />
+    </div>
   );
 };

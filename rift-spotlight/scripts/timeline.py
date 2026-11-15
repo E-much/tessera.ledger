@@ -10,10 +10,12 @@ words = json.load(open("audio/vo/words.json"))
 #  reliab.  "down" on beat 57          (28.50)
 #  coverage "Zero" on beat 75          (37.50)
 #  close    "Rift" on the downbeat     (40.00)
+SHIFT = 2 * 2 * BEAT  # hook got longer: everything after it moves by one bar (keeps beat alignment)
 START = {"hook": 0.5, "problem": 5.5, "solution": 16.0 - 5.30, "routing": 23.0 - 6.00,
          "reliability": 28.5 - 3.70, "coverage": 37.5 - 4.04, "close": 40.0}
-DURATION = 47.0
-out = {"fps": 60, "bpm": BPM, "duration": DURATION, "lines": []}
+START = {k: (v if k == "hook" else v + SHIFT) for k, v in START.items()}
+DURATION = 48.0
+out = {"fps": 60, "bpm": BPM, "duration": DURATION, "shift": SHIFT, "lines": []}
 for L in words:
     s = START[L["id"]]
     out["lines"].append({"id": L["id"], "start": round(s, 3), "text": L["text"],

@@ -1,72 +1,77 @@
 [
  {
   "id": "hook",
-  "text": "Moving money across chains shouldn't take five tabs, three bridges, and a prayer.",
+  "text": "Ten bitcoin into U S D T on Ethereum? Right now, that's four steps across three chains.",
   "words": [
    {
-    "w": "Moving",
+    "w": "10",
     "s": 0.0,
-    "e": 0.26
+    "e": 0.22
    },
    {
-    "w": "money",
-    "s": 0.26,
-    "e": 0.52
+    "w": "Bitcoin",
+    "s": 0.22,
+    "e": 0.6
+   },
+   {
+    "w": "into",
+    "s": 0.6,
+    "e": 0.94
+   },
+   {
+    "w": "USDT",
+    "s": 0.94,
+    "e": 1.88
+   },
+   {
+    "w": "on",
+    "s": 1.88,
+    "e": 2.06
+   },
+   {
+    "w": "Ethereum.",
+    "s": 2.06,
+    "e": 2.4
+   },
+   {
+    "w": "Right",
+    "s": 3.14,
+    "e": 3.34
+   },
+   {
+    "w": "now,",
+    "s": 3.34,
+    "e": 3.66
+   },
+   {
+    "w": "that's",
+    "s": 4.02,
+    "e": 4.24
+   },
+   {
+    "w": "four",
+    "s": 4.24,
+    "e": 4.44
+   },
+   {
+    "w": "steps",
+    "s": 4.44,
+    "e": 4.74
    },
    {
     "w": "across",
-    "s": 0.52,
-    "e": 0.8
-   },
-   {
-    "w": "chains",
-    "s": 0.8,
-    "e": 1.22
-   },
-   {
-    "w": "shouldn't",
-    "s": 1.22,
-    "e": 1.64
-   },
-   {
-    "w": "take",
-    "s": 1.64,
-    "e": 1.78
-   },
-   {
-    "w": "five",
-    "s": 1.78,
-    "e": 2.08
-   },
-   {
-    "w": "tabs,",
-    "s": 2.08,
-    "e": 2.54
+    "s": 4.74,
+    "e": 5.04
    },
    {
     "w": "three",
-    "s": 2.94,
-    "e": 3.12
+    "s": 5.04,
+    "e": 5.34
    },
    {
-    "w": "bridges",
-    "s": 3.12,
-    "e": 3.52
-   },
-   {
-    "w": "and",
-    "s": 3.52,
-    "e": 3.86
-   },
-   {
-    "w": "a",
-    "s": 3.86,
-    "e": 3.98
-   },
-   {
-    "w": "prayer.",
-    "s": 3.98,
-    "e": 4.18
+    "w": "chains.",
+    "s": 5.34,
+    "e": 5.66
    }
   ]
  },
