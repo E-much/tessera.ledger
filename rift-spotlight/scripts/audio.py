@@ -19,7 +19,7 @@ BEAT = 60 / BPM
 BAR = 4 * BEAT
 rng = np.random.default_rng(7)
 _sh = {x["id"]: x["t0"] for x in EV["shots"]}
-# music sections: pain → "Meet Rift" lift → route/no-fees peak → breath → resolve on "Rift."
+# music sections: the hunt (sparse) → Rift arrives (lift) → venues/route (peak) → breath → resolve on "Rift."
 CUT = [_sh["bridge"], _sh["logo"], _sh["route"], _sh["close"] - 0.01, _sh["close"]]
 
 
@@ -293,32 +293,33 @@ def soft_hit(level=1.0):
 # relative SFX levels (pre-mix); final check enforces SFX < VO and < music
 L_TICK, L_CLICK, L_LOCK, L_WHOOSH = 0.05, 0.16, 0.16, 0.06
 
-# every whip / zoom cut gets a short whoosh
-for c in EV["cuts"]:
-    add_sfx(None, whoosh(0.36, L_WHOOSH), c - 0.18)
-# pain: the transfer $ wobbles, fee rows tick in, best-price digits re-roll
-for i in range(3):
-    add_sfx(None, tick(L_TICK * 0.9, 1700 + 200 * i), _sh["fees"] + 0.1 + i * 0.12)
-add_sfx(None, tick(L_TICK * 1.2, 1300), _sh["fees"] + 0.5)
-for t in np.arange(_sh["unsure"] + 0.2, _sh["logo"] - 0.2, 1 / 12):
-    add_sfx(None, tick(L_TICK * 0.45, 2300 + 600 * rng.random()), t)
-# Meet Rift
-add_sfx(None, soft_hit(0.22), EV["closeLogo"] - 99 if False else _sh["logo"] + 0.1)
-# pick → typing, trade click
-for a0 in (EV["pickFrom"], EV["pickTo"]):
-    for t in np.linspace(a0, a0 + 0.4, 7):
-        add_sfx(None, click(L_CLICK * 0.25), t)
-add_sfx(None, click(L_CLICK), EV["click"])
-# route: hop ticks, venues, best-price lock
+# the hunt: typing, each tab sliding in, each Cancel click, the price slipping
+for a0 in (EV["typePay"], EV["typeGet"]):
+    for t in np.linspace(a0 - 0.1, a0 + 0.3, 6):
+        add_sfx(None, click(L_CLICK * 0.22), t)
+add_sfx(None, tick(L_TICK * 1.2, 1500), EV["q"][0])
+for t in EV["q"][1:]:
+    add_sfx(None, whoosh(0.34, L_WHOOSH * 0.8), t - 0.3)
+for t in EV["cancel"]:
+    if t is not None:
+        add_sfx(None, click(L_CLICK * 0.8), t)
+        add_sfx(None, whoosh(0.4, L_WHOOSH * 0.6, up=False), t + 0.08)
+for k in range(10):
+    add_sfx(None, tick(L_TICK * 0.6, 1800 - 90 * k), EV["moved"] + k * 0.13)
+# Rift arrives
+add_sfx(None, whoosh(0.5, L_WHOOSH), EV["sweep"])
+add_sfx(None, soft_hit(0.2), EV["sweep"] + 0.35)
+for t in np.arange(EV["venues"], EV["venuesEnd"], 1 / 10):
+    add_sfx(None, tick(L_TICK * 0.45, 2100 + 700 * rng.random()), t)
 for k in range(4):
-    add_sfx(None, tick(L_TICK * 1.2, 1900), EV["hop0"] + k * (EV["result"] - 0.15 - EV["hop0"]) / 3)
+    add_sfx(None, tick(L_TICK * 1.1, 1900), EV["route"] + k * (EV["chains"] - 0.1 - EV["route"]) / 4)
 add_sfx(None, lock(L_LOCK), EV["result"])
-# no approvals / zero fees / no guesswork
-for t in EV["nos"]:
-    add_sfx(None, soft_hit(0.1), t - 0.05)
-# close + creator card
+add_sfx(None, click(L_CLICK), EV["click"])
+# fees / close / card
+add_sfx(None, whoosh(0.4, L_WHOOSH * 0.8), EV["fees"] - 0.2)
+add_sfx(None, soft_hit(0.14), EV["fees"])
 add_sfx(None, soft_hit(0.2), EV["closeLogo"])
-add_sfx(None, chime(0.04), _sh["card"] + 0.3)
+add_sfx(None, chime(0.04), EV["card"] + 0.3)
 
 # ---------------------------------------------------------------- VO
 def true_peak(x):

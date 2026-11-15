@@ -1,23 +1,33 @@
 [
  {
-  "id": "pain",
-  "tts": "Swapping across chains should be simple. Instead, you're juggling bridges, paying fees, and still not sure you got the best price.",
-  "el": "Swapping across chains should be simple. Instead, you're juggling bridges, paying fees, and still not sure you got the best price."
+  "id": "setup",
+  "tts": "Say you want to swap ten bitcoin into dollars.",
+  "el": "Say you want to swap ten bitcoin into dollars."
  },
  {
-  "id": "meet",
-  "tts": "Meet Rift. Pick what you have, pick what you want, and hit trade.",
-  "el": "Meet Rift. Pick what you have, pick what you want, and hit trade."
+  "id": "q1",
+  "tts": "First quote comes in. Feels low.",
+  "el": "First quote comes in. Feels low."
  },
  {
-  "id": "route",
-  "tts": "Rift finds the best route across twenty-plus venues, in one click.",
-  "el": "Rift finds the best route across twenty-plus venues, in one click."
+  "id": "q2",
+  "tts": "So you try somewhere else. Slightly better, but is it the best?",
+  "el": "So you try somewhere else. Slightly better, but is it the best?"
  },
  {
-  "id": "nos",
-  "tts": "No approvals. Zero added fees. No guesswork.",
-  "el": "No approvals. Zero added fees. No guesswork."
+  "id": "q3",
+  "tts": "One more tab, and now the price has moved.",
+  "el": "One more tab, and now the price has moved."
+ },
+ {
+  "id": "rift",
+  "tts": "Rift does that hunting for you. It checks over twenty venues at once, and takes the best route, even if that runs across three chains.",
+  "el": "Rift does that hunting for you. It checks over twenty venues at once, and takes the best route, even if that runs across three chains."
+ },
+ {
+  "id": "click",
+  "tts": "One click. No added fees.",
+  "el": "One click. No added fees."
  },
  {
   "id": "close",

@@ -16,7 +16,7 @@ for i, L in enumerate(LINES):
         parts.append(f'<break time="{BREAKS[i]}s" />')
 text = " ".join(parts)
 body = {"text": text, "model_id": "eleven_multilingual_v2",
-        "voice_settings": {"stability": 0.55, "similarity_boost": 0.8, "style": 0.2, "use_speaker_boost": True, "speed": SPEED}}
+        "voice_settings": {"stability": 0.45, "similarity_boost": 0.8, "style": 0.3, "use_speaker_boost": True, "speed": SPEED}}
 req = urllib.request.Request(
     f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE}/with-timestamps?output_format=mp3_44100_128",
     data=json.dumps(body).encode(), headers={"Content-Type": "application/json", "xi-api-key": "proxy-injected"})
