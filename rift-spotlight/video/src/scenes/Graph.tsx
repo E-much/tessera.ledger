@@ -22,6 +22,17 @@ const VEL = FAN.find((x) => x.venue === "VELORA")!;
 
 // delivery execution_cost from the same quote (USDT)
 const DELIVERY_COST = 0.094769;
+/** Camera: push in on the venue fan while it re-quotes, snap back on the lock;
+ *  push hard into the failing hop on "down", ease out when the route relocks. */
+export const camera = (f: number) => {
+  const z1 = p(f, EV.requote[0], 1.0, E.inOut) * (1 - p(f, EV.lock - 0.04, 0.35, E.snap));
+  const z2 = p(f, EV.fail - 0.06, 0.3, E.snap) * (1 - p(f, EV.relock + 0.05, 0.7, E.settle));
+  const s = 1 + 0.14 * z1 + 0.38 * z2;
+  const fx = z2 > 0.001 ? 1330 : 1380;
+  const fy = z2 > 0.001 ? 548 : 560;
+  return { transform: `scale(${s})`, transformOrigin: `${fx}px ${fy}px` };
+};
+
 const lastLegQuote = (v: string) => LAST_LEG.find((x) => x.venue === v)!.out;
 
 // red flash: on/off twice after the failure
@@ -131,7 +142,8 @@ export const Spine: React.FC = () => {
   const fl = flash(f);
 
   return (
-    <div style={{ position: "absolute", inset: 0, opacity: (1 - exit) * resK, transform: `translateX(${jitter}px)` }}>
+    <div style={{ position: "absolute", inset: 0, clipPath: t >= EV.pullback + 0.4 ? "inset(150px 0 125px 0)" : undefined }}>
+    <div style={{ position: "absolute", inset: 0, opacity: (1 - exit) * resK, transform: `translateX(${jitter}px) ${camera(f).transform}`, transformOrigin: camera(f).transformOrigin }}>
       <svg width={1920} height={1080} style={{ position: "absolute", inset: 0 }}>
         {[0, 1, 2, 3].map((i) => {
           const pts = edgePts(i);
@@ -227,11 +239,12 @@ export const Spine: React.FC = () => {
         );
       })}
     </div>
+    </div>
   );
 };
 
-const Caption: React.FC<{ words: { w: string; t: number; color?: string; mono?: boolean }[]; exitAt?: number }> = ({ words, exitAt }) => (
-  <Words words={words} size={46} weight={600} exitAt={exitAt} style={{ position: "absolute", left: 0, width: 1920, top: 96, textAlign: "center" }} />
+const Caption: React.FC<{ words: { w: string; t: number; color?: string; mono?: boolean }[]; exitAt?: number; mode?: "up" | "left" | "right" | "zoom" }> = ({ words, exitAt, mode = "up" }) => (
+  <Words words={words} size={46} weight={600} exitAt={exitAt} mode={mode} exitTo={mode === "left" ? "right" : mode === "right" ? "left" : "up"} style={{ position: "absolute", left: 0, width: 1920, top: 96, textAlign: "center" }} />
 );
 
 export const LEGEND_X = (i: number) => 380 + i * 166;
@@ -360,7 +373,8 @@ export const Graph: React.FC = () => {
 
   return (
     <div style={{ position: "absolute", inset: 0 }}>
-      <div style={{ position: "absolute", inset: 0, opacity: on }}>
+      <div style={{ position: "absolute", inset: 0, clipPath: "inset(150px 0 125px 0)" }}>
+      <div style={{ position: "absolute", inset: 0, opacity: on, ...camera(f) }}>
         {/* engine frame (from the docs' route diagram) */}
         <svg width={1920} height={1080} style={{ position: "absolute", inset: 0 }}>
           <rect
@@ -623,13 +637,15 @@ export const Graph: React.FC = () => {
         )}
       </div>
 
+      </div>
+
       {/* captions */}
       <div style={{ opacity: 1 - p(f, EV.cuts[3] - 0.3, 0.3, E.exit) }}>
-        <Caption words={capA} exitAt={RW(12) - 0.3} />
-        <Caption words={capB} exitAt={RL(0) - 0.3} />
-        <Caption words={capC} exitAt={RL(7) - 0.3} />
-        <Caption words={capD} exitAt={RL(15) - 0.3} />
-        <Caption words={capE} />
+        <Caption words={capA} exitAt={RW(12) - 0.3} mode="right" />
+        <Caption words={capB} exitAt={RL(0) - 0.3} mode="left" />
+        <Caption words={capC} exitAt={RL(7) - 0.3} mode="right" />
+        <Caption words={capD} exitAt={RL(15) - 0.3} mode="zoom" />
+        <Caption words={capE} mode="left" />
       </div>
 
       {/* order status meter */}

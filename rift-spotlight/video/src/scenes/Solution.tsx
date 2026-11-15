@@ -76,7 +76,7 @@ export const SolutionReveal: React.FC = () => {
   ];
   return (
     <div style={{ position: "absolute", inset: 0, opacity: 1 - out }}>
-      <Words words={words} size={104} style={{ position: "absolute", left: 0, width: 1920, top: 580, textAlign: "center" }} />
+      <Words words={words} size={120} mode="zoom" align="center" style={{ position: "absolute", left: 0, width: 1920, top: 570 }} />
       <div
         style={{
           position: "absolute",
@@ -153,10 +153,10 @@ export const Widget: React.FC = () => {
     <>
       {/* captions above the UI */}
       <div style={{ position: "absolute", left: 156, top: 112, opacity: 1 - pb }}>
-        <Words words={cap1} size={60} exitAt={EV.results - 0.3} />
+        <Words words={cap1} size={60} mode="left" exitAt={EV.results - 0.3} exitTo="left" />
       </div>
-      <div style={{ position: "absolute", left: 156, top: 112, opacity: 1 - pb }}>
-        <Words words={cap2} size={60} exitAt={EV.click + 0.5} />
+      <div style={{ position: "absolute", right: 160, top: 112, opacity: 1 - pb }}>
+        <Words words={cap2} size={60} mode="right" align="right" exitAt={EV.click + 0.5} exitTo="right" />
       </div>
 
       <div
@@ -346,21 +346,19 @@ export const Widget: React.FC = () => {
 };
 
 export const LogoTile: React.FC = () => {
+  // Centre reveal on "Rift fixes that." → fades with the line → reappears inside the RIFT result row.
   const f = useCurrentFrame();
   const k = p(f, EV.logoIn, 0.55, E.snap);
-  const b = logoBox(f);
+  const gone = p(f, EV.logoFly, 0.3, E.exit);
+  const back = p(f, EV.results + 0.05, 0.45, E.snap);
   const pb = p(f, EV.pullback, 0.5, E.inOut);
-  const s = b.s * (0.94 + 0.06 * k);
+  const inRow = f / 60 >= EV.results;
+  const s = inRow ? 110 : 220 * (0.94 + 0.06 * k);
+  const x = inRow ? 214 : 960 - s / 2;
+  const y = inRow ? W_Y - 55 : 300 + (220 - s) / 2;
+  const op = inRow ? back * (1 - pb) : k * (1 - gone);
   return (
-    <div
-      style={{
-        position: "absolute",
-        left: b.x + (b.s - s) / 2,
-        top: b.y + (b.s - s) / 2,
-        opacity: k * (1 - pb),
-        clipPath: `inset(${(1 - k) * 50}% 0 ${(1 - k) * 50}% 0)`,
-      }}
-    >
+    <div style={{ position: "absolute", left: x, top: y, opacity: op, clipPath: inRow ? undefined : `inset(${(1 - k) * 50}% 0 ${(1 - k) * 50}% 0)` }}>
       <Logo size={s} />
     </div>
   );

@@ -55,11 +55,11 @@ E = {}
 # cuts land on the beat just before each new section's first word
 E["cuts"] = [down(start[x] - 0.2) for x in ("problem", "solution", "routing", "coverage")] + [start["close"] - B]
 # hook
-E["doubt"] = w("hook", 10)          # "best price?" — the 'best available' figure starts re-rolling
+E["doubt"] = round(w("hook", 12) - 0.18, 3)  # receipt arrives on "Honestly"; best-available starts re-rolling
 E["cantTell"] = w("hook", 14)       # "can't tell"
 # problem
-E["rows"] = [round(w("problem", 1) + 0.12 + i * 0.16, 3) for i in range(3)]
-E["rowSettle"] = [round(w("problem", 5) + 0.2 + i * 0.12, 3) for i in range(3)]
+E["rows"] = [round(w("problem", 6) + 0.1 + i * 0.16, 3) for i in range(3)]
+E["rowSettle"] = [round(w("problem", 11) + i * 0.12, 3) for i in range(3)]
 E["gap"] = w("problem", 14)         # "four thousand"
 # solution
 E["logoIn"] = round(w("solution", 0) - 0.08, 3)

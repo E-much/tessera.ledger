@@ -14,9 +14,14 @@ export const Grid: React.FC<{ opacity?: number }> = ({ opacity = 1 }) => (
   </svg>
 );
 
-export type W = { w: string; t: number; color?: string; mono?: boolean };
+export type Mode = "up" | "left" | "right" | "zoom";
+export type W = { w: string; t: number; color?: string; mono?: boolean; mode?: Mode };
 
-/** Word-by-word kinetic type: each word rises out of a mask on its VO timestamp. */
+/**
+ * Word-by-word kinetic type synced to VO timestamps.
+ * mode: "up" rises out of a mask · "left"/"right" slides in from that side · "zoom" punches in from large.
+ * exitTo: how the whole block leaves — fade with a push in that direction, or "zoomOut".
+ */
 export const Words: React.FC<{
   words: W[];
   size: number;
@@ -25,9 +30,14 @@ export const Words: React.FC<{
   lead?: number;
   style?: React.CSSProperties;
   exitAt?: number;
-}> = ({ words, size, weight = 600, color = C.white, lead = 0.06, style, exitAt }) => {
+  mode?: Mode;
+  exitTo?: "up" | "left" | "right" | "zoomOut";
+  align?: "left" | "right" | "center";
+}> = ({ words, size, weight = 600, color = C.white, lead = 0.06, style, exitAt, mode = "up", exitTo = "up", align }) => {
   const f = useCurrentFrame();
   const out = exitAt ? p(f, exitAt, 0.32, E.exit) : 0;
+  const exitT =
+    exitTo === "left" ? `translateX(${-out * 320}px)` : exitTo === "right" ? `translateX(${out * 320}px)` : exitTo === "zoomOut" ? `scale(${1 - 0.25 * out})` : `translateY(${-out * 40}px)`;
   return (
     <div
       style={{
@@ -38,6 +48,10 @@ export const Words: React.FC<{
         lineHeight: 1.02,
         color,
         fontVariationSettings: "'opsz' 32",
+        textAlign: align,
+        opacity: 1 - out,
+        transform: exitT,
+        transformOrigin: align === "right" ? "100% 50%" : align === "center" ? "50% 50%" : "0% 50%",
         ...style,
       }}
     >
@@ -45,23 +59,31 @@ export const Words: React.FC<{
         const lines: W[][] = [[]];
         words.forEach((w) => (w.w === "\n" ? lines.push([]) : lines[lines.length - 1].push(w)));
         return lines.map((ln, li) => (
-          <div key={li} style={{ height: size * 1.04, whiteSpace: "nowrap", opacity: 1 - out }}>
+          <div key={li} style={{ height: size * 1.04, whiteSpace: "nowrap" }}>
             {ln.map((w, i) => {
-              const k = p(f, w.t - lead, 0.5, E.snap);
-              return (
-                <span key={i} style={{ display: "inline-block", overflow: "hidden", verticalAlign: "top", height: size * 1.22, marginBottom: -size * 0.18 }}>
-                  <span
-                    style={{
-                      display: "inline-block",
-                      transform: `translateY(${(1 - k) * 140 - out * 140}%)`,
-                      color: w.color ?? color,
-                      fontFamily: w.mono ? F.mono : undefined,
-                      letterSpacing: w.mono ? "-0.02em" : undefined,
-                      whiteSpace: "pre",
-                    }}
-                  >
-                    {w.w}
+              const m = w.mode ?? mode;
+              const k = p(f, w.t - lead, m === "up" ? 0.5 : 0.55, E.snap);
+              const inner: React.CSSProperties = {
+                display: "inline-block",
+                color: w.color ?? color,
+                fontFamily: w.mono ? F.mono : undefined,
+                letterSpacing: w.mono ? "-0.02em" : undefined,
+                whiteSpace: "pre",
+              };
+              if (m === "up") {
+                return (
+                  <span key={i} style={{ display: "inline-block", overflow: "hidden", verticalAlign: "top", height: size * 1.22, marginBottom: -size * 0.18 }}>
+                    <span style={{ ...inner, transform: `translateY(${(1 - k) * 140}%)` }}>{w.w}</span>
                   </span>
+                );
+              }
+              const tr =
+                m === "zoom"
+                  ? `scale(${1 + 0.9 * (1 - k)})`
+                  : `translateX(${(m === "left" ? -1 : 1) * (1 - k) * size * 1.4}px)`;
+              return (
+                <span key={i} style={{ ...inner, verticalAlign: "top", opacity: Math.min(1, k * 1.6), transform: tr, transformOrigin: "50% 60%" }}>
+                  {w.w}
                 </span>
               );
             })}
