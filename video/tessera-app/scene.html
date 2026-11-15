@@ -1,0 +1,365 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Tessera App Film</title>
+<style>
+@font-face{font-family:Outfit;font-weight:400;src:url(fonts/outfit-400.woff2) format('woff2')}
+@font-face{font-family:Outfit;font-weight:500;src:url(fonts/outfit-500.woff2) format('woff2')}
+@font-face{font-family:Outfit;font-weight:600;src:url(fonts/outfit-600.woff2) format('woff2')}
+@font-face{font-family:Outfit;font-weight:700;src:url(fonts/outfit-700.woff2) format('woff2')}
+@font-face{font-family:Outfit;font-weight:800;src:url(fonts/outfit-800.woff2) format('woff2')}
+html,body{margin:0;background:#f4f1ea}canvas{display:block;width:100vw;height:auto}
+</style></head><body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="brand/icons.js"></script>
+<script>
+/* Tessera app film (16:9, 30s). Deterministic: renderFrame(t) draws time t in seconds.
+   Product-showcase style: big two-line headline left, the Tessera app on a phone right,
+   a glossy lime ribbon flowing through, background colour changing per scene. */
+const DUR=30, W=1920, H=1080;
+const C={cream:'#f4f1ea',paper:'#faf8f3',dark:'#1b2117',lime:'#d2fb95',limeDeep:'#b9ec6a',ink:'#0f0f0d',grey:'#7d7f76',line:'#e7e4dc',
+  green:'#2a6a14',mark:'#12121a',sx:'#f7e78c',oa:'#ddf3b3',kl:'#c8e0e8',soon:'#e6e3db'};
+const F='Outfit, sans-serif';
+const cv=document.getElementById('c'), X=cv.getContext('2d');
+const ICON={}; for(const k of ['spacex','openai','kalshi']){const im=new Image();im.src=window.ICON_DATA[k];ICON[k]=im;}
+
+/* ---------- math ---------- */
+const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)), P=(t,a,b)=>cl((t-a)/(b-a)), lerp=(a,b,k)=>a+(b-a)*k;
+const eo=x=>1-Math.pow(1-x,3), eo5=x=>1-Math.pow(1-x,5), eio=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+const back=x=>{const a=1.6,b=a+1;return 1+b*Math.pow(x-1,3)+a*Math.pow(x-1,2)};
+const hex=(h)=>{const n=parseInt(h.slice(1),16);return[n>>16,n>>8&255,n&255]};
+const mixc=(a,b,k)=>{const A=hex(a),B=hex(b);return `rgb(${lerp(A[0],B[0],k)|0},${lerp(A[1],B[1],k)|0},${lerp(A[2],B[2],k)|0})`};
+const rgba=(h,a)=>{const A=hex(h);return `rgba(${A[0]},${A[1]},${A[2]},${a})`};
+function font(c,s,w=600,ls){c.font=`${w} ${s}px ${F}`;c.letterSpacing=(ls??-s*0.03)+'px'}
+function rr(c,x,y,w,h,r){c.beginPath();c.roundRect(x,y,w,h,Math.max(0,Math.min(r,w/2,h/2)))}
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* ---------- scenes ---------- */
+// [start, background, ribbon preset]
+const SC=[
+  {t:0,    bg:C.cream, dark:0},
+  {t:9.0,  bg:C.dark,  dark:1},
+  {t:12.0, bg:C.cream, dark:0},
+  {t:16.0, bg:C.lime,  dark:0},
+  {t:19.5, bg:C.dark,  dark:1},
+  {t:22.0, bg:C.cream, dark:0},
+];
+const sceneAt=t=>{let i=0;for(let k=0;k<SC.length;k++)if(t>=SC[k].t)i=k;return i};
+const WIPE=0.42;
+
+/* ---------- Tessera mark + wordmark ---------- */
+const K3=Math.sqrt(3)/2, Pi=(x,y,z)=>[(x-y)*K3,(x+y)/2-z];
+const fT=(x,y,z)=>[Pi(x,y,z+1),Pi(x+1,y,z+1),Pi(x+1,y+1,z+1),Pi(x,y+1,z+1)];
+const fR=(x,y,z)=>[Pi(x+1,y,z+1),Pi(x+1,y+1,z+1),Pi(x+1,y+1,z),Pi(x+1,y,z)];
+const fL=(x,y,z)=>[Pi(x,y+1,z+1),Pi(x+1,y+1,z+1),Pi(x+1,y+1,z),Pi(x,y+1,z)];
+const FACES=[[fT(-1,0,0),[-1,-1]],[fT(0,-1,0),[1,-1]],[fT(0,0,0),[0,-1.2]],[fL(-1,0,0),[-1.2,0]],[fR(0,-1,0),[1.2,0]],
+  [fL(0,0,0),[-1,.4]],[fR(0,0,0),[1,.4]],[fL(0,0,-1),[-.8,1.2]],[fR(0,0,-1),[.8,1.2]]].map(([pts,from])=>{
+  const cx=pts.reduce((a,p)=>a+p[0],0)/4, cy=pts.reduce((a,p)=>a+p[1],0)/4, s=(Math.sqrt(3)/4-0.075)/(Math.sqrt(3)/4);
+  return {pts:pts.map(([x,y])=>[cx+(x-cx)*s,cy+(y-cy)*s]),from}});
+function mark(c,cx,cy,size,assemble=1,color=C.mark){const u=size/3.8;
+  FACES.forEach((f,i)=>{const k=cl((assemble-i/9*0.55)/0.45),d=(1-eo5(k))*2.4;if(k<=0)return;
+    c.save();c.globalAlpha*=Math.min(1,k*2.5);c.fillStyle=color;c.beginPath();
+    f.pts.forEach(([x,y],j)=>{const px=cx+(x+f.from[0]*d)*u,py=cy+(y-.25+f.from[1]*d)*u;j?c.lineTo(px,py):c.moveTo(px,py)});c.closePath();c.fill();c.restore()})}
+function wordmark(c,x,y,size,color=C.ink,align='left'){font(c,size,700,-size*0.04);const w=c.measureText('tessera').width,d=c.measureText('.').width;
+  const x0=align==='center'?x-(w+d)/2:x;c.textBaseline='alphabetic';c.textAlign='left';c.fillStyle=color;c.fillText('tessera',x0,y);c.fillStyle=color===C.ink?C.green:C.lime;c.fillText('.',x0+w,y);return w+d}
+
+/* ---------- background + grain ---------- */
+const grain=(()=>{const o=document.createElement('canvas');o.width=480;o.height=270;const g=o.getContext('2d'),id=g.createImageData(480,270),r=rng(9);
+  for(let i=0;i<id.data.length;i+=4){const v=r()*255;id.data[i]=id.data[i+1]=id.data[i+2]=v;id.data[i+3]=255}g.putImageData(id,0,0);return o})();
+function background(c,t){
+  const i=sceneAt(t), s=SC[i];
+  c.fillStyle=(i>0&&t<s.t+WIPE)?SC[i-1].bg:s.bg; c.fillRect(0,0,W,H);
+  if(i>0&&t<s.t+WIPE){ // new colour sweeps up from the bottom with a soft curved edge
+    const k=eio(P(t,s.t,s.t+WIPE)), y=lerp(H+120,-160,k);
+    c.fillStyle=s.bg;c.beginPath();c.moveTo(0,H);c.lineTo(0,y+60);c.quadraticCurveTo(W/2,y-80,W,y+60);c.lineTo(W,H);c.closePath();c.fill();
+  }
+}
+function finish(c,t,frame){c.save();c.globalAlpha=0.035;c.globalCompositeOperation='overlay';c.drawImage(grain,0,0,W,H);c.restore();
+  const f=Math.max(1-P(t,0,0.3),P(t,DUR-0.5,DUR));if(f>0){c.fillStyle=`rgba(244,241,234,${f})`;c.fillRect(0,0,W,H)}}
+
+/* ---------- glossy ribbon ---------- */
+// centreline y(x) = base + amp*sin(freq*x + phase); twist angle decides which face shows and how wide it looks.
+const RIB=[ // per scene: kept low so it never runs behind the copy
+  {base:930,amp:95,freq:0.0030,tw:0.0016,tw0:-1.2,w:230},
+  {base:950,amp:110,freq:0.0028,tw:0.0015,tw0:-0.6,w:250},
+  {base:945,amp:90,freq:0.0032,tw:0.0017,tw0:-1.6,w:220},
+  {base:955,amp:100,freq:0.0029,tw:0.0016,tw0:-0.9,w:240},
+  {base:950,amp:100,freq:0.0031,tw:0.0016,tw0:-1.4,w:240},
+  {base:830,amp:105,freq:0.0028,tw:0.0015,tw0:-1.0,w:250},
+];
+function ribbonParams(t){const i=sceneAt(t),s=SC[i];if(i===0)return RIB[0];
+  const k=eio(P(t,s.t,s.t+0.8)),A=RIB[i-1],B=RIB[i],o={};for(const key in A)o[key]=lerp(A[key],B[key],k);return o}
+function ribbon(c,t,alpha=1,offY=0){
+  const p=ribbonParams(t), ph=t*0.9, tph=t*0.7;
+  const pts=[];for(let x=-240;x<=W+240;x+=6){const y=p.base+offY+p.amp*Math.sin(p.freq*x+ph)+0.35*p.amp*Math.sin(p.freq*2.3*x-ph*0.6);
+    const th=p.tw0+p.tw*x+tph*0.6; pts.push([x,y,Math.cos(th),Math.sin(th)])}
+  c.save();c.globalAlpha=alpha;
+  // soft shadow
+  c.filter='blur(28px)';c.fillStyle='rgba(30,50,10,0.22)';c.beginPath();
+  pts.forEach(([x,y],i)=>{i?c.lineTo(x,y+70):c.moveTo(x,y+70)});for(let i=pts.length-1;i>=0;i--)c.lineTo(pts[i][0],pts[i][1]+110);c.fill();c.filter='none';
+  for(let i=0;i<pts.length-1;i++){const[a,b]=[pts[i],pts[i+1]];
+    const ha=p.w/2*a[2], hb=p.w/2*b[2]; const face=a[2]>=0;
+    const lit=Math.abs(a[3]); // edge-on = dark, flat = bright
+    const base=face?mixc('#84cf3c','#d6fca0',0.25+0.75*(1-lit)):mixc('#5fae2a','#a6e063',0.7*(1-lit));
+    c.fillStyle=base;c.beginPath();c.moveTo(a[0],a[1]-ha);c.lineTo(b[0]+0.6,b[1]-hb);c.lineTo(b[0]+0.6,b[1]+hb);c.lineTo(a[0],a[1]+ha);c.closePath();c.fill();}
+  // specular streak along the upper part of the front face
+  c.lineCap='round';
+  for(let i=0;i<pts.length-1;i++){const[a,b]=[pts[i],pts[i+1]];if(a[2]<0.25)continue;
+    const s=Math.pow(1-Math.abs(a[3]),4);c.strokeStyle=`rgba(255,255,240,${0.55*s})`;c.lineWidth=p.w*0.06*a[2];
+    const oa=-p.w*0.22*a[2], ob=-p.w*0.22*b[2];c.beginPath();c.moveTo(a[0],a[1]+oa);c.lineTo(b[0],b[1]+ob);c.stroke();}
+  c.restore();
+}
+function ribbonY(t,x){const p=ribbonParams(t),ph=t*0.9;return p.base+p.amp*Math.sin(p.freq*x+ph)+0.35*p.amp*Math.sin(p.freq*2.3*x-ph*0.6)}
+
+/* ---------- floating cards ---------- */
+const CO={spacex:{n:'SpaceX',c:C.sx,cat:'Aerospace',tk:'SX'},openai:{n:'OpenAI',c:C.oa,cat:'Artificial Intelligence',tk:'OA'},kalshi:{n:'Kalshi',c:C.kl,cat:'Prediction Markets',tk:'KL'}};
+function coCard(c,key,x,y,rot,alpha,scale=1){
+  if(alpha<=0)return; const w=330,h=128;
+  c.save();c.globalAlpha=alpha;c.translate(x,y);c.rotate(rot);c.scale(scale,scale);
+  c.shadowColor='rgba(40,50,20,0.18)';c.shadowBlur=40;c.shadowOffsetY=18;
+  rr(c,-w/2,-h/2,w,h,24);c.fillStyle=key==='soon'?C.soon:CO[key].c;c.fill();c.shadowColor='transparent';
+  if(key==='soon'){
+    rr(c,-w/2+26,-34,68,68,16);c.fillStyle='#d3d0c6';c.fill();font(c,40,800);c.fillStyle='#ffffff';c.textAlign='center';c.textBaseline='middle';c.fillText('?',-w/2+60,2);
+    c.fillStyle='#cfccc2';rr(c,-w/2+114,-30,150,22,11);c.fill();
+    font(c,19,600,0.5);c.fillStyle=C.grey;c.textAlign='left';c.fillText('Coming soon',-w/2+114,20);
+  }else{
+    const im=ICON[key]; if(im.complete)c.drawImage(im,-w/2+22,-38,76,76);
+    font(c,32,700);c.fillStyle=C.ink;c.textAlign='left';c.textBaseline='alphabetic';c.fillText(CO[key].n,-w/2+114,-2);
+    font(c,19,500,0);c.fillStyle='#4f5249';c.fillText('Company exposure',-w/2+114,28);
+  }
+  c.restore();
+}
+function payCard(c,x,y,rot,alpha){
+  if(alpha<=0)return;const w=440,h=270;c.save();c.globalAlpha=alpha;c.translate(x,y);c.rotate(rot);
+  c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=50;c.shadowOffsetY=24;rr(c,-w/2,-h/2,w,h,26);
+  const g=c.createLinearGradient(-w/2,-h/2,w/2,h/2);g.addColorStop(0,'#dcfda6');g.addColorStop(1,'#a9e15a');c.fillStyle=g;c.fill();c.shadowColor='transparent';
+  font(c,40,700);c.fillStyle=C.ink;c.textAlign='left';c.textBaseline='alphabetic';c.fillText('Pay by card',-w/2+34,-h/2+70);
+  c.strokeStyle=C.ink;c.lineWidth=5;c.lineCap='round';c.beginPath();c.moveTo(w/2-70,-h/2+52);c.lineTo(w/2-58,-h/2+64);c.lineTo(w/2-36,-h/2+38);c.stroke();
+  rr(c,-w/2+34,-28,62,46,9);c.fillStyle='rgba(15,15,13,.18)';c.fill();
+  font(c,26,600,6);c.fillStyle='rgba(15,15,13,.6)';c.fillText('•••• •••• ••••',-w/2+34,62);
+  font(c,22,500,0);c.fillStyle='rgba(15,15,13,.7)';c.fillText('A simpler way to fund.',-w/2+34,h/2-30);
+  c.restore();
+}
+
+/* ---------- phone ---------- */
+const PW=440, PH=920, SW=PW-28, SH=PH-28;
+function tap(c,x,y,t,at){const k=P(t,at,at+0.45);if(k<=0||k>=1)return;c.save();c.fillStyle=`rgba(120,120,120,${0.35*(1-k)})`;c.beginPath();c.arc(x,y,lerp(14,46,eo(k)),0,7);c.fill();c.restore()}
+const press=(t,at)=>1-0.05*Math.sin(Math.PI*P(t,at,at+0.18));
+function statusBar(c,dark){font(c,22,600,0);c.fillStyle=dark?'#fff':C.ink;c.textAlign='left';c.textBaseline='middle';c.fillText('9:41',40,34);
+  c.fillRect(SW-82,28,26,13);c.fillRect(SW-50,26,30,16);}
+function btn(c,x,y,w,h,label,t,at,{bg=C.ink,fg='#fff',size=26}={}){c.save();const s=at?press(t,at):1;c.translate(x+w/2,y+h/2);c.scale(s,s);
+  rr(c,-w/2,-h/2,w,h,h/2);c.fillStyle=bg;c.fill();font(c,size,600,0);c.fillStyle=fg;c.textAlign='center';c.textBaseline='middle';c.fillText(label,0,2);c.restore();if(at)tap(c,x+w/2,y+h/2,t,at)}
+function chip(c,x,y,w,label,sel,sub){rr(c,x,y,w,74,18);c.fillStyle=sel?C.ink:'#efece4';c.fill();font(c,26,700,0);c.fillStyle=sel?'#fff':C.ink;c.textAlign='center';c.textBaseline='middle';
+  c.fillText(label,x+w/2,y+(sub?30:38));if(sub){font(c,13,600,1);c.fillStyle=sel?'#cfcfc8':C.grey;c.fillText(sub,x+w/2,y+56)}}
+function coIcon(c,key,x,y,s){if(key==='soon'){rr(c,x,y,s,s,s*.24);c.fillStyle='#dcd9cf';c.fill();font(c,s*.55,800);c.fillStyle='#fff';c.textAlign='center';c.textBaseline='middle';c.fillText('?',x+s/2,y+s/2+2);return}
+  const im=ICON[key];if(im.complete)c.drawImage(im,x,y,s,s)}
+
+// --- screens (drawn in screen coords, 0..SW x 0..SH) ---
+function scrHome(c,t,o={}){
+  c.fillStyle=C.paper;c.fillRect(0,0,SW,SH);statusBar(c,false);
+  wordmark(c,32,118,38);
+  c.fillStyle=C.lime;c.beginPath();c.arc(SW-58,104,30,0,7);c.fill();font(c,26,700);c.fillStyle=C.ink;c.textAlign='center';c.textBaseline='middle';c.fillText('K',SW-58,106);
+  // balance card
+  rr(c,24,160,SW-48,200,28);c.fillStyle='#ffffff';c.fill();c.strokeStyle=C.line;c.lineWidth=2;c.stroke();
+  font(c,16,600,2);c.fillStyle=C.grey;c.textAlign='left';c.textBaseline='alphabetic';c.fillText('USDC BALANCE',52,206);
+  font(c,64,800,-2);c.fillStyle=C.ink;c.fillText(o.balance??'$0.00',50,276);
+  btn(c,50,296,SW-100,50,'Add funds  +',t,o.tapAdd,{size:22});
+  font(c,30,800,-.5);c.fillStyle=C.ink;c.textAlign='left';c.fillText('Companies',32,418);
+  const rows=['spacex','openai','kalshi','soon'];
+  rows.forEach((k,i)=>{const y=444+i*112-(o.scroll||0);
+    const hi=(o.highlight===k)?eo(P(t,o.hiAt,o.hiAt+0.4)):0;
+    rr(c,24,y,SW-48,96,22);c.fillStyle=k==='soon'?mixc('#f1eee7','#ffffff',hi):'#ffffff';c.fill();c.strokeStyle=hi?mixc(C.line,C.limeDeep,hi):C.line;c.lineWidth=2+2*hi;c.stroke();
+    if(o.tapRow===k){c.save();c.globalAlpha=0.5*Math.sin(Math.PI*P(t,o.tapAt,o.tapAt+0.3));rr(c,24,y,SW-48,96,22);c.fillStyle='#e9e6de';c.fill();c.restore()}
+    coIcon(c,k,44,y+18,60);
+    if(k==='soon'){c.fillStyle='#d9d6cc';rr(c,122,y+28,130,18,9);c.fill();font(c,17,500,0);c.fillStyle=C.grey;c.textAlign='left';c.textBaseline='alphabetic';c.fillText('Coming soon',122,y+72);
+      const nk=o.notifyAt?P(t,o.notifyAt+0.15,o.notifyAt+0.4):0;
+      btn(c,SW-190,y+26,142,44,nk>0.5?'✓ Notified':'Notify me',t,o.notifyAt,{bg:nk>0.5?C.lime:C.ink,fg:nk>0.5?C.ink:'#fff',size:18});}
+    else{font(c,26,700,-.3);c.fillStyle=C.ink;c.textAlign='left';c.textBaseline='alphabetic';c.fillText(CO[k].n,122,y+46);font(c,17,500,0);c.fillStyle=C.grey;c.fillText(CO[k].cat,122,y+72);
+      rr(c,SW-120,y+32,72,32,16);c.fillStyle=CO[k].c;c.fill();font(c,14,700,1);c.fillStyle=C.ink;c.textAlign='center';c.textBaseline='middle';c.fillText(CO[k].tk,SW-84,y+49);}
+  });
+  if(o.tapRow&&o.tapAt){tap(c,SW/2,444+rows.indexOf(o.tapRow)*112+48-(o.scroll||0),t,o.tapAt)}
+}
+function scrAddFunds(c,t,o){
+  c.fillStyle=C.paper;c.fillRect(0,0,SW,SH);statusBar(c,false);
+  font(c,24,700);c.fillStyle=C.ink;c.textAlign='center';c.textBaseline='alphabetic';wordmark(c,SW/2,104,30,C.ink,'center');
+  font(c,42,800,-1);c.textAlign='left';c.fillStyle=C.ink;c.fillText('Add funds',32,176);font(c,19,500,0);c.fillStyle=C.grey;c.fillText('Funding amount',32,208);
+  const sel=t>=o.tapSel+0.1, v=Math.round(lerp(50,250,eo(P(t,o.tapSel+0.05,o.tapSel+0.5))));
+  font(c,96,800,-3);c.fillStyle=C.ink;c.textAlign='center';c.fillText('$'+v,SW/2,328);
+  const cw=(SW-48-28)/3;[['$50','QUICK'],['$250','POPULAR'],['$1,000','CUSTOM']].forEach(([l,s],i)=>chip(c,24+i*(cw+14),370,cw,l,sel?i===1:i===0,s));
+  tap(c,24+cw*1.5+14,407,t,o.tapSel);
+  font(c,15,600,2);c.fillStyle=C.grey;c.textAlign='left';c.fillText('FUNDING METHOD',32,504);
+  rr(c,24,522,SW-48,104,20);c.fillStyle='#fff';c.fill();c.strokeStyle=C.ink;c.lineWidth=2.5;c.stroke();
+  c.beginPath();c.arc(64,574,13,0,7);c.strokeStyle=C.ink;c.lineWidth=3;c.stroke();c.beginPath();c.arc(64,574,6,0,7);c.fillStyle=C.ink;c.fill();
+  font(c,26,700,-.3);c.fillStyle=C.ink;c.fillText('Banxa',96,566);font(c,17,500,0);c.fillStyle=C.grey;c.fillText('Card, Apple Pay, Google Pay',96,594);
+  btn(c,24,664,SW-48,82,'Continue to Banxa',t,o.tapGo,{size:26});
+  font(c,15,500,0);c.fillStyle=C.grey;c.textAlign='center';c.fillText('Fund your wallet with USDC on Solana.',SW/2,790);c.fillText('Provider fees and verification apply.',SW/2,814);
+}
+function scrBuy(c,t,o){
+  c.fillStyle=C.paper;c.fillRect(0,0,SW,SH);statusBar(c,false);
+  font(c,28,400);c.fillStyle=C.ink;c.textAlign='left';c.textBaseline='middle';c.fillText('‹',30,104);
+  coIcon(c,'spacex',SW/2-110,78,52);font(c,28,700,-.3);c.textBaseline='alphabetic';c.fillText('T-SpaceX',SW/2-46,104);font(c,15,500,0);c.fillStyle=C.grey;c.fillText('Aerospace · SpaceX exposure',SW/2-46,126);
+  font(c,20,600,0);c.fillStyle=C.grey;c.textAlign='center';c.fillText('How much will you buy?',SW/2,232);
+  const sel=t>=o.tapOne+0.08; const amt=sel?'$1.00':'$0';
+  const s=sel?lerp(1.25,1,back(P(t,o.tapOne+0.08,o.tapOne+0.5))):1;
+  c.save();c.translate(SW/2,330);c.scale(s,s);font(c,110,800,-4);c.fillStyle=sel?C.ink:'#c9c6bc';c.fillText(amt,0,0);c.restore();
+  const cw=(SW-48-36)/4;['$1','$25','$100','$500'].forEach((l,i)=>{rr(c,24+i*(cw+12),380,cw,60,30);c.fillStyle=(sel&&i===0)?C.ink:'#efece4';c.fill();
+    font(c,22,700,0);c.fillStyle=(sel&&i===0)?'#fff':C.ink;c.textAlign='center';c.textBaseline='middle';c.fillText(l,24+i*(cw+12)+cw/2,411)});
+  tap(c,24+cw/2,410,t,o.tapOne);
+  rr(c,24,480,SW-48,150,20);c.fillStyle='#fff';c.fill();c.strokeStyle=C.line;c.lineWidth=2;c.stroke();
+  font(c,20,500,0);c.textAlign='left';c.textBaseline='alphabetic';c.fillStyle=C.grey;c.fillText('You pay',48,532);c.fillText('Pay with',48,598);
+  c.fillStyle=C.ink;c.textAlign='right';font(c,21,700,0);c.fillText(sel?'$1.00':'$0.00',SW-48,532);c.fillText('USDC balance',SW-48,598);
+  c.fillStyle=C.line;c.fillRect(48,558,SW-96,2);
+  btn(c,24,670,SW-48,82,'Review order',t,o.tapReview,{size:26,bg:sel?C.ink:'#bdbab1'});
+  font(c,14,500,0);c.fillStyle=C.grey;c.textAlign='center';c.fillText('Loan participation right. Not shares.',SW/2,796);
+}
+function scrDone(c,t,o){
+  c.fillStyle=C.paper;c.fillRect(0,0,SW,SH);statusBar(c,false);
+  const k=back(P(t,o.t0,o.t0+0.55));c.save();c.translate(SW/2,250);c.scale(k,k);c.fillStyle=C.lime;c.beginPath();c.arc(0,0,92,0,7);c.fill();c.restore();
+  const ck=eo(P(t,o.t0+0.3,o.t0+0.7));if(ck>0){c.save();c.strokeStyle=C.ink;c.lineWidth=12;c.lineCap='round';c.lineJoin='round';c.beginPath();
+    const pts=[[-38,2],[-10,30],[42,-26]];const L1=Math.hypot(28,28),L2=Math.hypot(52,56),L=L1+L2,d=ck*L;c.moveTo(SW/2+pts[0][0],250+pts[0][1]);
+    if(d<=L1){const r=d/L1;c.lineTo(SW/2+lerp(-38,-10,r),250+lerp(2,30,r))}else{c.lineTo(SW/2-10,280);const r=(d-L1)/L2;c.lineTo(SW/2+lerp(-10,42,r),250+lerp(30,-26,r))}c.stroke();c.restore()}
+  const tk=eo5(P(t,o.t0+0.45,o.t0+0.9));c.save();c.globalAlpha=tk;font(c,44,800,-1);c.fillStyle=C.ink;c.textAlign='center';c.textBaseline='alphabetic';c.fillText('Order confirmed',SW/2,420+(1-tk)*20);
+  font(c,21,500,0);c.fillStyle=C.grey;c.fillText('T-SpaceX is in your wallet.',SW/2,458+(1-tk)*20);c.restore();
+  const wk=eo5(P(t,o.t0+1.1,o.t0+1.6));c.save();c.globalAlpha=wk;c.translate(0,(1-wk)*40);
+  font(c,15,600,2);c.fillStyle=C.grey;c.textAlign='left';c.fillText('YOUR WALLET',32,540);
+  rr(c,24,556,SW-48,100,22);c.fillStyle='#fff';c.fill();c.strokeStyle=C.line;c.lineWidth=2;c.stroke();coIcon(c,'spacex',44,576,60);
+  font(c,26,700,-.3);c.fillStyle=C.ink;c.fillText('T-SpaceX',122,602);font(c,17,500,0);c.fillStyle=C.grey;c.fillText('Self-custody',122,630);
+  rr(c,SW-150,588,102,36,18);c.fillStyle=C.lime;c.fill();font(c,16,700,1);c.fillStyle=C.ink;c.textAlign='center';c.textBaseline='middle';c.fillText('IN WALLET',SW-99,607);c.restore();
+  btn(c,24,720,SW-48,82,'Back to home',t,null,{size:26,bg:'#efece4',fg:C.ink});
+}
+// phone screen timeline
+function phoneScreen(c,t){
+  const seq=[ // [start, drawer]
+    [0,   t=>scrHome(c,t,{tapAdd:8.75})],
+    [9.0, t=>scrAddFunds(c,t,{tapSel:10.15,tapGo:11.45})],
+    [12.0,t=>scrHome(c,t,{tapRow:'spacex',tapAt:12.55,balance:'$250.00'})],
+    [12.95,t=>scrBuy(c,t,{tapOne:14.9,tapReview:15.65})],
+    [16.0,t=>scrDone(c,t,{t0:16.15})],
+    [19.5,t=>scrHome(c,t,{balance:'$249.00',scroll:0,highlight:'soon',hiAt:19.9,notifyAt:20.9})],
+  ];
+  let i=0;for(let k=0;k<seq.length;k++)if(t>=seq[k][0])i=k;
+  const k=i>0?eio(P(t,seq[i][0],seq[i][0]+0.42)):1;
+  if(k<1){c.save();c.translate(-SW*0.3*k,0);seq[i-1][1](t);c.restore();c.save();c.translate(SW*(1-k),0);c.shadowColor='rgba(0,0,0,.2)';seq[i][1](t);c.restore()}
+  else seq[i][1](t);
+}
+function phone(c,t){
+  const rise=eo5(P(t,7.35,8.25)), out=eio(P(t,21.85,22.5));
+  if(rise<=0||out>=1)return;
+  const bob=Math.sin(t*1.1)*6, swing=(sceneAt(t)>0)?Math.sin(Math.PI*P(t,SC[sceneAt(t)].t,SC[sceneAt(t)].t+0.6))*0.03:0;
+  const cx=1415, cy=600+(1-rise)*900+out*1000+bob;
+  c.save();c.translate(cx,cy);c.rotate(-0.075+swing+(1-rise)*0.15);c.transform(1,0,-0.035,1,0,0);
+  c.shadowColor='rgba(0,0,0,.35)';c.shadowBlur=70;c.shadowOffsetX=-30;c.shadowOffsetY=40;
+  rr(c,-PW/2,-PH/2,PW,PH,72);c.fillStyle='#16161a';c.fill();c.shadowColor='transparent';
+  rr(c,-PW/2+3,-PH/2+3,PW-6,PH-6,69);c.strokeStyle='#3a3a40';c.lineWidth=3;c.stroke();
+  c.fillStyle='#2b2b30';c.fillRect(PW/2-1,-200,5,110);c.fillRect(-PW/2-4,-250,5,60);c.fillRect(-PW/2-4,-170,5,90);
+  c.save();rr(c,-SW/2,-SH/2,SW,SH,58);c.clip();c.translate(-SW/2,-SH/2);phoneScreen(c,t);c.restore();
+  rr(c,-62,-SH/2+16,124,36,18);c.fillStyle='#000';c.fill();
+  // glass reflection
+  c.save();rr(c,-SW/2,-SH/2,SW,SH,58);c.clip();const g=c.createLinearGradient(-SW/2,-SH/2,SW/2,0);g.addColorStop(0,'rgba(255,255,255,.10)');g.addColorStop(.4,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(-SW/2,-SH/2,SW,SH);c.restore();
+  c.restore();
+}
+
+/* ---------- headlines ---------- */
+// each: lines, enter time, exit time, size, colour, highlight index
+const HEADS=[
+  {lines:["The world's best","companies."],t0:0.35,t1:4.6},
+  {lines:['Always out','of reach.'],t0:4.75,t1:6.15,color:'#9a9b92'},
+  {lines:['Private markets.','Within reach.'],t0:6.25,t1:8.85,hl:1,sub:'Meet the Tessera app.',subAt:7.5},
+  {lines:['Load up.','Pay by card.'],t0:9.1,t1:11.9,color:'#ffffff',sub:'Card or Apple Pay, in seconds.',subAt:9.6},
+  {lines:['Big names.','Your amount.'],t0:12.1,t1:15.9,sub:'SpaceX. OpenAI. Kalshi. From $1.',subAt:12.7},
+  {lines:['No accreditation.','Your wallet.'],t0:16.1,t1:19.4,sub:'Your tokens stay in your own wallet.',subAt:17.4},
+  {lines:['More names.','Coming soon.'],t0:19.6,t1:21.9,color:'#ffffff',hl:1,sub:'Turn on alerts in the app.',subAt:20.4},
+];
+function headline(c,t,h){
+  if(t<h.t0||t>h.t1+0.5)return;
+  const x=150, y0=340, size=118, lh=124;
+  font(c,size,800,-size*0.035);
+  let maxw=0;h.lines.forEach(l=>maxw=Math.max(maxw,c.measureText(l).width));const sc=Math.min(1,980/maxw);
+  c.save();c.translate(x,y0);c.scale(sc,sc);
+  h.lines.forEach((l,i)=>{
+    const k=eo5(P(t,h.t0+i*0.09,h.t0+i*0.09+0.6)), o=eio(P(t,h.t1+i*0.05,h.t1+i*0.05+0.38));
+    const ly=i*lh;
+    c.save();c.beginPath();c.rect(-20,ly-size*1.0,2200,size*1.28);c.clip();
+    const dy=(1-k)*size*1.1-o*size*1.1;
+    font(c,size,800,-size*0.035);
+    if(h.hl===i){const hk=eio(P(t,h.t0+0.35,h.t0+0.8))*(1-o);const w=c.measureText(l).width;if(hk>0){c.fillStyle=C.lime;rr(c,-12,ly-size*0.78+dy,(w+24)*hk,size*0.98,14);c.fill()}}
+    c.fillStyle=(h.hl===i&&h.color==='#ffffff')?C.ink:(h.color||C.ink);
+    if(h.hl===i&&h.color==='#ffffff'){const hk=eio(P(t,h.t0+0.35,h.t0+0.8));c.fillStyle=mixc('#ffffff',C.ink,hk)}
+    c.textAlign='left';c.textBaseline='alphabetic';c.fillText(l,0,ly+dy);c.restore();
+  });
+  if(h.sub){const k=eo5(P(t,h.subAt,h.subAt+0.55)),o=eio(P(t,h.t1,h.t1+0.3));if(k>0&&o<1){c.save();c.globalAlpha=k*(1-o);
+    font(c,40,500,-0.5);c.fillStyle=h.color==='#ffffff'?'rgba(255,255,255,.85)':'#2b2c27';c.textAlign='left';c.fillText(h.sub,0,lh*h.lines.length+20+(1-k)*20);c.restore()}}
+  c.restore();
+}
+const NOTES=[ // small print, bottom-left
+  {s:'Provider fees and verification apply.',t0:9.3,t1:11.9,dark:1},
+  {s:'Tokenised exposure. Capital at risk.',t0:12.3,t1:15.9},
+  {s:'18+, outside excluded jurisdictions. Not available to US persons.',t0:16.3,t1:19.4,lime:1},
+];
+function note(c,t,n){const k=eo(P(t,n.t0,n.t0+0.4))*(1-P(t,n.t1,n.t1+0.3));if(k<=0)return;c.save();c.globalAlpha=k;font(c,21,500,0);
+  const w=c.measureText(n.s).width;rr(c,130,H-88,w+40,42,12);c.fillStyle=n.dark?'#2a3125':(n.lime?'#c4ef86':'#ebe7de');c.fill();
+  c.fillStyle=n.dark?'rgba(255,255,255,.7)':'#55574f';c.textAlign='left';c.textBaseline='middle';c.fillText(n.s,150,H-66);c.restore()}
+
+/* ---------- opening + closing compositions ---------- */
+function openingCards(c,t){
+  if(t>9.4)return;
+  const ex=eio(P(t,8.9,9.3));
+  // arrive on the names in the voiceover, ride the ribbon, then settle lower-left when the phone comes in
+  const cards=[['spacex',2.25,1150,430,-0.08],['openai',2.95,1470,560,0.05],['kalshi',3.65,1220,700,-0.04]];
+  const settle=eio(P(t,7.3,8.3));
+  const low=[[300,860,-0.1],[620,770,0.04],[930,690,-0.06]];
+  cards.forEach(([k,at,x,y,r],i)=>{const a=P(t,at,at+0.6);if(a<=0)return;const e=back(a);
+    const fx=lerp(x,low[i][0],settle), fy=lerp(y,low[i][1],settle)+Math.sin(t*1.4+i*2)*8;
+    const dim=P(t,4.75,5.2)*(1-P(t,6.2,6.6)); // greyed out while "out of reach"
+    c.save();if(dim>0)c.filter=`grayscale(${dim}) blur(${dim*2}px)`;
+    coCard(c,k,fx+(1-e)*240,fy-ex*0,r+(1-e)*0.2,Math.min(1,a*2)*(1-ex)*(1-0.45*dim),lerp(1,0.92,settle));c.restore();
+    if(dim>0){c.save();c.globalAlpha=dim*(1-ex);const lx=fx+120,ly=fy-50;c.fillStyle=C.ink;rr(c,lx-24,ly-8,48,38,8);c.fill();c.strokeStyle=C.ink;c.lineWidth=6;c.beginPath();c.arc(lx,ly-8,14,Math.PI,0);c.stroke();c.restore()}
+  });
+}
+function soonCard(c,t){ // scene 5: the mystery card pops out of the phone
+  const a=P(t,20.05,20.75), o=eio(P(t,21.8,22.2));if(a<=0||o>=1)return;const e=back(a);
+  coCard(c,'soon',lerp(1300,860,eo5(a)),lerp(760,760,a)+Math.sin(t*1.5)*8,-0.06,Math.min(1,a*2)*(1-o),lerp(0.6,1.15,e));
+}
+function payCardScene(c,t){const a=P(t,10.45,11.15),o=eio(P(t,11.85,12.15));if(a<=0||o>=1)return;const e=back(a);
+  payCard(c,lerp(1350,860,eo5(a)),lerp(700,760,eo5(a))+Math.sin(t*1.6)*8,lerp(0.2,-0.12,e),Math.min(1,a*2)*(1-o))}
+function ending(c,t){
+  if(t<22.0)return;
+  const k=P(t,22.15,23.0);
+  // logo lockup
+  const lk=back(P(t,22.3,23.0)),la=eo(P(t,22.3,22.7));
+  c.save();c.globalAlpha=la;const S=150;c.translate(960-240,250);c.scale(lerp(.7,1,lk),lerp(.7,1,lk));rr(c,-S/2,-S/2,S,S,S*.24);c.fillStyle=C.lime;c.fill();mark(c,0,0,S*.74,P(t,22.35,23.2));c.restore();
+  const wk=eo5(P(t,22.55,23.2));c.save();c.globalAlpha=wk;wordmark(c,960-240+S/2+40+(1-wk)*60,250+42,124);c.restore();
+  const tk=eo5(P(t,23.0,23.6));c.save();c.globalAlpha=tk;font(c,52,700,-1);c.fillStyle=C.ink;c.textAlign='center';c.textBaseline='alphabetic';
+  c.fillText('Private markets. ',960-150,420+(1-tk)*20);const w1=c.measureText('Private markets. ').width;
+  const w2=c.measureText('Within reach.').width;const hk=eio(P(t,23.3,23.8));c.fillStyle=C.lime;rr(c,960-150+w1/2-6,420-44+(1-tk)*20,(w2+12)*hk,58,10);c.fill();
+  c.fillStyle=C.ink;c.textAlign='left';c.fillText('Within reach.',960-150+w1/2,420+(1-tk)*20);c.restore();
+  const uk=eo5(P(t,23.6,24.1));c.save();c.globalAlpha=uk;font(c,30,600,1);c.fillStyle='#3d3f38';c.textAlign='center';c.fillText('app.tessera.fun',960,488);c.restore();
+  // cards riding the ribbon
+  ['spacex','openai','kalshi','soon'].forEach((key,i)=>{const a=P(t,22.5+i*0.18,23.2+i*0.18);if(a<=0)return;
+    const x=330+i*420, y=Math.max(620,ribbonY(t,x)-95)+Math.sin(t*1.3+i)*6;coCard(c,key,x+(1-eo5(a))*300,y,[-0.07,0.04,-0.05,0.06][i],Math.min(1,a*2),0.95)});
+  // disclaimer
+  const dk=eo(P(t,23.8,24.4));c.save();c.globalAlpha=dk*0.9;font(c,19,500,0);c.fillStyle='#5f6159';c.textAlign='center';
+  c.fillText('T-tokens are loan participation rights issued by subsidiaries of Tessera Works Foundation. They are not shares.',960,H-62);
+  c.fillText('Not available to US persons or in excluded jurisdictions, including the UK. You may lose everything you put in.',960,H-34);c.restore();
+}
+
+/* ---------- master ---------- */
+function renderFrame(t,frame=0){
+  const c=X;c.setTransform(1,0,0,1,0,0);c.globalAlpha=1;c.filter='none';
+  background(c,t);
+  ribbon(c,t);
+  openingCards(c,t);
+  payCardScene(c,t);
+  soonCard(c,t);
+  for(const h of HEADS)headline(c,t,h);
+  for(const n of NOTES)note(c,t,n);
+  phone(c,t);
+  ending(c,t);
+  // corner wordmark (scenes 1-5)
+  const wa=eo(P(t,0.2,0.8))*(1-P(t,21.9,22.2));if(wa>0){c.save();c.globalAlpha=wa;wordmark(c,150,104,40,SC[sceneAt(t)].dark&&t>SC[sceneAt(t)].t+WIPE*0.6?'#ffffff':C.ink);c.restore()}
+  finish(c,t,frame);
+}
+window.renderFrame=renderFrame;window.DUR=DUR;
+window.ready=Promise.all([...[400,500,600,700,800].map(w=>document.fonts.load(`${w} 100px Outfit`)),...Object.values(ICON).map(im=>im.decode().catch(()=>0))]);
+window.ready.then(()=>{const q=new URLSearchParams(location.search);if(q.has('render'))return;
+  if(q.has('t')){renderFrame(parseFloat(q.get('t')));return}
+  const s=performance.now();(function loop(){renderFrame(((performance.now()-s)/1000)%DUR);requestAnimationFrame(loop)})()});
+</script></body></html>

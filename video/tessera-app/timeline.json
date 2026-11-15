@@ -1,0 +1,53 @@
+{
+ "duration": 26.21,
+ "lines": [
+  {
+   "i": 0,
+   "start": 0.35,
+   "end": 4.488,
+   "text": "The world's best companies. SpaceX. OpenAI. Kalshi."
+  },
+  {
+   "i": 1,
+   "start": 4.788,
+   "end": 6.962,
+   "text": "Always out of reach. Until now."
+  },
+  {
+   "i": 2,
+   "start": 7.462,
+   "end": 8.504,
+   "text": "Meet Tessera."
+  },
+  {
+   "i": 3,
+   "start": 9.004,
+   "end": 11.984,
+   "text": "Load up in seconds, with your card or Apple Pay."
+  },
+  {
+   "i": 4,
+   "start": 12.434,
+   "end": 15.635,
+   "text": "Pick a company. Choose your amount, from just one dollar."
+  },
+  {
+   "i": 5,
+   "start": 16.085,
+   "end": 19.448,
+   "text": "No accreditation. Your tokens stay in your own wallet."
+  },
+  {
+   "i": 6,
+   "start": 19.948,
+   "end": 21.681,
+   "text": "And more names are coming soon."
+  },
+  {
+   "i": 7,
+   "start": 22.231,
+   "end": 24.611,
+   "text": "Tessera. Private markets, within reach."
+  }
+ ]
+}
