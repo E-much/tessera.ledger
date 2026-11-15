@@ -61,10 +61,23 @@ export const Close: React.FC = () => {
           rift.trade
         </div>
       </div>
-      <div style={{ position: "absolute", left: 0, width: 1920, top: 690, display: "flex", justifyContent: "center", alignItems: "center", gap: 18, opacity: credit, transform: `translateY(${(1 - credit) * 14}px)` }}>
-        <Img src={staticFile("pfp.jpg")} style={{ width: 48, height: 48, borderRadius: 24, border: `1px solid ${C.line}` }} />
-        <Label size={20} color={C.mute} style={{ letterSpacing: "0.14em", textTransform: "none" }}>
-          <span style={{ color: C.orange }}>///</span> Weekly Spotlight by <span style={{ color: C.white }}>{HANDLE}</span> · fan-made, not affiliated with RIFT
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          width: 1920,
+          top: 702,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          opacity: credit,
+          transform: `translateY(${(1 - credit) * 14}px)`,
+        }}
+      >
+        <Img src={staticFile("pfp.jpg")} style={{ width: 72, height: 72, borderRadius: 36, border: `1px solid ${C.line}` }} />
+        <div style={{ fontFamily: F.mono, fontSize: 24, color: C.white, letterSpacing: "0.04em", marginTop: 14 }}>{HANDLE}</div>
+        <Label size={17} color={C.mute} style={{ letterSpacing: "0.14em", textTransform: "none", marginTop: 14 }}>
+          <span style={{ color: C.orange }}>///</span> Weekly Spotlight · fan-made, not affiliated with RIFT
         </Label>
       </div>
     </div>
