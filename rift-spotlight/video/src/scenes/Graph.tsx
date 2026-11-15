@@ -270,19 +270,19 @@ export const Graph: React.FC = () => {
     { w: "routes ", t: RW(4) },
     { w: "across ", t: RW(5) },
     { w: "20+ ", t: RW(6), color: C.orangeHi },
-    { w: "venues ", t: RW(8) },
-    { w: "on ", t: RW(9) },
-    { w: "8 ", t: RW(10), color: C.orangeHi },
-    { w: "chains,", t: RW(11) },
+    { w: "venues ", t: RW(7) },
+    { w: "on ", t: RW(8) },
+    { w: "8 ", t: RW(9), color: C.orangeHi },
+    { w: "chains,", t: RW(10) },
   ];
   const capB = [
-    { w: "finding ", t: RW(12) },
-    { w: "the ", t: RW(13) },
-    { w: "best ", t: RW(14), color: C.orangeHi },
-    { w: "price ", t: RW(15), color: C.orangeHi },
-    { w: "at ", t: RW(16) },
-    { w: "every ", t: RW(17) },
-    { w: "step.", t: RW(18) },
+    { w: "finding ", t: RW(11) },
+    { w: "the ", t: RW(12) },
+    { w: "best ", t: RW(13), color: C.orangeHi },
+    { w: "price ", t: RW(14), color: C.orangeHi },
+    { w: "at ", t: RW(15) },
+    { w: "every ", t: RW(16) },
+    { w: "step.", t: RW(17) },
   ];
   const capC = [
     { w: "Every ", t: RL(0) },
@@ -303,14 +303,14 @@ export const Graph: React.FC = () => {
     { w: "mid‑route,", t: RL(13) },
   ];
   const capE = [
-    { w: "Rift ", t: RL(15) },
-    { w: "tries ", t: RL(16) },
-    { w: "every ", t: RL(17) },
-    { w: "other ", t: RL(18), color: C.orangeHi },
-    { w: "venue ", t: RL(19) },
-    { w: "for ", t: RL(20) },
-    { w: "that ", t: RL(21) },
-    { w: "step.", t: RL(22) },
+    { w: "Rift ", t: RL(14) },
+    { w: "tries ", t: RL(15) },
+    { w: "every ", t: RL(16) },
+    { w: "other ", t: RL(17), color: C.orangeHi },
+    { w: "venue ", t: RL(18) },
+    { w: "for ", t: RL(19) },
+    { w: "that ", t: RL(20) },
+    { w: "step.", t: RL(21) },
   ];
 
   // ---- order execution ---------------------------------------------------
@@ -641,10 +641,10 @@ export const Graph: React.FC = () => {
 
       {/* captions */}
       <div style={{ opacity: 1 - p(f, EV.cuts[3] - 0.3, 0.3, E.exit) }}>
-        <Caption words={capA} exitAt={RW(12) - 0.3} mode="right" />
+        <Caption words={capA} exitAt={RW(11) - 0.3} mode="right" />
         <Caption words={capB} exitAt={RL(0) - 0.3} mode="left" />
         <Caption words={capC} exitAt={RL(7) - 0.3} mode="right" />
-        <Caption words={capD} exitAt={RL(15) - 0.3} mode="zoom" />
+        <Caption words={capD} exitAt={RL(14) - 0.3} mode="right" />
         <Caption words={capE} mode="left" />
       </div>
 

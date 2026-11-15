@@ -18,19 +18,19 @@ def dur(id_):
 # (line, anchor word index, min breath before the line in seconds)
 PLAN = [
     ("hook", 0, 0.0),
-    ("problem", 0, 0.75),
-    ("solution", 18, 0.7),   # "click." on the beat
-    ("routing", 0, 0.75),
-    ("reliability", 12, 1.4),  # "down" on the beat (room for the lock + travel before it)
-    ("coverage", 7, 0.9),    # "Zero" on the beat
-    ("close", 0, 1.2),       # "Rift." on a bar downbeat
+    ("problem", 0, 0.55),
+    ("solution", 18, 0.5),   # "click." on the beat
+    ("routing", 0, 0.5),
+    ("reliability", 12, 1.25),  # "down" on the beat (room for the lock + travel before it)
+    ("coverage", 7, 0.7),    # "Zero" on the beat
+    ("close", 0, 0.9),       # "Rift." on a bar downbeat
 ]
 
 start, prev_end = {}, 0.0
 for i, (lid, anchor, breath) in enumerate(PLAN):
     a_off = W[lid]["words"][anchor]["t"] if "t" in W[lid]["words"][anchor] else W[lid]["words"][anchor]["s"]
     earliest = 0.5 if i == 0 else prev_end + breath
-    grid = BAR if lid == "close" else B
+    grid = B
     t_anchor = math.ceil((earliest + a_off) / grid - 1e-9) * grid
     s = t_anchor - a_off
     start[lid] = round(s, 3)
@@ -76,13 +76,13 @@ E["stations"] = w("routing", 3)
 E["venues"] = w("routing", 6)
 E["chains"] = w("routing", 10)
 E["lock"] = up(w("routing", len(lines[3]["words"]) - 1))
-E["requote"] = [w("routing", 12), round(E["lock"] - 0.12, 3)]
+E["requote"] = [w("routing", 11), round(E["lock"] - 0.12, 3)]
 # reliability
 E["deposit"] = [round(w("reliability", 5) - 0.2, 3), w("reliability", 6, "e")]
 E["fail"] = w("reliability", 12)    # on the beat ("down")
-E["hops"] = [[round(E["fail"] - 1.6 + k * 0.5, 3), round(E["fail"] - 1.15 + k * 0.5, 3)] for k in range(3)]
-E["funded"] = round(E["hops"][0][0] - 0.15, 3)
-E["scan"] = [round(w("reliability", 15) + 0.12 * i, 3) for i in range(4)]
+E["hops"] = [[round(E["fail"] - 1.25 + k * 0.4, 3), round(E["fail"] - 0.9 + k * 0.4, 3)] for k in range(3)]
+E["funded"] = round(E["hops"][0][0] - 0.12, 3)
+E["scan"] = [round(w("reliability", 14) + 0.12 * i, 3) for i in range(4)]
 E["relock"] = up(E["scan"][-1] + 0.1)
 E["resume"] = [round(E["relock"] + 0.25, 3), round(E["relock"] + 0.9, 3)]
 E["out"] = [round(E["resume"][1] + 0.05, 3), round(E["resume"][1] + 0.45, 3)]
@@ -92,9 +92,9 @@ E["chainWords"] = [w("coverage", i) for i in range(6)]
 E["zero"] = w("coverage", 7)
 # close
 E["closeLogo"] = start["close"]
-E["endCard"] = round(end("close") + 1.1, 3)
-E["credit"] = round(E["endCard"] + 0.85, 3)
-E["end"] = round(E["credit"] + 3.0, 3)
+E["endCard"] = round(end("close") + 0.8, 3)
+E["credit"] = round(E["endCard"] + 0.6, 3)
+E["end"] = round(E["credit"] + 2.3, 3)
 
 DUR = E["end"]
 json.dump({"fps": 60, "bpm": BPM, "duration": DUR, "lines": lines}, open("video/src/timeline.json", "w"), indent=1)

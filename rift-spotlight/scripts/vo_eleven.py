@@ -1,6 +1,6 @@
 """Voiceover via ElevenLabs (human male voice) with character-level timestamps → word timings.
 Key is injected by the environment's network proxy (never stored here)."""
-import base64, json, re, sys, urllib.request
+import base64, json, re, subprocess, sys, urllib.request
 import numpy as np, soundfile as sf
 
 VOICE = sys.argv[1]
@@ -14,19 +14,21 @@ for i, L in enumerate(LINES, 1):
     body = {
         "text": L["el"],
         "model_id": MODEL,
-        "voice_settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True},
+        "voice_settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.15, "use_speaker_boost": True, "speed": 1.08},
         "previous_text": " ".join(x["el"] for x in LINES[: i - 1])[-500:] or None,
         "next_text": LINES[i]["el"] if i < len(LINES) else None,
     }
     if ONLY and i not in ONLY:
         continue
     req = urllib.request.Request(
-        f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE}/with-timestamps?output_format=pcm_44100",
+        f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE}/with-timestamps?output_format=mp3_44100_128",
         data=json.dumps(body).encode(),
         headers={"Content-Type": "application/json", "xi-api-key": "proxy-injected"},
     )
     d = json.load(urllib.request.urlopen(req, timeout=120))
-    pcm = np.frombuffer(base64.b64decode(d["audio_base64"]), dtype="<i2").astype(np.float32) / 32768
+    mp3 = base64.b64decode(d["audio_base64"])
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-i", "pipe:0", "-f", "f32le", "-ac", "1", "-ar", str(SR), "pipe:1"], input=mp3, capture_output=True, check=True).stdout
+    pcm = np.frombuffer(raw, dtype="<f4").copy()
     al = d["alignment"]
     chars, st, en = al["characters"], al["character_start_times_seconds"], al["character_end_times_seconds"]
     # trim leading silence (keep 20 ms) and shift timings
