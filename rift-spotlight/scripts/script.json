@@ -1,33 +1,23 @@
 [
  {
-  "id": "hook",
-  "tts": "Last time you swapped across chains, did you get the best price? Honestly, you can't tell.",
-  "el": "Last time you swapped across chains, did you get the best price? Honestly, you can't tell."
+  "id": "pain",
+  "tts": "Swapping across chains should be simple. Instead, you're juggling bridges, paying fees, and still not sure you got the best price.",
+  "el": "Swapping across chains should be simple. Instead, you're juggling bridges, paying fees, and still not sure you got the best price."
  },
  {
-  "id": "problem",
-  "tts": "Every route has a different price. On ten bitcoin today, the quotes were over four thousand dollars apart.",
-  "el": "Every route has a different price. On ten bitcoin today, the quotes were over four thousand dollars apart."
+  "id": "meet",
+  "tts": "Meet Rift. Pick what you have, pick what you want, and hit trade.",
+  "el": "Meet Rift. Pick what you have, pick what you want, and hit trade."
  },
  {
-  "id": "solution",
-  "tts": "Rift fixes that. Pick what you have. Pick what you want. Rift finds the best price, in one click.",
-  "el": "Rift fixes that. Pick what you have. Pick what you want. Rift finds the best price, in one click."
+  "id": "route",
+  "tts": "Rift finds the best route across twenty-plus venues, in one click.",
+  "el": "Rift finds the best route across twenty-plus venues, in one click."
  },
  {
-  "id": "routing",
-  "tts": "Behind that click, Rift routes across twenty-plus venues on eight chains, finding the best price at every step.",
-  "el": "Behind that click, Rift routes across twenty-plus venues on eight chains, finding the best price at every step."
- },
- {
-  "id": "reliability",
-  "tts": "Every order gets its own deposit address. And if a venue goes down mid-route, Rift tries every other venue for that step.",
-  "el": "Every order gets its own deposit address. And if a venue goes down mid-route, Rift tries every other venue for that step."
- },
- {
-  "id": "coverage",
-  "tts": "Bitcoin, Ethereum, Base, Arbitrum, Polygon, and more. Zero added fees.",
-  "el": "Bitcoin, Ethereum, Base, Arbitrum, Polygon, and more. Zero added fees."
+  "id": "nos",
+  "tts": "No approvals. Zero added fees. No guesswork.",
+  "el": "No approvals. Zero added fees. No guesswork."
  },
  {
   "id": "close",

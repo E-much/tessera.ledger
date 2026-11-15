@@ -18,7 +18,9 @@ BPM = TL["bpm"]
 BEAT = 60 / BPM
 BAR = 4 * BEAT
 rng = np.random.default_rng(7)
-CUT = EV["cuts"]
+_sh = {x["id"]: x["t0"] for x in EV["shots"]}
+# music sections: pain → "Meet Rift" lift → route/no-fees peak → breath → resolve on "Rift."
+CUT = [_sh["bridge"], _sh["logo"], _sh["route"], _sh["close"] - 0.01, _sh["close"]]
 
 
 def t_(n):
@@ -289,65 +291,34 @@ def soft_hit(level=1.0):
 
 
 # relative SFX levels (pre-mix); final check enforces SFX < VO and < music
-L_TICK, L_CLICK, L_LOCK, L_WHOOSH = 0.05, 0.16, 0.16, 0.055
+L_TICK, L_CLICK, L_LOCK, L_WHOOSH = 0.05, 0.16, 0.16, 0.06
 
-# transitions
+# every whip / zoom cut gets a short whoosh
 for c in EV["cuts"]:
-    add_sfx(None, whoosh(0.42, L_WHOOSH), c - 0.3)
-add_sfx(None, whoosh(0.5, L_WHOOSH * 0.8), EV["logoFly"] - 0.05)
-add_sfx(None, whoosh(0.6, L_WHOOSH * 0.8, up=False), EV["pullback"] + 0.05)
-add_sfx(None, whoosh(0.5, L_WHOOSH * 0.6), EV["endCard"] - 0.1)
-
-# hook: the 'best available' figure re-rolls, then lands on "can't tell"
-for t in np.arange(EV["doubt"], EV["cantTell"], 1 / 15):
-    add_sfx(None, tick(L_TICK * 0.5, 2300 + 600 * rng.random()), t)
-add_sfx(None, tick(L_TICK * 1.3, 1500), EV["cantTell"])
-
-# problem: rows, re-quote ticks, hunting bracket
-for t in EV["rows"]:
-    add_sfx(None, click(L_CLICK * 0.35), t)
-for t in np.arange(EV["rows"][0], EV["rowSettle"][-1], 1 / 15):
-    add_sfx(None, tick(L_TICK * 0.6, 2400 + 300 * rng.random()), t)
-add_sfx(None, lock(L_LOCK * 0.5), EV["gap"])  # spread bracket snaps on
-
-# solution
-add_sfx(None, soft_hit(0.22), EV["logoIn"])
-for a, b in (EV["typeFrom"], EV["typeTo"]):
-    for t in np.linspace(a, b, 8):
+    add_sfx(None, whoosh(0.36, L_WHOOSH), c - 0.18)
+# pain: the transfer $ wobbles, fee rows tick in, best-price digits re-roll
+for i in range(3):
+    add_sfx(None, tick(L_TICK * 0.9, 1700 + 200 * i), _sh["fees"] + 0.1 + i * 0.12)
+add_sfx(None, tick(L_TICK * 1.2, 1300), _sh["fees"] + 0.5)
+for t in np.arange(_sh["unsure"] + 0.2, _sh["logo"] - 0.2, 1 / 12):
+    add_sfx(None, tick(L_TICK * 0.45, 2300 + 600 * rng.random()), t)
+# Meet Rift
+add_sfx(None, soft_hit(0.22), EV["closeLogo"] - 99 if False else _sh["logo"] + 0.1)
+# pick → typing, trade click
+for a0 in (EV["pickFrom"], EV["pickTo"]):
+    for t in np.linspace(a0, a0 + 0.4, 7):
         add_sfx(None, click(L_CLICK * 0.25), t)
-for t in np.arange(EV["results"], EV["quoteSettle"], 1 / 15):
-    add_sfx(None, tick(L_TICK * 0.6, 2500 + 300 * rng.random()), t)
 add_sfx(None, click(L_CLICK), EV["click"])
-
-# routing: venues pop, chains pop, re-quote flicker, lock
-for i in range(13):
-    add_sfx(None, tick(L_TICK * 0.7, 2000 + 120 * i), EV["venues"] + i * 0.045)
-for i in range(8):
-    add_sfx(None, tick(L_TICK * 0.7, 1500 + 80 * i), EV["chains"] + i * 0.045)
-for t in np.arange(EV["requote"][0], EV["requote"][1], 1 / 15):
-    add_sfx(None, tick(L_TICK * 0.55, 2200 + 900 * rng.random()), t)
-add_sfx(None, lock(L_LOCK), EV["lock"])
-
-# reliability
-for t in np.linspace(EV["deposit"][0], EV["deposit"][1], 12):
-    add_sfx(None, click(L_CLICK * 0.2), t)
-add_sfx(None, click(L_CLICK * 0.6), EV["funded"])
-for a, b in EV["hops"]:
-    add_sfx(None, tick(L_TICK * 1.3, 1900), b)
-add_sfx(None, glitch(0.1), EV["fail"])
-for t in EV["scan"]:
-    add_sfx(None, tick(L_TICK, 2300), t)
-add_sfx(None, lock(L_LOCK * 0.85), EV["relock"])
-add_sfx(None, tick(L_TICK * 1.3, 1900), EV["resume"][1])
-add_sfx(None, chime(0.05), EV["delivered"])
-
-# coverage
-for t in EV["chainWords"]:
-    add_sfx(None, tick(L_TICK * 0.9, 1700), t)
-add_sfx(None, soft_hit(0.14), EV["zero"])
-
-# close
+# route: hop ticks, venues, best-price lock
+for k in range(4):
+    add_sfx(None, tick(L_TICK * 1.2, 1900), EV["hop0"] + k * (EV["result"] - 0.15 - EV["hop0"]) / 3)
+add_sfx(None, lock(L_LOCK), EV["result"])
+# no approvals / zero fees / no guesswork
+for t in EV["nos"]:
+    add_sfx(None, soft_hit(0.1), t - 0.05)
+# close + creator card
 add_sfx(None, soft_hit(0.2), EV["closeLogo"])
+add_sfx(None, chime(0.04), _sh["card"] + 0.3)
 
 # ---------------------------------------------------------------- VO
 def true_peak(x):

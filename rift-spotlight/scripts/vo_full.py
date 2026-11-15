@@ -7,7 +7,7 @@ import numpy as np, soundfile as sf
 VOICE = sys.argv[1]
 SPEED = float(sys.argv[2]) if len(sys.argv) > 2 else 1.0
 LINES = json.load(open("scripts/script.json"))
-BREAKS = [0.35, 0.45, 0.45, 0.6, 0.5, 0.55]  # pause after each line (s)
+BREAKS = [float(x) for x in sys.argv[3].split(",")] if len(sys.argv) > 3 else [0.4] * 10  # pause after each line (s)
 SR = 44100
 parts = []
 for i, L in enumerate(LINES):
