@@ -4,7 +4,7 @@ import { CHAINS, LAST_LEG, PATHS_PRICED, QUOTE, ROUTE, SINGLE_HOP, fmt } from ".
 import EV from "../events.json";
 import { BRIDGES, BRIDGE_X, FAN, FAN_X, G_Y, RAILS, STATIONS, W_Y, bridgePath, fanPath, pointAt, polyLen, railPath, toD } from "../geometry";
 import { C, E, F, FPS, lerp, p, wt } from "../theme";
-import { Blocks, Label, Scramble, Words } from "../ui";
+import { Blocks, Key, Label, Scramble } from "../ui";
 
 const RW = (i: number) => wt("routing", i);
 const RL = (i: number) => wt("reliability", i);
@@ -243,9 +243,6 @@ export const Spine: React.FC = () => {
   );
 };
 
-const Caption: React.FC<{ words: { w: string; t: number; color?: string; mono?: boolean }[]; exitAt?: number; mode?: "up" | "left" | "right" | "zoom" }> = ({ words, exitAt, mode = "up" }) => (
-  <Words words={words} size={46} weight={600} exitAt={exitAt} mode={mode} exitTo={mode === "left" ? "right" : mode === "right" ? "left" : "up"} style={{ position: "absolute", left: 0, width: 1920, top: 96, textAlign: "center" }} />
-);
 
 export const LEGEND_X = (i: number) => 380 + i * 166;
 export const LEGEND_Y = 262;
@@ -260,58 +257,6 @@ export const Graph: React.FC = () => {
   const loser = 1 - 0.78 * lf;
   const frameK = p(f, EV.pullback + 0.15, 0.9, E.inOut);
   const frameLen = 2 * (1400 + 770);
-
-  // ---- captions ------------------------------------------------------------
-  const capA = [
-    { w: "Behind ", t: RW(0) },
-    { w: "that ", t: RW(1) },
-    { w: "click, ", t: RW(2) },
-    { w: "Rift ", t: RW(3) },
-    { w: "routes ", t: RW(4) },
-    { w: "across ", t: RW(5) },
-    { w: "20+ ", t: RW(6), color: C.orangeHi },
-    { w: "venues ", t: RW(7) },
-    { w: "on ", t: RW(8) },
-    { w: "8 ", t: RW(9), color: C.orangeHi },
-    { w: "chains,", t: RW(10) },
-  ];
-  const capB = [
-    { w: "finding ", t: RW(11) },
-    { w: "the ", t: RW(12) },
-    { w: "best ", t: RW(13), color: C.orangeHi },
-    { w: "price ", t: RW(14), color: C.orangeHi },
-    { w: "at ", t: RW(15) },
-    { w: "every ", t: RW(16) },
-    { w: "step.", t: RW(17) },
-  ];
-  const capC = [
-    { w: "Every ", t: RL(0) },
-    { w: "order ", t: RL(1) },
-    { w: "gets ", t: RL(2) },
-    { w: "its ", t: RL(3) },
-    { w: "own ", t: RL(4), color: C.orangeHi },
-    { w: "deposit ", t: RL(5) },
-    { w: "address.", t: RL(6) },
-  ];
-  const capD = [
-    { w: "And ", t: RL(7) },
-    { w: "if ", t: RL(8) },
-    { w: "a ", t: RL(9) },
-    { w: "venue ", t: RL(10) },
-    { w: "goes ", t: RL(11) },
-    { w: "down ", t: RL(12), color: C.red },
-    { w: "mid‑route,", t: RL(13) },
-  ];
-  const capE = [
-    { w: "Rift ", t: RL(14) },
-    { w: "tries ", t: RL(15) },
-    { w: "every ", t: RL(16) },
-    { w: "other ", t: RL(17), color: C.orangeHi },
-    { w: "venue ", t: RL(18) },
-    { w: "for ", t: RL(19) },
-    { w: "that ", t: RL(20) },
-    { w: "step.", t: RL(21) },
-  ];
 
   // ---- order execution ---------------------------------------------------
   const hopPts = (i: number): [number, number][] => {
@@ -383,13 +328,13 @@ export const Graph: React.FC = () => {
             width={1400}
             height={770}
             rx={36}
-            fill="rgba(232,124,18,0.028)"
+            fill="rgba(8,5,3,0.78)"
             stroke="rgba(232,124,18,0.55)"
             strokeWidth={1.5}
             strokeDasharray={frameLen}
             strokeDashoffset={(1 - frameK) * frameLen}
           />
-          <path d="M630 170 L1290 170 L1262 222 L658 222 Z" fill={C.bg} stroke="rgba(232,124,18,0.55)" strokeWidth={1.5} opacity={frameK} />
+          <path d="M630 170 L1290 170 L1262 222 L658 222 Z" fill="#0B0704" stroke="rgba(232,124,18,0.55)" strokeWidth={1.5} opacity={frameK} />
           {/* ports on the frame edges */}
           {[-60, 0, 60].map((d) => (
             <g key={d} opacity={frameK}>
@@ -639,13 +584,14 @@ export const Graph: React.FC = () => {
 
       </div>
 
-      {/* captions */}
+      {/* keywords only — swap in as each idea is spoken */}
       <div style={{ opacity: 1 - p(f, EV.cuts[3] - 0.3, 0.3, E.exit) }}>
-        <Caption words={capA} exitAt={RW(11) - 0.3} mode="right" />
-        <Caption words={capB} exitAt={RL(0) - 0.3} mode="left" />
-        <Caption words={capC} exitAt={RL(7) - 0.3} mode="right" />
-        <Caption words={capD} exitAt={RL(14) - 0.3} mode="right" />
-        <Caption words={capE} mode="left" />
+        <Key text={<span>20+ <span style={{ color: C.orangeHi }}>venues</span></span>} t0={RW(6)} t1={RW(9) - 0.18} y={46} size={100} mode="right" />
+        <Key text={<span>8 <span style={{ color: C.orangeHi }}>chains</span></span>} t0={RW(9)} t1={RW(16) - 0.18} y={46} size={100} mode="left" />
+        <Key text={<span>Every <span style={{ color: C.orangeHi }}>step</span></span>} t0={RW(16)} t1={RL(4) - 0.18} y={46} size={100} mode="zoom" />
+        <Key text={<span>Own <span style={{ color: C.orangeHi }}>address</span></span>} t0={RL(4)} t1={RL(10) - 0.18} y={46} size={100} mode="right" />
+        <Key text={<span>Venue <span style={{ color: "#FF8A80" }}>down</span></span>} t0={RL(10)} t1={RL(15) - 0.18} y={46} size={100} mode="zoom" />
+        <Key text={<span>Next <span style={{ color: C.orangeHi }}>venue</span></span>} t0={RL(15)} t1={EV.cuts[3] - 0.3} y={46} size={100} mode="left" />
       </div>
 
       {/* order status meter */}

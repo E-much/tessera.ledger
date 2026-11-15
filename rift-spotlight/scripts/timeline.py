@@ -26,15 +26,9 @@ PLAN = [
     ("close", 0, 0.9),       # "Rift." on a bar downbeat
 ]
 
-start, prev_end = {}, 0.0
-for i, (lid, anchor, breath) in enumerate(PLAN):
-    a_off = W[lid]["words"][anchor]["t"] if "t" in W[lid]["words"][anchor] else W[lid]["words"][anchor]["s"]
-    earliest = 0.5 if i == 0 else prev_end + breath
-    grid = B
-    t_anchor = math.ceil((earliest + a_off) / grid - 1e-9) * grid
-    s = t_anchor - a_off
-    start[lid] = round(s, 3)
-    prev_end = s + dur(lid)
+# The VO is ONE continuous take: keep its natural timing exactly (no re-spacing of lines).
+LEAD = 0.5
+start = {lid: round(LEAD + W[lid].get("offset", 0.0), 3) for lid, *_ in PLAN}
 
 lines = []
 for lid, *_ in PLAN:
@@ -53,7 +47,7 @@ down = lambda t: math.floor(t / B + 1e-9) * B
 
 E = {}
 # cuts land on the beat just before each new section's first word
-E["cuts"] = [down(start[x] - 0.2) for x in ("problem", "solution", "routing", "coverage")] + [start["close"] - B]
+E["cuts"] = [round(w(x, 0) - 0.25, 3) for x in ("problem", "solution", "routing", "coverage")] + [round(w("close", 0) - 0.25, 3)]
 # hook
 E["doubt"] = round(w("hook", 12) - 0.18, 3)  # receipt arrives on "Honestly"; best-available starts re-rolling
 E["cantTell"] = w("hook", 14)       # "can't tell"
@@ -75,26 +69,28 @@ E["pullback"] = E["cuts"][2]
 E["stations"] = w("routing", 3)
 E["venues"] = w("routing", 6)
 E["chains"] = w("routing", 10)
-E["lock"] = up(w("routing", len(lines[3]["words"]) - 1))
+E["lock"] = round(w("routing", 17) + 0.05, 3)  # "step."
 E["requote"] = [w("routing", 11), round(E["lock"] - 0.12, 3)]
 # reliability
 E["deposit"] = [round(w("reliability", 5) - 0.2, 3), w("reliability", 6, "e")]
 E["fail"] = w("reliability", 12)    # on the beat ("down")
-E["hops"] = [[round(E["fail"] - 1.25 + k * 0.4, 3), round(E["fail"] - 0.9 + k * 0.4, 3)] for k in range(3)]
-E["funded"] = round(E["hops"][0][0] - 0.12, 3)
+_h0 = w("reliability", 6, "e") + 0.12  # funds land right after "address."
+_hl = (E["fail"] - 0.12 - _h0) / 3
+E["hops"] = [[round(_h0 + k * _hl, 3), round(_h0 + (k + 0.85) * _hl, 3)] for k in range(3)]
+E["funded"] = round(E["hops"][0][0] - 0.05, 3)
 E["scan"] = [round(w("reliability", 14) + 0.12 * i, 3) for i in range(4)]
-E["relock"] = up(E["scan"][-1] + 0.1)
+E["relock"] = round(E["scan"][-1] + 0.2, 3)
 E["resume"] = [round(E["relock"] + 0.25, 3), round(E["relock"] + 0.9, 3)]
 E["out"] = [round(E["resume"][1] + 0.05, 3), round(E["resume"][1] + 0.45, 3)]
-E["delivered"] = up(E["out"][1])
+E["delivered"] = round(E["out"][1] + 0.05, 3)
 # coverage
 E["chainWords"] = [w("coverage", i) for i in range(6)]
 E["zero"] = w("coverage", 7)
 # close
-E["closeLogo"] = start["close"]
-E["endCard"] = round(end("close") + 0.8, 3)
+E["closeLogo"] = w("close", 0)
+E["endCard"] = round(end("close") + 0.6, 3)
 E["credit"] = round(E["endCard"] + 0.6, 3)
-E["end"] = round(E["credit"] + 2.3, 3)
+E["end"] = round(E["credit"] + 2.2, 3)
 
 DUR = E["end"]
 json.dump({"fps": 60, "bpm": BPM, "duration": DUR, "lines": lines}, open("video/src/timeline.json", "w"), indent=1)
@@ -102,5 +98,5 @@ json.dump(E, open("video/src/events.json", "w"), indent=1)
 for L in lines:
     print(f'{L["id"]:12s} {L["start"]:6.2f} → {L["words"][-1]["e"]:6.2f}')
 print("cuts", E["cuts"], "lock", E["lock"], "funded", E["funded"], "deposit end", E["deposit"][1], "duration", DUR)
-assert E["funded"] > E["deposit"][1] - 0.3, "deposit typing overlaps funding — widen reliability breath"
+assert E["hops"][0][1] - E["hops"][0][0] > 0.2, "hops too short"
 assert DUR <= 60

@@ -4,7 +4,7 @@ import { QUOTE, SINGLE_HOP, fmt } from "../data";
 import EV from "../events.json";
 import { W_Y } from "../geometry";
 import { C, E, F, lerp, p, wt } from "../theme";
-import { Label, Logo, Scramble, Words } from "../ui";
+import { Label, Logo, Scramble } from "../ui";
 
 const T = (i: number) => wt("solution", i);
 
@@ -76,16 +76,15 @@ export const SolutionReveal: React.FC = () => {
   ];
   return (
     <div style={{ position: "absolute", inset: 0, opacity: 1 - out }}>
-      <Words words={words} size={120} mode="zoom" align="center" style={{ position: "absolute", left: 0, width: 1920, top: 570 }} />
       <div
         style={{
           position: "absolute",
-          top: 740,
+          top: 590,
           left: 0,
           width: 1920,
           display: "flex",
           justifyContent: "center",
-          opacity: p(f, T(2), 0.4),
+          opacity: p(f, T(1), 0.4),
         }}
       >
         <div
@@ -151,13 +150,6 @@ export const Widget: React.FC = () => {
 
   return (
     <>
-      {/* captions above the UI */}
-      <div style={{ position: "absolute", left: 156, top: 112, opacity: 1 - pb }}>
-        <Words words={cap1} size={60} mode="left" exitAt={EV.results - 0.3} exitTo="left" />
-      </div>
-      <div style={{ position: "absolute", right: 160, top: 112, opacity: 1 - pb }}>
-        <Words words={cap2} size={60} mode="right" align="right" exitAt={EV.click + 0.5} exitTo="right" />
-      </div>
 
       <div
         style={{
@@ -200,6 +192,36 @@ export const Widget: React.FC = () => {
         <div style={{ position: "absolute", left: 420, top: 336, fontFamily: F.mono, fontSize: 15, color: "#6B7280", letterSpacing: "0.2em", transform: "translateX(70px)" }}>
           ← EDIT ME
         </div>
+        {[
+          { x: 826, w: 280, t: wt("solution", 6), label: "HAVE" },
+          { x: 1184, w: 312, t: wt("solution", 10), label: "WANT" },
+        ].map((g) => {
+          const k = p(f, g.t - 0.05, 0.35, E.snap) * (1 - p(f, EV.results - 0.25, 0.25, E.exit));
+          return (
+            <div
+              key={g.label}
+              style={{
+                position: "absolute",
+                left: g.x,
+                width: g.w,
+                top: 430,
+                display: "flex",
+                flexDirection: "column-reverse",
+                alignItems: "center",
+                textAlign: "center",
+                fontFamily: F.mono,
+                fontSize: 26,
+                letterSpacing: "0.3em",
+                color: C.white,
+                opacity: k,
+                transform: `translateY(${(1 - k) * 14}px)`,
+              }}
+            >
+              {g.label}
+              <div style={{ width: 2, height: 22, background: C.orange, margin: "0 auto 8px" }} />
+            </div>
+          );
+        })}
         <TokenPill x={826} w={280} text={typed(f, "bitcoin.btc", EV.typeFrom[0], EV.typeFrom[1])} ticker="BTC" k={fromK} />
         <div
           style={{
@@ -332,9 +354,6 @@ export const Widget: React.FC = () => {
             SHOW ALL (5) ⌄
           </div>
         </div>
-        <Label size={13} color={C.dim} style={{ position: "absolute", left: 184, top: 936, letterSpacing: "0.18em", opacity: res }}>
-          Live quote · api.rift.trade · {QUOTE.date} · indicative · UI recreated from rift.trade
-        </Label>
       </div>
 
       {/* cursor */}

@@ -7,7 +7,7 @@ import { Graph, Spine } from "./scenes/Graph";
 import { Hook } from "./scenes/Hook";
 import { Problem } from "./scenes/Problem";
 import { LogoTile, SolutionReveal, Widget } from "./scenes/Solution";
-import { C, E, FPS, p, wt } from "./theme";
+import { BG, C, E, FPS, p, wt } from "./theme";
 import { FontFaces, Grid, HUD } from "./ui";
 
 const SECTIONS: [number, string][] = [
@@ -37,9 +37,8 @@ export const Main: React.FC = () => {
   const hudOp = p(f, 0.1, 0.5) * (1 - p(f, EV.cuts[4] - 0.3, 0.3, E.exit));
 
   return (
-    <AbsoluteFill style={{ background: C.bg }}>
+    <AbsoluteFill style={{ background: BG }}>
       <FontFaces />
-      <Grid />
       {between(t, 0, EV.cuts[0]) && <Hook />}
       {between(t, EV.cuts[0], EV.cuts[1]) && <Problem />}
       {between(t, EV.cuts[1], EV.logoFly + 0.4) && <SolutionReveal />}
@@ -49,7 +48,6 @@ export const Main: React.FC = () => {
       <Spine />
       <Coverage />
       <Close />
-      <HUD section={SECTIONS[idx][1]} index={idx + 1} opacity={hudOp} />
     </AbsoluteFill>
   );
 };

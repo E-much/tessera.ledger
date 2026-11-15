@@ -2,7 +2,7 @@ import React from "react";
 import { Img, staticFile, useCurrentFrame } from "remotion";
 import EV from "../events.json";
 import { C, E, F, FPS, lerp, p, wt } from "../theme";
-import { Label, Words } from "../ui";
+import { Key, Label } from "../ui";
 
 // "Rift. Best price execution, in one click."  → creator end card
 const T = (i: number) => wt("close", i);
@@ -18,16 +18,6 @@ export const Close: React.FC = () => {
   const credit = p(f, EV.credit, 0.6, E.snap);
   const fade = p(f, EV.end - 0.45, 0.45, E.inOut);
 
-  const line = [
-    { w: "Best ", t: T(1), color: C.orangeHi },
-    { w: "price ", t: T(2), color: C.orangeHi },
-    { w: "execution", t: T(3) },
-    { w: "\n", t: 0 },
-    { w: "in ", t: T(4) },
-    { w: "one ", t: T(5) },
-    { w: "click", t: T(6) },
-    { w: ".", t: T(6) + 0.14, color: C.orange },
-  ];
 
   return (
     <div style={{ position: "absolute", inset: 0, opacity: 1 - fade }}>
@@ -53,7 +43,8 @@ export const Close: React.FC = () => {
         >
           Rift<span style={{ color: C.orange }}>.</span>
         </div>
-        <Words words={line} size={96} mode="right" align="center" style={{ position: "absolute", left: 0, width: 1920, top: 560 }} />
+        <Key text={<span>Best <span style={{ color: C.orangeHi }}>price</span></span>} t0={T(1)} t1={T(5) - 0.15} y={560} size={120} mode="left" />
+        <Key text={<span>One <span style={{ color: C.orangeHi }}>click</span><span style={{ color: C.orange }}>.</span></span>} t0={T(5)} t1={EV.endCard - 0.3} y={560} size={120} mode="right" />
       </div>
 
       {/* end card: creator only */}

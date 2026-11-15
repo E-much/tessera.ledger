@@ -3,7 +3,7 @@ import { useCurrentFrame } from "remotion";
 import { CHAINS } from "../data";
 import EV from "../events.json";
 import { C, E, F, FPS, lerp, p, wt } from "../theme";
-import { Label, Words } from "../ui";
+import { Key, Label, Words } from "../ui";
 
 // "Bitcoin, Ethereum, Base, Arbitrum, Polygon, and more. Zero added fees."
 const T = (i: number) => wt("coverage", i);
@@ -111,9 +111,6 @@ export const Coverage: React.FC = () => {
           align="right"
           style={{ position: "absolute", right: GX, top: GY + 2 * CH + GAP + 40 }}
         />
-        <Label size={15} style={{ position: "absolute", left: GX, top: GY + 2 * CH + GAP + 64 }}>
-          Supported chains · rift.trade/docs
-        </Label>
       </div>
 
       {/* Beat 3 — text only: zero added fees, zooming out */}
@@ -146,13 +143,7 @@ const ZeroFees: React.FC = () => {
         </span>
         <span style={{ fontFamily: F.mono, fontSize: 110, color: C.orangeHi, marginLeft: 28, opacity: p(f, T(7) + 0.1, 0.3) }}>bps</span>
       </div>
-      <Words
-        words={[{ w: "added ", t: T(8) }, { w: "fees", t: T(9) }, { w: ".", t: T(9) + 0.14, color: C.orange }]}
-        size={112}
-        mode="left"
-        align="center"
-        style={{ position: "absolute", left: 0, width: 1920, top: 650 }}
-      />
+      <Key text={<span>added fees<span style={{ color: C.orange }}>.</span></span>} t0={T(8)} t1={999} y={650} size={112} mode="zoom" />
     </div>
   );
 };

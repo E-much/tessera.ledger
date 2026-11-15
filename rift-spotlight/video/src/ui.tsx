@@ -154,7 +154,8 @@ export const Label: React.FC<{ children: React.ReactNode; color?: string; size?:
 
 /** The provided RIFT logo, used exactly as supplied (square tile, unaltered). */
 export const Logo: React.FC<{ size: number; style?: React.CSSProperties }> = ({ size, style }) => (
-  <Img src={staticFile("rift-logo.jpg")} style={{ width: size, height: size, display: "block", ...style }} />
+  // the supplied logo, unaltered, presented as a rounded-corner tile (app-icon shape)
+  <Img src={staticFile("rift-logo.jpg")} style={{ width: size, height: size, display: "block", borderRadius: size * 0.22, ...style }} />
 );
 
 /** Persistent HUD: "///" label, section, and a block progress bar for the whole piece. */
@@ -186,3 +187,57 @@ export const FontFaces: React.FC = () => (
     @font-face { font-family: 'Sometype'; src: url('${staticFile("fonts/SometypeMono-var.woff2")}') format('woff2'); font-weight: 400 700; }
   `}</style>
 );
+
+/**
+ * A keyword (not a caption): one or two words, big, on screen only while that idea is spoken.
+ * Enters from the left / right or zooms; leaves the opposite way.
+ */
+export const Key: React.FC<{
+  text: React.ReactNode;
+  t0: number;
+  t1: number;
+  x?: number;
+  y: number;
+  w?: number;
+  align?: "left" | "center" | "right";
+  size?: number;
+  mode?: "left" | "right" | "zoom" | "up";
+  color?: string;
+}> = ({ text, t0, t1, x = 0, y, w = 1920, align = "center", size = 140, mode = "zoom", color = C.white }) => {
+  const f = useCurrentFrame();
+  const t = f / 60;
+  if (t < t0 - 0.1 || t > t1 + 0.4) return null;
+  const k = p(f, t0 - 0.04, 0.42, E.snap);
+  const o = p(f, t1, 0.28, E.exit);
+  const dx = mode === "left" ? -1 : mode === "right" ? 1 : 0;
+  const tr =
+    mode === "zoom"
+      ? `scale(${(1 + 0.3 * (1 - k)) * (1 - 0.08 * o)})`
+      : mode === "up"
+      ? `translateY(${(1 - k) * 60 - o * 40}px)`
+      : `translateX(${dx * (1 - k) * 220 - dx * o * 160}px)`;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: x,
+        top: y,
+        width: w,
+        textAlign: align,
+        fontFamily: F.sans,
+        fontVariationSettings: "'opsz' 32",
+        fontWeight: 600,
+        fontSize: size,
+        letterSpacing: "-0.05em",
+        lineHeight: 1,
+        color,
+        opacity: Math.min(1, k * 1.8) * (1 - o),
+        transform: tr,
+        transformOrigin: align === "left" ? "0% 50%" : align === "right" ? "100% 50%" : "50% 50%",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {text}
+    </div>
+  );
+};

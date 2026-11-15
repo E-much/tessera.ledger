@@ -14,13 +14,17 @@ export const C = {
   mute: "#9A9A9A",
   dim: "#6B6B6B",
   orange: "#E87C12", // "Rift Orange" (brand kit)
-  orangeHi: "#FF8F28", // --color-two / accent text on site
+  orangeHi: "#FFD9A8", // accent text — warm glow tint, reads on the orange gradient
   glow: "#FFE0B0", // "Warm Glow" (brand kit)
   green: "#22C55E", // best-route row on the widget
   red: "#EF4444", // losing rows / failures on the widget
   pillBlue: "#2E40B7", // token selector fill
   pillBlueBorder: "#627EEA",
 };
+
+// Orange → black gradient used for the whole piece (Rift Orange glowing up from below)
+export const BG =
+  "radial-gradient(130% 95% at 50% 118%, #E87C12 0%, #B9600E 22%, #5A2A07 48%, #1A0C04 72%, #080503 100%)";
 
 export const F = {
   // Neue Haas Display (site headline face) is commercial; Inter Display (opsz 32) is the closest
