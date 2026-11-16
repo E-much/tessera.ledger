@@ -1,0 +1,307 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Tessera Film Renderer</title>
+<style>
+@font-face{font-family:"JBM";src:url(fonts/JetBrainsMono.woff2) format("woff2");font-weight:100 800}
+html,body{margin:0;background:#000}
+canvas{display:block}
+</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+const W=1920,H=1080,cv=document.getElementById('c'),x=cv.getContext('2d');
+const C={bg:'#050705',panel:'#0a0d0a',card:'#0f140f',lime:'#c3ea6e',ink:'#f0f5ec',mute:'#8b9986',red:'#f26a57',line:'rgba(195,234,110,.16)',lineS:'rgba(195,234,110,.4)',paper:'#e8ebe4',graphite:'#1b1f1b'};
+const MONO='"JBM", monospace', SANS='"Inter Display","Inter",sans-serif', SANSB='"Inter",sans-serif';
+const LOGO=new Path2D("M16 2 4 9v14l12 7 12-7V9L16 2zm0 2.4 9.2 5.3L16 15.1 6.8 9.7 16 4.4zM6 11.2l9 5.2v11.3L6 22.5V11.2zm11 16.5V16.4l9-5.2v11.3l-9 5.2z");
+let TL=[];
+// ---------- helpers ----------
+const cl=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-cl(t),3);
+const eio=t=>{t=cl(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const rng=s=>()=>((s=Math.imul(s^s>>>15,1|s)+0x6D2B79F5|0,(s^s>>>14)>>>0)/4294967296);
+function noise1(seed,t){const i=Math.floor(t),f=t-i,a=rng(seed+i*7919)(),b=rng(seed+(i+1)*7919)();const u=f*f*(3-2*f);return a*(1-u)+b*u}
+function font(sz,fam=MONO,w=400){x.font=`${w} ${sz}px ${fam}`}
+function txt(s,X,Y,{sz=40,fam=MONO,w=400,col=C.ink,al='left',ls=0,a=1,base='alphabetic'}={}){font(sz,fam,w);x.letterSpacing=ls+'px';x.textAlign=al;x.textBaseline=base;x.globalAlpha=a;x.fillStyle=col;x.fillText(s,X,Y);x.globalAlpha=1;x.letterSpacing='0px';}
+function tw(s,lt,cps=22){return s.slice(0,Math.max(0,Math.floor(lt*cps)))}
+function cursorOn(lt){return Math.floor(lt*2.2)%2===0}
+function measure(s,sz,fam=MONO,w=400,ls=0){font(sz,fam,w);x.letterSpacing=ls+'px';const m=x.measureText(s).width;x.letterSpacing='0px';return m}
+function rect(X,Y,w,h,col,a=1){x.globalAlpha=a;x.fillStyle=col;x.fillRect(X,Y,w,h);x.globalAlpha=1}
+function rrect(X,Y,w,h,r,fill,stroke,a=1,lw=2){x.globalAlpha=a;x.beginPath();x.roundRect(X,Y,w,h,r);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=lw;x.stroke()}x.globalAlpha=1}
+function line(x1,y1,x2,y2,col,lw=2,a=1){x.globalAlpha=a;x.strokeStyle=col;x.lineWidth=lw;x.beginPath();x.moveTo(x1,y1);x.lineTo(x2,y2);x.stroke();x.globalAlpha=1}
+function logo(cx,cy,size,col=C.lime,a=1){x.save();x.globalAlpha=a;x.translate(cx-size/2,cy-size/2);x.scale(size/32,size/32);x.fillStyle=col;x.fill(LOGO);x.restore()}
+function bgGrid(lt,a=.06,col=C.lime){x.save();x.globalAlpha=a;x.strokeStyle=col;x.lineWidth=1;const s=80,o=(lt*6)%s;for(let i=-1;i<W/s+1;i++){x.beginPath();x.moveTo(i*s+o,0);x.lineTo(i*s+o,H);x.stroke()}for(let j=0;j<H/s+1;j++){x.beginPath();x.moveTo(0,j*s);x.lineTo(W,j*s);x.stroke()}x.restore()}
+function fmt$(n,d=2){return '$'+n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d})}
+function hud(T,sc,label){ // small corner telemetry
+  const a=.55;txt('TESSERA // '+label,64,70,{sz:15,col:C.mute,ls:3,a});
+  const m=Math.floor(T/60),s=(T%60).toFixed(2).padStart(5,'0');
+  txt(`TC ${String(m).padStart(2,'0')}:${s}`,W-64,70,{sz:15,col:C.mute,al:'right',ls:2,a});
+  txt('PRIVATE MARKETS. PUBLIC LEDGER.',64,H-56,{sz:13,col:C.mute,ls:4,a:.35});
+  txt('SOLANA // TOKEN-2022 // CHAINLINK POR',W-64,H-56,{sz:13,col:C.mute,ls:4,al:'right',a:.35});
+}
+// ---------- grain / vignette ----------
+const grain=document.createElement('canvas');grain.width=grain.height=512;{const g=grain.getContext('2d'),d=g.createImageData(512,512),r=rng(99);for(let i=0;i<d.data.length;i+=4){const v=r()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}g.putImageData(d,0,0)}
+function post(T,light){
+  const r=rng(Math.floor(T*30)+1);x.save();x.globalAlpha=light?.035:.05;x.globalCompositeOperation='overlay';
+  const ox=-r()*512,oy=-r()*512;for(let i=ox;i<W;i+=512)for(let j=oy;j<H;j+=512)x.drawImage(grain,i,j);x.restore();
+  const g=x.createRadialGradient(W/2,H/2,H*.35,W/2,H/2,H*1.05);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,light?'rgba(0,0,0,.28)':'rgba(0,0,0,.6)');x.fillStyle=g;x.fillRect(0,0,W,H);
+}
+// ---------- scenes ----------
+const S={};
+S.open=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.bg);bgGrid(lt,.04);
+  x.save();x.translate(W/2,H/2);const z=1+lt*.012;x.scale(z,z);x.rotate(-0.06);x.transform(1,0,-0.12,1,0,0);
+  const s=tw(p.text,lt-.25,16);let sz=96;while(measure(p.text,sz,MONO,300,8)>W*.82)sz-=4;
+  const tw_=measure(p.text,sz,MONO,300,8);
+  txt(s,-tw_/2,sz*.35,{sz,w:300,ls:8,col:C.ink});
+  if(s.length<p.text.length||cursorOn(lt)){const cw=measure(s,sz,MONO,300,8);rect(-tw_/2+cw+6,-sz*.45,sz*.5,sz*.85,C.lime,.9)}
+  x.restore();
+  // light leak sweep
+  const lx=lerp(-600,W+600,eio(lt/d));const g=x.createLinearGradient(lx-400,0,lx+400,0);g.addColorStop(0,'rgba(195,234,110,0)');g.addColorStop(.5,'rgba(195,234,110,.05)');g.addColorStop(1,'rgba(195,234,110,0)');x.fillStyle=g;x.fillRect(0,0,W,H);
+  hud(T,'',p.tag||'TRANSMISSION');
+};
+S.lines=(lt,d,p,T)=>{
+  rect(0,0,W,H,'#000');
+  const n=46;x.save();x.lineWidth=3;
+  for(let i=0;i<n;i++){const k=i/n,ph=lt*.35+k*1.4;x.globalAlpha=.18+.7*Math.pow(k,1.5);x.strokeStyle=k>.85?C.lime:C.ink;
+    x.beginPath();const y0=H*1.1,x0=W*.45+i*26;x.moveTo(x0,y0);
+    x.bezierCurveTo(x0+120,H*.6-Math.sin(ph)*40,W*.75+i*14,H*.2+i*6,W+80+i*30,-60+i*4+Math.cos(ph)*30);x.stroke()}
+  x.restore();
+  const g=x.createLinearGradient(0,0,W*.7,0);g.addColorStop(0,'rgba(0,0,0,1)');g.addColorStop(.6,'rgba(0,0,0,.85)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const words=p.text.split(' ');let X=150;const Y=H/2+30;
+  words.forEach((w,i)=>{const a=eo((lt-.4-i*.28)/.6);txt(w,X,Y+(1-a)*30,{sz:92,fam:SANS,w:300,col:C.ink,a,ls:-2});X+=measure(w+' ',92,SANS,300,-2)});
+  rect(150,Y+50,lerp(0,420,eo((lt-1)/1.2)),3,C.lime);
+  hud(T,'','SIGNAL');
+};
+function tapeGrid(lt,a){const r=rng(7),rows=26,cols=14,cw=W/cols,ch=H/rows;
+  for(let j=0;j<rows;j++){const sp=(j%2?1:-1)*(30+r()*40),off=(lt*sp)%cw;
+    for(let i=-1;i<=cols;i++){const s=rng(j*131+((i-Math.floor(lt*sp/cw))*977))();const up=s>.45;
+      const X=i*cw+off,Y=j*ch;rect(X+1,Y+1,cw-2,ch-2,up?'#1f3a14':'#4a1712',a*(0.6+s*.4));
+      txt((up?'+':'-')+(s*4).toFixed(2)+'%',X+10,Y+ch*.68,{sz:15,col:up?C.lime:C.red,a:a*.7})}}}
+S.tape=(lt,d,p,T)=>{
+  rect(0,0,W,H,'#000');x.save();x.translate(W/2,H/2);x.rotate(-.04);x.scale(1.1+lt*.01,1.1+lt*.01);x.translate(-W/2,-H/2);tapeGrid(lt,.85);x.restore();
+  const bh=220,a=eo(lt/.6);rect(0,H/2-bh/2,W,bh,'#000',.88*a);line(0,H/2-bh/2,W,H/2-bh/2,C.lime,1,.5*a);line(0,H/2+bh/2,W,H/2+bh/2,C.lime,1,.5*a);
+  const s=tw(p.text,lt-.5,18);const tw_=measure(p.text,74,MONO,400,10);txt(s,W/2-tw_/2,H/2+26,{sz:74,ls:10});
+  if(cursorOn(lt))rect(W/2-tw_/2+measure(s,74,MONO,400,10)+6,H/2-32,36,64,C.lime);
+  hud(T,'','MARKET TAPE');
+};
+S.title=(lt,d,p,T)=>{
+  rect(0,0,W,H,'#000');
+  const a=eo((lt-.2)/1.2);logo(W/2,H/2-150,110,C.lime,a);
+  txt(p.kicker,W/2,H/2-30,{sz:22,col:C.lime,al:'center',ls:22,a});
+  const b=eo((lt-1.1)/1.2);txt(p.text,W/2,H/2+70+(1-b)*20,{sz:70,fam:SANS,w:600,al:'center',ls:-1,a:b});
+  rect(W/2-lerp(0,300,eio((lt-1.4)/1.5)),H/2+120,lerp(0,600,eio((lt-1.4)/1.5)),2,C.lime,.7);
+  if(lt>d-1)rect(0,0,W,H,'#000',(lt-(d-1)));
+};
+S.act=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.bg);bgGrid(lt,.03);
+  const roman={I:1,II:2,III:3,IV:4,V:5,VI:6,VII:7}[p.num];
+  const a=eo(lt/.6);txt(`CHAPTER ${String(roman).padStart(2,'0')} / 07`,160,H/2-90,{sz:20,col:C.lime,ls:10,a});
+  const lw=lerp(0,W-320,eio((lt-.2)/1.4));rect(160,H/2-60,lw,2,C.lime,.6);
+  rect(160+lw-8,H/2-64,10,10,C.lime);
+  const s=tw(p.title,lt-.5,20);txt(s,160,H/2+60,{sz:110,fam:SANS,w:700,ls:-3});
+  for(let i=0;i<7;i++)rect(160+i*34,H/2+140,24,6,i<roman?C.lime:'#223022',a);
+  hud(T,'','CHAPTER INDEX');
+};
+S.chart=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.bg);bgGrid(lt,.03);
+  txt(p.label,140,190,{sz:20,col:C.lime,ls:8});txt(p.note,W-140,190,{sz:16,col:C.mute,ls:6,al:'right'});
+  const yrs=[];for(let y=1998;y<=2024;y+=2)yrs.push(y);
+  const base=H-200,top=300,X0=140,bw=(W-280)/yrs.length;
+  [0,4,8,12].forEach(v=>{const y=base-(v/14)*(base-top);line(X0,y,W-140,y,C.line,1);txt(v+' YRS',X0-16,y+6,{sz:14,col:C.mute,al:'right'})});
+  yrs.forEach((yr,i)=>{const v=4+8.5*Math.pow(i/(yrs.length-1),1.2)+(rng(i+3)()-.5)*1.4;const g=eo((lt-.3-i*.12)/.9);const h=(v/14)*(base-top)*g;
+    rect(X0+i*bw+bw*.18,base-h,bw*.64,h,i>yrs.length-4?C.lime:'#2b3a22');txt(String(yr),X0+i*bw+bw/2,base+36,{sz:15,col:C.mute,al:'center'})});
+  const a=eo((lt-2.6)/.8);rrect(W-560,320,380,90,8,'#000',C.lime,a);txt('A DECADE. OR MORE.',W-370,375,{sz:26,al:'center',col:C.lime,a,ls:3});
+  hud(T,'','DURATION');
+};
+S.chart2=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.bg);bgGrid(lt,.03);
+  txt('PRIVATE VALUE CREATION // OUT OF PUBLIC VIEW',140,190,{sz:20,col:C.lime,ls:6});
+  const lx=W-360;line(lx,240,lx,H-200,C.mute,2,.5);txt('PUBLIC LISTING',lx,H-160,{sz:16,col:C.mute,al:'center',ls:4});
+  p.items.forEach((it,i)=>{const y=290+i*120,a=eo((lt-.4-i*.9)/.6);
+    txt(it,140,y+18,{sz:30,a,ls:3});const g=eio((lt-.6-i*.9)/3.5);const w=lerp(0,lx-560-i*40,g);
+    rect(560,y-14,w,40,C.lime,.18*a);rect(560,y-14,w,40,'transparent');line(560,y+26,560+w,y+26,C.lime,2,a);
+    rect(560+w-6,y-14,6,40,C.lime,a);txt('PRIVATE',560+w-14,y+12,{sz:14,col:C.lime,al:'right',ls:4,a:a*.9})});
+  hud(T,'','SECTORS');
+};
+S.bigstat=(lt,d,p,T)=>{
+  rect(0,0,W,H,'#000');
+  const v=Math.round(p.value*eo((lt-.3)/2.2));const s=p.prefix+v.toLocaleString('en-US');
+  txt(s,W/2,H/2+60,{sz:260,w:300,al:'center',ls:-6,col:C.ink});
+  txt('+',W/2+measure(s,260,MONO,300,-6)/2+30,H/2-40,{sz:90,col:C.red,a:eo((lt-2.5)/.4)});
+  rect(W/2-600,H/2+130,1200,2,C.line);txt(p.label,W/2,H/2+190,{sz:22,col:C.mute,al:'center',ls:8,a:eo((lt-1)/.8)});
+  hud(T,'','BARRIER 01');
+};
+S.gate=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.bg);
+  // padlock
+  const la=eo(lt/.8),cx=W-420,cy=H/2;x.save();x.globalAlpha=la;x.strokeStyle=C.red;x.lineWidth=22;x.beginPath();x.arc(cx,cy-60,90,Math.PI,0);x.lineTo(cx+90,cy);x.moveTo(cx-90,cy-60);x.lineTo(cx-90,cy);x.stroke();
+  x.fillStyle='#1a0d0b';x.strokeStyle=C.red;x.lineWidth=4;x.beginPath();x.roundRect(cx-150,cy-10,300,240,18);x.fill();x.stroke();x.fillStyle=C.red;x.beginPath();x.arc(cx,cy+90,22,0,7);x.fill();x.fillRect(cx-8,cy+90,16,60);x.restore();
+  p.rows.forEach((r,i)=>{const y=280+i*120,a=eo((lt-.3-i*.75)/.5);rrect(140,y-58,960,90,10,C.card,C.line,a);
+    txt(String(i+1).padStart(2,'0'),180,y+2,{sz:22,col:C.red,a});txt(r,250,y+2,{sz:34,a,ls:2});
+    const sw=eio((lt-.9-i*.75)/.5);line(240,y-10,240+lerp(0,820,sw),y-10,C.red,3,a)});
+  hud(T,'','RESTRICTIONS');
+};
+S.radial=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.paper);
+  const n=220,cx=W/2,cy=H/2;x.save();
+  for(let i=0;i<n;i++){const ang=i/n*Math.PI*2+lt*.03,r0=210+Math.sin(i*.7+lt*.8)*16,r1=lerp(r0,r0+260+120*noise1(i,lt*.5+i*.1),eo((lt-.1)/1.6));
+    x.globalAlpha=.25+.35*noise1(i+50,lt*.3);x.strokeStyle='#2a2e2a';x.lineWidth=1.4;x.beginPath();x.moveTo(cx+Math.cos(ang)*r0,cy+Math.sin(ang)*r0);x.lineTo(cx+Math.cos(ang)*r1,cy+Math.sin(ang)*r1);x.stroke()}
+  x.restore();
+  const a=eo((lt-.5)/.8),b=eo((lt-1.3)/.8);const wa=measure(p.a+' ',58,SANS,300),wb=measure(p.b,58,SANS,600);const X=cx-(wa+wb)/2;
+  txt(p.a+' ',X,cy+20,{sz:58,fam:SANS,w:300,col:'#7b7f7a',a});txt(p.b,X+wa,cy+20,{sz:58,fam:SANS,w:600,col:'#111',a:b});
+  logo(90,90,34,'#111',.85);txt('TESSERA',W/2,H-60,{sz:13,col:'#555',al:'center',ls:6});
+};
+S.logo=(lt,d,p,T)=>{
+  rect(0,0,W,H,'#000');
+  const g=x.createRadialGradient(W/2,H/2-60,10,W/2,H/2-60,600);g.addColorStop(0,'rgba(195,234,110,.13)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.globalAlpha=eo(lt/2);x.fillRect(0,0,W,H);x.globalAlpha=1;
+  const s=eo((lt-.1)/1.3);x.save();x.translate(W/2,H/2-120);x.scale(lerp(.7,1,s),lerp(.7,1,s));x.rotate(lerp(-.5,0,s));logo(0,0,220,C.lime,s);x.restore();
+  const b=eo((lt-1)/1);txt('TESSERA',W/2+measure('T',120,SANS,800,30)*0+15,H/2+140,{sz:120,fam:SANS,w:800,al:'center',ls:30,a:b});
+  const c=eo((lt-1.8)/1);txt('PRE-IPO EXPOSURE // REBUILT ON-CHAIN',W/2,H/2+220,{sz:22,col:C.lime,al:'center',ls:10,a:c});
+};
+const STEPS=[
+ ['PHASE 01 // INFLOW','Lending Deployment','USDC','Stablecoin liquidity is deployed into a dedicated Cayman Islands Segregated Portfolio Company (SPC).'],
+ ['PHASE 02 // RING-FENCING','Asset Ring-Fencing','SPC','Securities held segregated per portfolio. Signing authority in multi-party Fireblocks vaults.'],
+ ['PHASE 03 // TOKEN-2022','Supply Minting','SOL','T-Tokens mint on Solana. Chainlink Proof of Reserve verifies supply against custodian assets.'],
+ ['PHASE 04 // REDEMPTION','Event Execution','EXIT','On an authorized exit (IPO or M&A), loan participation settles and redemption opens.']];
+function wrap(s,maxW,sz,fam,w){font(sz,fam,w);const out=[];let cur='';s.split(' ').forEach(t=>{const tt=cur?cur+' '+t:t;if(x.measureText(tt).width>maxW){out.push(cur);cur=t}else cur=tt});if(cur)out.push(cur);return out}
+S.flow=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.bg);bgGrid(lt,.03);
+  txt('PROTOCOL MECHANICS & LIFECYCLE',140,170,{sz:20,col:C.lime,ls:8});
+  const n=4,cw=330,gap=(W-280-cw*n)/(n-1),y=260,ch=300;
+  for(let i=0;i<n;i++){const X=140+i*(cw+gap),act=i===p.step,done=i<p.step,a=act?1:done?.75:.3;
+    rrect(X,y,cw,ch,16,act?'#121b0f':C.card,act?C.lime:C.line,1,act?3:1.5);
+    txt(STEPS[i][0],X+28,y+50,{sz:15,col:act||done?C.lime:C.mute,ls:3,a});
+    // icon
+    const ix=X+cw/2,iy=y+150;x.globalAlpha=a;x.strokeStyle=act?C.lime:C.mute;x.lineWidth=2;x.beginPath();x.arc(ix,iy,52,0,7);x.stroke();
+    if(act){x.globalAlpha=.5;x.beginPath();x.arc(ix,iy,52+((lt*40)%40),0,7);x.globalAlpha=cl(1-((lt*40)%40)/40)*.6;x.stroke()}x.globalAlpha=1;
+    txt(STEPS[i][2],ix,iy+9,{sz:24,w:700,al:'center',col:act?C.lime:C.ink,a});
+    txt(STEPS[i][1],X+28,y+ch-40,{sz:28,fam:SANS,w:600,a});
+    if(done)txt('✓',X+cw-36,y+52,{sz:22,col:C.lime});
+    if(i<n-1){const x1=X+cw+8,x2=X+cw+gap-8,ly=y+150;line(x1,ly,x2,ly,i<p.step?C.lime:C.line,2);
+      if(i<p.step||(i===p.step)){for(let k=0;k<3;k++){const f=((lt*.6+k/3)%1);rect(lerp(x1,x2,f)-4,ly-4,8,8,C.lime,i===p.step?.9:.4)}}}}
+  const a=eo((lt-.2)/.7);const st=STEPS[p.step];
+  txt(st[1],140,730+(1-a)*20,{sz:76,fam:SANS,w:700,ls:-2,a});
+  wrap(st[3],1300,32,SANS,400).forEach((l,i)=>txt(l,140,810+i*46,{sz:32,fam:SANS,col:C.mute,a:eo((lt-.6-i*.2)/.7)}));
+  hud(T,'','ARCHITECTURE');
+};
+S.tokens=(lt,d,p,T)=>{
+  rect(0,0,W,H,'#000');bgGrid(lt,.03);
+  txt('T-TOKENS // LOAN PARTICIPATION RIGHTS',W/2,200,{sz:22,col:C.lime,al:'center',ls:8,a:eo(lt/.6)});
+  p.tokens.forEach((t,i)=>{const a=eo((lt-.5-i*.45)/.7),cw=470,X=W/2-(cw*3+60)/2+i*(cw+30),y=300+(1-a)*60;
+    rrect(X,y,cw,440,18,C.card,C.lineS,a);logo(X+70,y+80,56,C.lime,a);txt(t[1],X+cw-34,y+90,{sz:14,col:C.mute,al:'right',ls:3,a});
+    txt(t[0],X+40,y+260,{sz:66,fam:SANS,w:700,ls:-2,a});rect(X+40,y+300,cw-80,1,C.line,a);
+    txt('TOKEN-2022 · SOLANA',X+40,y+350,{sz:16,col:C.lime,ls:3,a});txt('PoR-VERIFIED RESERVE',X+40,y+390,{sz:16,col:C.mute,ls:3,a})});
+  txt('Not direct common equity. Exposure via loan participation.',W/2,H-130,{sz:24,fam:SANS,col:C.mute,al:'center',a:eo((lt-2.5)/.8)});
+  hud(T,'','INSTRUMENT');
+};
+S.counter=(lt,d,p,T)=>{
+  rect(0,0,W,H,'#0b0c0b');
+  // device
+  const z=1+lt*.008;x.save();x.translate(W/2,H/2);x.scale(z,z);x.translate(-W/2,-H/2);
+  const dx=360,dy=170,dw=1200,dh=720;const g=x.createLinearGradient(0,dy,0,dy+dh);g.addColorStop(0,'#2a2c2a');g.addColorStop(1,'#121312');rrect(dx,dy,dw,dh,40,g,'#3a3d3a',1,2);
+  for(let i=0;i<22;i++)rect(dx+120+i*44,dy-26,26,30,'#1d1f1d');
+  rrect(dx+60,dy+60,dw-120,dh-150,24,'#050605','#000',1,6);
+  logo(dx+120,dy+120,30,C.ink,.9);rrect(dx+dw-300,dy+98,190,44,22,'#111511',C.line);x.fillStyle=C.lime;x.beginPath();x.arc(dx+dw-272,dy+120,7,0,7);x.fill();
+  txt('MAINNET',dx+dw-250,dy+127,{sz:18,ls:3});
+  const n=Math.floor(18402233+lt*48211.7+Math.sin(lt*3)*800);txt(n.toLocaleString('en-US'),dx+130,dy+370,{sz:96,w:700});
+  txt('RESERVE DATA POINTS PUBLISHED',dx+dw-130,dy+370,{sz:18,col:C.mute,al:'right',ls:3});
+  const s=Math.floor(lt);txt(`00:${String(s).padStart(2,'0')}`,dx+130,dy+490,{sz:96,w:700});txt('TIME ELAPSED',dx+dw-130,dy+490,{sz:18,col:C.mute,al:'right',ls:3});
+  logo(W/2,dy+dh-40,34,'#060606',1);x.restore();
+  txt('SIMULATED FEED // FOR ILLUSTRATION',W/2,H-50,{sz:14,col:C.mute,al:'center',ls:5,a:.6});
+};
+S.desk=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.bg);bgGrid(lt,.03);
+  txt('SECONDARY POOLS vs. PROOF-OF-RESERVE NAV',140,170,{sz:20,col:C.lime,ls:6});txt('ILLUSTRATIVE DATA',W-140,170,{sz:15,col:C.mute,al:'right',ls:5});
+  const X0=140,X1=W-560,Y0=240,Y1=860,nav=1.12,lo=.9,hi=1.34,yv=v=>lerp(Y1,Y0,(v-lo)/(hi-lo));
+  rrect(X0,Y0-20,X1-X0+40,Y1-Y0+60,14,C.panel,C.line);
+  const N=240,shown=Math.floor(N*cl(eo((lt-.2)/3)));const pts=[];let v=1.02;const r=rng(42);for(let i=0;i<N;i++){v+=(r()-.48)*.018+(nav+.04-v)*.02;pts.push(v)}
+  const ny=yv(nav);x.setLineDash([10,8]);line(X0+20,ny,X1,ny,C.ink,2,.7);x.setLineDash([]);txt('PoR NAV  '+fmt$(nav),X0+30,ny-14,{sz:16,col:C.ink,ls:2});
+  x.strokeStyle=C.lime;x.lineWidth=3;x.beginPath();pts.slice(0,shown).forEach((q,i)=>{const px=lerp(X0+20,X1,i/(N-1)),py=yv(q);i?x.lineTo(px,py):x.moveTo(px,py)});x.stroke();
+  if(shown>1){const q=pts[shown-1],px=lerp(X0+20,X1,(shown-1)/(N-1));x.fillStyle=C.lime;x.beginPath();x.arc(px,yv(q),8,0,7);x.fill();
+    const spread=(q/nav-1)*100;const sx=W-480;
+    rrect(sx,240,340,620,14,C.card,C.line);txt('tSpaceX',sx+30,300,{sz:34,fam:SANS,w:700});
+    txt('DEX POOL',sx+30,370,{sz:14,col:C.mute,ls:3});txt(fmt$(q,4),sx+30,415,{sz:38,w:700});
+    txt('PoR NAV',sx+30,480,{sz:14,col:C.mute,ls:3});txt(fmt$(nav,4),sx+30,525,{sz:38,w:700});
+    txt('SPREAD',sx+30,590,{sz:14,col:C.mute,ls:3});txt((spread>=0?'+':'')+spread.toFixed(2)+'%',sx+30,640,{sz:38,w:700,col:spread>=0?C.lime:C.red});
+    rrect(sx+30,720,280,56,10,C.lime);txt('METEORA POOL ↗',sx+170,756,{sz:18,w:700,col:'#050705',al:'center'})}
+  hud(T,'','ARBITRAGE DESK');
+};
+S.calc=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.bg);bgGrid(lt,.03);
+  txt('PRE-IPO LIQUIDATION & EXIT SIMULATOR',140,170,{sz:20,col:C.lime,ls:6});txt('HYPOTHETICAL // NOT A FORECAST',W-140,170,{sz:15,col:C.mute,al:'right',ls:5});
+  const tok=2500,entry=1,exit=lerp(1,2.8,eio((lt-.8)/4));
+  rrect(140,230,1640,680,18,C.card,C.line);
+  const L=[['TOKEN BALANCE','2,500'],['ENTRY PRICE (USDC)','$1.00'],['PROJECTED EXIT PRICE',fmt$(exit)]];
+  L.forEach((l,i)=>{const y=310+i*170;txt(l[0],200,y,{sz:15,col:C.mute,ls:4});rrect(200,y+20,760,76,10,'#050705',i===2?C.lime:C.line);txt(l[1],230,y+72,{sz:34})});
+  const sy=310+2*170+130;rect(200,sy,760,4,'#223022');rect(200,sy,760*(exit-.5)/9.5,4,C.lime);x.fillStyle=C.lime;x.beginPath();x.arc(200+760*(exit-.5)/9.5,sy+2,14,0,7);x.fill();
+  const cost=tok*entry,gross=tok*exit,fee=gross*.002,net=gross-fee-cost;
+  rrect(1040,280,680,580,14,'#050705',C.line);
+  [['Deployed Capital',fmt$(cost),C.ink],['Gross Realization',fmt$(gross),C.ink],['Transfer Fee (20 bps)','-'+fmt$(fee),C.red],['Return Multiple',(gross/cost).toFixed(2)+'x',C.ink]].forEach((r,i)=>{const y=370+i*90;
+    txt(r[0],1080,y,{sz:22,col:C.mute});txt(r[1],1680,y,{sz:28,w:700,al:'right',col:r[2]});x.setLineDash([4,6]);line(1080,y+30,1680,y+30,C.line,1);x.setLineDash([])});
+  txt('Net Projected Gain',1080,790,{sz:24,col:C.mute});txt(fmt$(net),1680,795,{sz:52,w:700,al:'right',col:C.lime});
+  hud(T,'','EXIT SIMULATOR');
+};
+S.addresses=(lt,d,p,T)=>{
+  rect(0,0,W,H,'#000');bgGrid(lt,.03);
+  txt('ON-CHAIN PROGRAM & AUTHORITY DIRECTORY',W/2,220,{sz:22,col:C.lime,al:'center',ls:8});
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz123456789';
+  p.rows.forEach((r,i)=>{const y=400+i*170,a=eo((lt-.3-i*.5)/.5);rrect(200,y-80,W-400,130,14,C.card,C.line,a);
+    txt(r[0],250,y,{sz:36,fam:SANS,w:700,a});txt('MINT // TOKEN-2022',250,y+34,{sz:14,col:C.mute,ls:3,a});
+    const k=Math.floor(cl((lt-.6-i*.5)/1.6)*r[1].length);const rr=rng(Math.floor(lt*20)+i);
+    const s=r[1].slice(0,k)+Array.from({length:r[1].length-k},()=>chars[Math.floor(rr()*chars.length)]).join('');
+    txt(s.slice(0,k),620,y+12,{sz:32,col:C.ink,a});txt(s.slice(k),620+measure(s.slice(0,k),32),y+12,{sz:32,col:C.lime,a:a*.35});
+    txt('SOLSCAN ↗',W-250,y+12,{sz:18,col:C.lime,al:'right',ls:3,a:a*(k===r[1].length?1:.3)})});
+  hud(T,'','VERIFICATION KEYS');
+};
+S.matrix=(lt,d,p,T)=>{
+  rect(0,0,W,H,C.bg);bgGrid(lt,.03);
+  const X=[140,560,1180],Y0=230,rh=118;
+  rrect(120,Y0-60,W-240,90+p.rows.length*rh,14,C.panel,C.line);
+  [['PARAMETER',C.lime],['LEGACY PRIVATE MARKETS',C.mute],['TESSERA T-TOKENS',C.lime]].forEach((h,i)=>txt(h[0],X[i]+20,Y0,{sz:16,col:h[1],ls:5}));
+  line(120,Y0+30,W-120,Y0+30,C.line,1);
+  const per=(d-3)/p.rows.length;
+  p.rows.forEach((r,i)=>{const t0=.8+i*per*.82,y=Y0+100+i*rh,a=eo((lt-t0)/.5),b=eo((lt-t0-per*.4)/.5);
+    txt(r[0],X[0]+20,y,{sz:20,w:700,ls:2,a});txt(r[1],X[1]+20,y,{sz:26,col:C.mute,a});
+    line(X[1]+20,y-9,X[1]+20+lerp(0,measure(r[1],26),eio((lt-t0-per*.3)/.4)),y-9,C.red,2,a*.8);
+    txt(r[2],X[2]+20,y,{sz:28,w:700,col:C.lime,a:b});if(b>0)rect(X[2],y-34,6,46,C.lime,b);
+    line(120,y+48,W-120,y+48,C.line,1,a)});
+  hud(T,'','STRUCTURE MATRIX');
+};
+S.monitor=(lt,d,p,T)=>{
+  const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#cfd2cd');g.addColorStop(1,'#8f938e');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const z=lerp(1.0,1.06,eio(lt/d));x.save();x.translate(W/2,H/2);x.scale(z,z);x.translate(-W/2,-H/2);
+  const mx=430,my=150,mw=1060,mh=760;
+  x.fillStyle='#3d403c';x.beginPath();x.moveTo(mx,my);x.lineTo(mx+mw,my);x.lineTo(mx+mw-60,my+60);x.lineTo(mx+60,my+60);x.fill();
+  x.fillStyle='#2b2d2a';x.beginPath();x.moveTo(mx,my);x.lineTo(mx+60,my+60);x.lineTo(mx+60,my+mh-60);x.lineTo(mx,my+mh);x.fill();
+  x.fillStyle='#9a9d98';x.beginPath();x.moveTo(mx,my+mh);x.lineTo(mx+60,my+mh-60);x.lineTo(mx+mw-60,my+mh-60);x.lineTo(mx+mw,my+mh);x.fill();
+  x.fillStyle='#5b5e5a';x.beginPath();x.moveTo(mx+mw,my);x.lineTo(mx+mw,my+mh);x.lineTo(mx+mw-60,my+mh-60);x.lineTo(mx+mw-60,my+60);x.fill();
+  rect(mx+60,my+60,mw-120,mh-120,'#eef0ec');
+  const s=tw(p.text,lt-1.0,14);txt(s,mx+110,my+mh/2+18,{sz:56,fam:SANS,w:400,col:'#111',ls:-1});
+  if(s.length<p.text.length||cursorOn(lt))rect(mx+110+measure(s,56,SANS,400,-1)+4,my+mh/2-28,30,58,'#111');
+  logo(mx+110,my+110,28,'#111',.9);
+  txt('/// LOADING',mx+100,my+mh-90,{sz:12,col:'#777',ls:3});txt('TESSERA. PRIVATE MARKETS. PUBLIC LEDGER.',mx+mw-100,my+mh-90,{sz:12,col:'#777',ls:3,al:'right'});
+  x.restore();
+  if(lt>d-1.2)rect(0,0,W,H,'#000',cl((lt-(d-1.2))/1.2));
+};
+S.disclaimer=(lt,d,p,T)=>{
+  rect(0,0,W,H,'#000');const a=eo(lt/1)*(lt>d-1?cl(d-lt):1);
+  logo(W/2,H/2-170,70,C.lime,a);txt('TESSERA',W/2,H/2-80,{sz:24,col:C.ink,al:'center',ls:16,a});
+  ['T-Tokens represent loan participation rights, not direct common equity shares.','Figures and feeds shown are illustrative or hypothetical. Not a forecast. Not financial advice.','Digital assets carry risk, including total loss. Availability may be restricted by jurisdiction.','Independent ambassador production.']
+   .forEach((l,i)=>txt(l,W/2,H/2+20+i*44,{sz:20,col:C.mute,al:'center',a}));
+};
+// ---------- master ----------
+function renderAt(T){
+  let i=TL.findIndex(s=>T<s.start+s.dur);if(i<0)i=TL.length-1;const sc=TL[i],lt=T-sc.start;
+  x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.globalCompositeOperation='source-over';
+  S[sc.scene](lt,sc.dur,sc.p||{},T);
+  const light=sc.scene==='radial'||sc.scene==='monitor';
+  post(T,light);
+  // cut transitions: quick flash-in and dip
+  const fi=cl(1-lt/.25),fo=cl(1-(sc.dur-lt)/.2);
+  if(i>0&&fi>0)rect(0,0,W,H,'#000',fi*.9);
+  if(i<TL.length-1&&fo>0)rect(0,0,W,H,'#000',fo*.9);
+  // global fade in
+  if(T<1)rect(0,0,W,H,'#000',1-T);
+}
+window.setTL=t=>{TL=t};window.renderAt=renderAt;
+window.frameJPEG=(T)=>{renderAt(T);return cv.toDataURL('image/jpeg',.93)};
+</script></body></html>

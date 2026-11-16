@@ -1,0 +1,402 @@
+[
+ {
+  "id": "actI",
+  "scene": "act",
+  "p": {
+   "num": "I",
+   "title": "THE CLOSED DOOR"
+  },
+  "min": 4.2,
+  "sfx": "tick"
+ },
+ {
+  "id": "c01",
+  "scene": "open",
+  "act": "I",
+  "vo": "For most of modern history, the biggest gains in a company's life happened behind a closed door.",
+  "p": {
+   "text": "BEHIND A CLOSED DOOR."
+  },
+  "lead": 1.6,
+  "hold": 1.8,
+  "sfx": "hit"
+ },
+ {
+  "id": "c02",
+  "scene": "lines",
+  "vo": "Before the bell. Before the ticker. Before the public ever got a seat at the table.",
+  "p": {
+   "text": "Before the bell."
+  },
+  "hold": 1.4
+ },
+ {
+  "id": "c03",
+  "scene": "tape",
+  "vo": "By the time a company finally lists, much of its growth story has already been written. And the people who wrote it were paid in full.",
+  "p": {
+   "text": "THE STORY IS ALREADY WRITTEN."
+  },
+  "hold": 1.6
+ },
+ {
+  "id": "c04",
+  "scene": "title",
+  "p": {
+   "kicker": "TESSERA",
+   "text": "PRIVATE MARKETS. PUBLIC LEDGER."
+  },
+  "min": 5.5,
+  "sfx": "hit"
+ },
+ {
+  "id": "actII",
+  "scene": "act",
+  "p": {
+   "num": "II",
+   "title": "THE TERMS"
+  },
+  "min": 4.2,
+  "sfx": "tick"
+ },
+ {
+  "id": "c05",
+  "scene": "chart",
+  "act": "II",
+  "vo": "Today, the world's most ambitious companies stay private longer than ever. A decade. Sometimes more.",
+  "p": {
+   "label": "YEARS PRIVATE BEFORE LISTING",
+   "note": "ILLUSTRATIVE"
+  },
+  "hold": 1.8
+ },
+ {
+  "id": "c06",
+  "scene": "chart2",
+  "vo": "Rocket companies. Frontier AI labs. Whole new kinds of markets. Built, scaled, and valued, almost entirely out of public view.",
+  "p": {
+   "items": [
+    "ORBITAL LAUNCH",
+    "FRONTIER AI",
+    "PREDICTION MARKETS",
+    "DEFENSE TECH",
+    "BIOTECH"
+   ]
+  },
+  "hold": 1.6
+ },
+ {
+  "id": "c06b",
+  "scene": "lines",
+  "vo": "Meanwhile, the value they create compounds, quietly, where most people simply can't reach.",
+  "p": {
+   "text": "Where most people can't reach."
+  },
+  "hold": 1.6
+ },
+ {
+  "id": "c07",
+  "scene": "bigstat",
+  "vo": "And getting access comes with conditions. Minimum tickets in the hundreds of thousands of dollars.",
+  "p": {
+   "value": 250000,
+   "prefix": "$",
+   "label": "TYPICAL MINIMUM TICKET // LEGACY SECONDARIES"
+  },
+  "hold": 1.6
+ },
+ {
+  "id": "c08",
+  "scene": "gate",
+  "vo": "Accredited investors only. Lockups that last for years. Settlement measured in months, not seconds.",
+  "p": {
+   "rows": [
+    "ACCREDITED / QIB ONLY",
+    "LOCKUP: UNTIL IPO",
+    "SETTLEMENT: 30\u201390 DAYS",
+    "ISSUER RIGHT OF FIRST REFUSAL",
+    "QUARTERLY PDF REPORTING"
+   ]
+  },
+  "hold": 1.6
+ },
+ {
+  "id": "c09",
+  "scene": "open",
+  "vo": "The door wasn't locked by accident. It was built that way.",
+  "p": {
+   "text": "IT WAS BUILT THAT WAY."
+  },
+  "hold": 2.0
+ },
+ {
+  "id": "actIII",
+  "scene": "act",
+  "p": {
+   "num": "III",
+   "title": "THE TURN"
+  },
+  "min": 4.2,
+  "sfx": "tick"
+ },
+ {
+  "id": "c10",
+  "scene": "radial",
+  "act": "III",
+  "vo": "So what happens when the door becomes a ledger?",
+  "p": {
+   "a": "The door becomes",
+   "b": "a ledger."
+  },
+  "hold": 2.2,
+  "sfx": "riser"
+ },
+ {
+  "id": "c11",
+  "scene": "logo",
+  "vo": "Tessera. Pre-IPO exposure, rebuilt on-chain.",
+  "p": {},
+  "hold": 2.4,
+  "sfx": "hit"
+ },
+ {
+  "id": "c12",
+  "scene": "open",
+  "vo": "Not a promise. A structure. Here is how it works.",
+  "p": {
+   "text": "NOT A PROMISE. A STRUCTURE."
+  },
+  "hold": 1.4
+ },
+ {
+  "id": "actIV",
+  "scene": "act",
+  "p": {
+   "num": "IV",
+   "title": "THE STRUCTURE"
+  },
+  "min": 4.2,
+  "sfx": "tick"
+ },
+ {
+  "id": "c13",
+  "scene": "flow",
+  "act": "IV",
+  "vo": "It starts with capital. Stablecoin liquidity, in U S D C, is deployed into a dedicated Cayman Islands segregated portfolio company.",
+  "p": {
+   "step": 0
+  },
+  "hold": 1.4,
+  "sfx": "tick"
+ },
+ {
+  "id": "c14",
+  "scene": "flow",
+  "vo": "Each portfolio is ring-fenced. Assets are held separately, series by series, with signing authority secured in multi-party Fireblocks vaults.",
+  "p": {
+   "step": 1
+  },
+  "hold": 1.4,
+  "sfx": "tick"
+ },
+ {
+  "id": "c15",
+  "scene": "flow",
+  "vo": "Then the tokens are minted on Solana, using the Token twenty twenty-two standard. Chainlink Proof of Reserve oracles verify that circulating supply matches what the custodian actually holds.",
+  "p": {
+   "step": 2
+  },
+  "hold": 1.4,
+  "sfx": "tick"
+ },
+ {
+  "id": "c16",
+  "scene": "flow",
+  "vo": "And when a liquidity event arrives, an IPO or an acquisition, the loan participation settles, and redemption opens.",
+  "p": {
+   "step": 3
+  },
+  "hold": 1.8,
+  "sfx": "tick"
+ },
+ {
+  "id": "c17",
+  "scene": "tokens",
+  "vo": "What you hold is a T-Token. Loan participation rights, linked to the companies defining the next decade.",
+  "p": {
+   "tokens": [
+    [
+     "tSpaceX",
+     "T-SPACEX SERIES"
+    ],
+    [
+     "tOpenAI",
+     "T-OPENAI SERIES"
+    ],
+    [
+     "tKalshi",
+     "T-KALSHI SERIES"
+    ]
+   ]
+  },
+  "hold": 2.0
+ },
+ {
+  "id": "actV",
+  "scene": "act",
+  "p": {
+   "num": "V",
+   "title": "THE PROOF"
+  },
+  "min": 4.2,
+  "sfx": "tick"
+ },
+ {
+  "id": "c18",
+  "scene": "counter",
+  "act": "V",
+  "vo": "And all of it is verifiable. Reserve data is published on-chain, continuously. Not in a quarterly PDF.",
+  "p": {},
+  "hold": 1.6
+ },
+ {
+  "id": "c19",
+  "scene": "desk",
+  "vo": "Secondary pools trade around the clock on Meteora and Jupiter. Anyone can see the price. Anyone can check the reserve.",
+  "p": {},
+  "hold": 1.8
+ },
+ {
+  "id": "c19b",
+  "scene": "calc",
+  "vo": "Every position can be modeled in the open. Entry, exit, and the twenty basis point transfer fee. All of it, on the table.",
+  "p": {},
+  "hold": 1.8
+ },
+ {
+  "id": "c20",
+  "scene": "addresses",
+  "vo": "Every mint address is public. Every transfer is on the record.",
+  "p": {
+   "rows": [
+    [
+     "tSpaceX",
+     "TSPXcLV76s6V2zDiZQ18kBfcbnjaE2ZzNT3ga2Pd99v"
+    ],
+    [
+     "tOpenAI",
+     "oPAiAikWTaFj9RYoRFD35ccfwhnMcB3ThgBZRHSkjTZ"
+    ],
+    [
+     "tKalshi",
+     "TKLSidmLVt3cqGaaodG8tyRzoANfQwoh67AccjmubeZ"
+    ]
+   ]
+  },
+  "hold": 2.0
+ },
+ {
+  "id": "actVI",
+  "scene": "act",
+  "p": {
+   "num": "VI",
+   "title": "THE DIFFERENCE"
+  },
+  "min": 4.2,
+  "sfx": "tick"
+ },
+ {
+  "id": "c21",
+  "scene": "open",
+  "act": "VI",
+  "vo": "So compare the old way, to the new one.",
+  "p": {
+   "text": "THE OLD WAY. THE NEW ONE."
+  },
+  "hold": 1.2,
+  "sfx": "hit"
+ },
+ {
+  "id": "c22",
+  "scene": "matrix",
+  "vo": "Six-figure minimums, or fractional units. Accredited only, or open secondary access. Years of lockup, or markets that never close. Ninety days to settle, or sub-second finality.",
+  "p": {
+   "rows": [
+    [
+     "MINIMUM TICKET",
+     "$100K \u2013 $250K+",
+     "$1.00 FRACTIONAL UNITS"
+    ],
+    [
+     "ACCESS",
+     "ACCREDITED / QIB ONLY",
+     "OPEN SECONDARY POOLS"
+    ],
+    [
+     "LIQUIDITY",
+     "MULTI-YEAR LOCKUP",
+     "24/7 ON METEORA / JUPITER"
+    ],
+    [
+     "SETTLEMENT",
+     "30 \u2013 90 BUSINESS DAYS",
+     "SUB-SECOND FINALITY"
+    ],
+    [
+     "RESERVES",
+     "QUARTERLY PDF",
+     "REAL-TIME CHAINLINK POR"
+    ]
+   ]
+  },
+  "hold": 2.4
+ },
+ {
+  "id": "actVII",
+  "scene": "act",
+  "p": {
+   "num": "VII",
+   "title": "THE OPEN DOOR"
+  },
+  "min": 4.2,
+  "sfx": "tick"
+ },
+ {
+  "id": "c23",
+  "scene": "open",
+  "act": "VII",
+  "vo": "This isn't the end of private markets.",
+  "p": {
+   "text": "NOT THE END OF PRIVATE MARKETS."
+  },
+  "hold": 1.4
+ },
+ {
+  "id": "c24",
+  "scene": "radial",
+  "vo": "It's the moment they finally meet the public.",
+  "p": {
+   "a": "Private markets,",
+   "b": "meet the public."
+  },
+  "hold": 2.2,
+  "sfx": "riser"
+ },
+ {
+  "id": "c25",
+  "scene": "monitor",
+  "vo": "Tessera. Private markets. Public ledger.",
+  "p": {
+   "text": "Private Markets. Public Ledger."
+  },
+  "lead": 0.8,
+  "hold": 4.0,
+  "sfx": "hit"
+ },
+ {
+  "id": "c26",
+  "scene": "disclaimer",
+  "p": {},
+  "min": 6.0
+ }
+]
