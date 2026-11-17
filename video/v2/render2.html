@@ -60,14 +60,29 @@ function cardEnd(lt,d){rect(0,0,W,H,'#000');
   txt('@Tessera_PE',W/2,H/2+240,{sz:26,f:MONO,w:500,col:INK,al:'center',ls:6,a:eo((l-1.6)/.5)*.8});
   if(lt>d-.6)rect(0,0,W,H,'#000',(lt-(d-.6))/.6)}
 function cardCredits(lt,d){rect(0,0,W,H,'#000');const a=eo(lt/.6)*cl((d-lt)/.8);
-  [['FEATURING','Dr. Chan Ahn, CEO, Tessera'],['FOOTAGE','Code and Concrete, hosted by Building'],['EDIT','Tessera community cut']].forEach((r,i)=>{
-    txt(r[0],W/2,H/2-120+i*110,{sz:16,f:MONO,col:LIME,al:'center',ls:8,a});txt(r[1],W/2,H/2-80+i*110,{sz:34,w:500,al:'center',a})});
+  [['FEATURING','Dr. Chan Ahn, CEO, Tessera'],['INTERVIEW','Code and Concrete, hosted by Building'],['B-ROLL VIA WIKIMEDIA COMMONS','NYC aerials: the Dronalist (CC BY 3.0) · Earth: ESA (CC BY-SA 3.0 IGO) · Launches: U.S. Space Force (public domain)'],['EDIT','Tessera community cut']].forEach((r,i)=>{
+    txt(r[0],W/2,H/2-170+i*105,{sz:16,f:MONO,col:LIME,al:'center',ls:8,a});txt(r[1],W/2,H/2-130+i*105,{sz:i===2?24:34,w:500,al:'center',a})});
   txt('Not financial advice. T-Tokens are loan participation rights, not direct equity.',W/2,H-90,{sz:18,col:'#8b8f88',al:'center',a})}
+// ---------- b-roll ----------
+const ocv=document.createElement('canvas');ocv.width=W;ocv.height=H;const oc=ocv.getContext('2d');
+async function drawBroll(b,T){const bi=E.broll.indexOf(b),l=T-b.t;const fn=Math.min(Math.floor(l*30)+1,Math.floor(b.dur*30));
+  const im=await loadImg(`../build/v2/broll/${pad(bi,2)}/${pad(fn,5)}.jpg`);rect(0,0,W,H,'#000');
+  const whip=b.cold?0:(1-eo(l/.18));const z=(b.cold?lerp(1.2,1.05,eo(l/b.dur)):lerp(1.03,1.12,l/b.dur))+whip*.7;
+  x.filter='contrast(1.12) saturate(0.88) brightness(0.95)';
+  if(im){const n=whip>.02?4:1;for(let k=0;k<n;k++){x.save();x.globalAlpha=n>1?(k===0?1:.35):1;x.translate(W/2-whip*W*.25-k*whip*90,H/2);x.scale(z,z);x.translate(-W/2,-H/2);x.drawImage(im,0,0,W,H);x.restore()}}
+  x.filter='none';x.globalAlpha=1;
+  const g=x.createLinearGradient(0,H*.55,0,H);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.6)');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const v=x.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,H*1.0);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.5)');x.fillStyle=v;x.fillRect(0,0,W,H);
+  if(b.cold){if(l<.07)rect(0,0,W,H,'#fff',.7);return}
+  captions(T,false);mark(78,74,44,WHITE,1);
+  if(l>b.dur-.07)rect(0,0,W,H,'#fff',.25)}
 // ---------- main ----------
 async function frame(T){
   x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.filter='none';
   const card=E.cards.find(c=>T>=c.start&&T<c.start+c.dur);
   if(card){const lt=T-card.start;({black_type:cardBlackType,logo:cardLogo,chapter:cardChapter,end:cardEnd,credits:cardCredits})[card.kind](lt,card.dur,card);return}
+  const br=(E.broll||[]).find(b=>T>=b.t&&T<b.t+b.dur);
+  if(br){await drawBroll(br,T);return}
   let it=E.items.find(i=>T>=i.start&&T<i.start+i.dur);
   if(!it){ // tiny gaps (cold open flashes)
     rect(0,0,W,H,'#fff',.9);return}
@@ -80,6 +95,7 @@ async function frame(T){
   let z=(host?1.05:it.zoom)*lerp(1,1.03,lt/Math.max(it.dur,1));
   let sx=0,sy=0;if(sl&&sp<.12){const r=rng(Math.floor(T*30));sx=(r()-.5)*40;sy=(r()-.5)*30;z*=1.06}
   if(cold){z*=lerp(1.0,1.05,lt/it.dur)}
+  if(sl&&!host){z=lerp(1.0,1.025,sp/1.05)*(sp<.12?1.04:1)}
   x.save();x.translate(W/2+sx,H/2+sy);x.scale(z,z);x.translate(-W/2,-H/2);
   x.filter=cold?'contrast(1.18) saturate(0.6) brightness(0.92)':'contrast(1.06) saturate(0.92)';
   if(im)x.drawImage(im,0,0,W,H);else rect(0,0,W,H,'#111');x.filter='none';
@@ -89,16 +105,22 @@ async function frame(T){
   // vignette
   const g=x.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,H*1.0);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.45)');x.fillStyle=g;x.fillRect(0,0,W,H);
   if(cold){rect(0,0,W,H,'#000',.25);captions(T,true);if(lt<.05)rect(0,0,W,H,'#fff',.6);return}
-  // slam
-  if(sl){const a=sp<.9?1:cl((1.05-sp)/.15);rect(0,0,W,H,'#000',.62*a);
-    let sz=150;while(meas(sl.text,sz,SANS,900,-4)>W*.86)sz-=6;const p=back(sp/.18);
-    x.save();x.translate(W/2,H/2);x.scale(lerp(1.25,1,cl(p)),lerp(1.25,1,cl(p)));
-    txt(sl.text,0,sz*.35,{sz,w:900,al:'center',ls:-4,col:WHITE,a});x.restore();
-    rect(W/2-lerp(0,140,eo(sp/.3)),H/2+sz*.6,lerp(0,280,eo(sp/.3)),8,LIME,a);
-    if(sp<.05)rect(0,0,W,H,'#fff',.35)}
+  // slam: text rises from BEHIND the speaker
+  if(sl){const a=sp<.9?1:cl((1.05-sp)/.15);rect(0,0,W,H,'#000',.38*a);
+    let sz=190;while(meas(sl.text,sz,SANS,900,-6)>W*.92)sz-=6;
+    const headY=H/2+((sl.head??.15)*H-H/2)*z+sy;
+    const rise=back(cl(sp/.32)),ty=headY+H*.05-sz*.35+(1-rise)*200;
+    x.save();x.translate(W/2,ty);const sc=lerp(.85,1,cl(rise));x.scale(sc,sc);
+    txt(sl.text,0,sz*.35,{sz,w:900,al:'center',ls:-6,col:WHITE,a:a*cl(sp/.06)});
+    rect(-lerp(0,180,eo((sp-.15)/.3)),sz*.35+26,lerp(0,360,eo((sp-.15)/.3)),12,LIME,a);x.restore();
+    const mk=await loadImg(`../build/v2/masks/${pad(idx,3)}_${pad(fn,5)}.png`);
+    if(mk&&im){oc.setTransform(1,0,0,1,0,0);oc.clearRect(0,0,W,H);oc.save();oc.translate(W/2+sx,H/2+sy);oc.scale(z,z);oc.translate(-W/2,-H/2);
+      oc.filter='contrast(1.06) saturate(0.92)';oc.drawImage(im,0,0,W,H);oc.filter='none';oc.globalCompositeOperation='destination-in';oc.drawImage(mk,0,0,W,H);
+      oc.globalCompositeOperation='source-over';oc.restore();x.drawImage(ocv,0,0)}
+    if(sp<.04)rect(0,0,W,H,'#fff',.25)}
   else captions(T,false);
   // bug + credit
-  mark(78,74,44,WHITE,1);txt('CODE AND CONCRETE',W-60,82,{sz:15,f:MONO,col:WHITE,al:'right',ls:5,a:.55});
+  if(!sl)mark(78,74,44,WHITE,1);if(!sl)txt('CODE AND CONCRETE',W-60,82,{sz:15,f:MONO,col:WHITE,al:'right',ls:5,a:.55});
   if(host)txt('MATTHEW SCHNEIDER  ·  HOST',60,H-60,{sz:16,f:MONO,col:WHITE,ls:5,a:.7});
   // lower third
   const lt3=E.items.find(i=>i.lower_third&&T>=i.start&&T<i.start+5.5);

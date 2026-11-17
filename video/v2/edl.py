@@ -63,7 +63,8 @@ HOST = {"A": (962, 286, 958, 539), "B": (962, 286, 958, 539), "C": (962, 286, 95
 
 def norm(t): return re.sub(r"[^a-z0-9\-]", "", t.lower())
 
-items, caps, slams, sfx, cards = [], [], [], [], []
+items, caps, slams, sfx, cards, broll = [], [], [], [], [], []
+COLD_BROLL = [("tsq_night", 263.0), ("earth", 125.0), ("f9_a", 12.2), ("wtc", 205.0), ("midtown_night", 184.0), ("tsq_night", 365.0)]
 T = 0.0
 used_slams = set()
 zoom_toggle = 0
@@ -95,7 +96,13 @@ for i, (s, a, b) in enumerate(COLD):
     sfx.append({"t": round(T, 3), "n": "glitch" if i % 2 else "click"})
     for p in ps: add_piece(p, kind="cold", z=1.08 + 0.06 * (i % 3), slam_ok=False)
     items[-1]["flash_out"] = True
-    T += 0.12
+    if i < len(COLD) - 1:
+        src_, at_ = COLD_BROLL[i]
+        broll.append({"t": round(T, 3), "dur": 0.55, "src": src_, "in": at_, "cold": True})
+        sfx.append({"t": round(T, 3), "n": "whoosh"})
+        T += 0.55
+    else:
+        T += 0.12
 cards.append({"start": round(T, 3), "dur": 5.0, "kind": "logo"}); sfx.append({"t": round(T, 3), "n": "hit"}); T += 5.0
 
 # --- chapters
@@ -121,9 +128,38 @@ for ci, (title, bites) in enumerate(CHAPTERS):
 cards.append({"start": round(T, 3), "dur": 7.5, "kind": "end"}); sfx.append({"t": round(T, 3), "n": "hit"}); T += 7.5
 cards.append({"start": round(T, 3), "dur": 5.0, "kind": "credits"}); T += 5.0
 
+# ---- B-roll over dialogue, anchored to phrases
+BROLL = [
+    ("billions", "midtown_night", 41.0, 3.2), ("steepest", "f9_a", 11.0, 4.2), ("arrive", "wtc", 76.0, 3.4),
+    ("capital formation", "parkave", 327.9, 3.4), ("machinery", "midtown_day", 99.0, 3.6),
+    ("buy and sell stocks", "midtown_day", 39.6, 3.4), ("agents", "tsq_night", 362.0, 3.4),
+    ("created as a safeguard", "wtc", 205.0, 3.2), ("know you", "midtown_night", 245.9, 3.0),
+    ("human history", "earth", 107.0, 3.6), ("multiple sources", "earth", 268.0, 3.0),
+    ("blurring", "midtown_night", 184.0, 3.0),
+    ("bridge the gap", "parkave", 41.0, 3.2), ("private equity space", "f9_b", 6.0, 3.6),
+]
+toks = [norm(c["w"]) for c in caps]
+def find(ph, after=0):
+    ws = [norm(w) for w in ph.split()]
+    for i in range(len(toks)):
+        if caps[i]["t0"] >= after and toks[i:i + len(ws)] == ws: return caps[i]["t0"]
+    return None
+for ph, src_, at_, d in BROLL:
+    t = find(ph, 25)
+    if t is None: print("phrase not found:", ph); continue
+    t -= 0.15
+    for sl in slams:  # keep slams on the speaker
+        if t < sl["t"] + 1.15 and t + d > sl["t"] - 0.1: t = sl["t"] + 1.15
+    it = next((i for i in items if i["start"] <= t < i["start"] + i["dur"]), None)
+    if it is None: print("no clip under", ph); continue
+    broll.append({"t": round(t, 3), "dur": d, "src": src_, "in": at_})
+    sfx.append({"t": round(t, 3), "n": "whoosh"})
+for b in broll:  # don't show host cutaway while b-roll is up
+    for i in items:
+        if i.get("cutaway") and b["t"] < i["start"] + i["cutaway"][1] and b["t"] + b["dur"] > i["start"]: i.pop("cutaway")
 for s in slams: sfx.append({"t": round(s["t"] - 0.05, 3), "n": "click"})
 edl = {"duration": round(T, 3), "items": items, "captions": caps, "slams": slams, "sfx": sorted(sfx, key=lambda e: e["t"]),
-       "cards": cards, "src": SRC}
+       "cards": cards, "src": SRC, "broll": broll}
 os.makedirs(f"{ROOT}/build/v2", exist_ok=True)
 json.dump(edl, open(f"{ROOT}/build/v2/edl.json", "w"), indent=1)
 print(f"duration {T:.1f}s  pieces {len(items)}  slams {len(slams)}/{len(SLAMS)}  captions {len(caps)}")
