@@ -31,7 +31,8 @@ def loop_into(buf, clip, a, b, gain, xf=1.0):
 
 cards = e["cards"]; logo = next(c for c in cards if c["kind"] == "logo"); end = next(c for c in cards if c["kind"] == "end")
 chap = [c for c in cards if c["kind"] == "chapter"]
-beds = {k: load(M(k)) for k in ["intro", "groove", "groove2", "pad", "outro"]}
+beds = {k: load(M(v)) for k, v in {"intro": "epic_intro", "groove": "epic_a", "groove2": "epic_b", "pad": "pad", "outro": "epic_outro"}.items()}
+beds["groove"] = beds["groove"][int(4.2 * SR):]  # skip its quiet build so the loop stays driving
 for k in beds: beds[k] /= rms(beds[k])
 mus = np.zeros(N)
 # cold open: tension bed, fades into the logo hit
@@ -41,12 +42,12 @@ mus[:n] += beds["intro"][:n] * env
 bounds = [c["start"] for c in chap] + [end["start"]]
 for k in range(len(chap)):
     loop_into(mus, beds["groove" if k % 2 == 0 else "groove2"], bounds[k], bounds[k + 1], 0.85)
-loop_into(mus, beds["pad"], logo["start"], end["start"] + 1, 0.35, xf=2.0)
+loop_into(mus, beds["pad"], logo["start"], end["start"] + 1, 0.2, xf=2.0)
 fo = int(end["start"] * SR); mus[fo:fo + SR] *= np.linspace(1, 0, min(SR, N - fo)); mus[fo + SR:] = 0
 o = beds["outro"]; n = min(len(o), N - fo); mus[fo:fo + n] += o[:n] * 1.1
 # duck: music sits ~16 dB under the voice while he talks, opens up on cards and B-roll gaps
 k = int(.35 * SR); sm = np.convolve(speech, np.ones(k) / k, "same")
-mus *= D * (0.16 * sm + 0.55 * (1 - sm))
+mus *= D * (0.2 * sm + 0.6 * (1 - sm))
 mus *= np.clip((T - t) / 3, 0, 1)
 
 # ---------- accents ----------
