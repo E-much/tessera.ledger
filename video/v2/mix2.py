@@ -1,46 +1,79 @@
+"""Soundtrack v2: dialogue + chaptered music bed (alternating loops, ambient pad) + accent SFX."""
 import json, os, subprocess, numpy as np
-R=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); SR=48000
-e=json.load(open(f"{R}/build/v2/edl.json")); T=e["duration"]; N=int(T*SR)
-def load(f,ss=None,t=None):
-    cmd=["ffmpeg","-v","error"]+(["-ss",str(ss)] if ss is not None else [])+["-i",f]+(["-t",str(t)] if t else [])+["-f","f32le","-ac","1","-ar",str(SR),"-"]
-    return np.frombuffer(subprocess.check_output(cmd),np.float32).astype(np.float64)
-# dialogue
-src={k:load(f"{R}/build/clips/{v}.mp4") for k,v in e["src"].items()}
-dia=np.zeros(N); speech=np.zeros(N)
-f=int(.008*SR); ramp=np.linspace(0,1,f)
+R = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); SR = 48000
+e = json.load(open(f"{R}/build/v2/edl.json")); T = e["duration"]; N = int(T * SR)
+t = np.arange(N) / SR
+
+def load(f):
+    raw = subprocess.check_output(["ffmpeg", "-v", "error", "-i", f, "-f", "f32le", "-ac", "1", "-ar", str(SR), "-"])
+    return np.frombuffer(raw, np.float32).astype(np.float64)
+def rms(a): return np.sqrt(np.mean(a ** 2)) + 1e-9
+def peaknorm(a): return a / (np.abs(a).max() + 1e-9)
+M = lambda n: f"{R}/build/music/{n}.mp3"
+
+# ---------- dialogue ----------
+src = {k: load(f"{R}/build/clips/{v}.mp4") for k, v in e["src"].items()}
+dia = np.zeros(N); speech = np.zeros(N); f8 = int(.008 * SR); ramp = np.linspace(0, 1, f8)
 for it in e["items"]:
-    a=src[it["src"]][int(it["in"]*SR):int(it["out"]*SR)].copy()
-    a[:f]*=ramp; a[-f:]*=ramp[::-1]
-    i=int(it["start"]*SR); n=min(len(a),N-i); dia[i:i+n]+=a[:n]; speech[i:i+n]=1
-# normalise dialogue loudness roughly
-dia/= (np.sqrt(np.mean(dia[speech>0]**2))+1e-9); dia*=0.12
-# music
-def at(name): return load(f"{R}/build/music/{name}.mp3")
-mus=np.zeros(N)
-cards=e["cards"]; logo=next(c for c in cards if c["kind"]=="logo"); end=next(c for c in cards if c["kind"]=="end")
-intro=at("intro"); n=min(len(intro),int(logo["start"]*SR)+SR); env=np.ones(n); env[-SR:]=np.linspace(1,0,SR); mus[:n]+=intro[:n]*env*0.9
-g=at("groove"); x0=int((logo["start"]+0.3)*SR); x1=int(end["start"]*SR)+SR; xf=SR
-pos=x0
-while pos<x1:
-    seg=g.copy(); seg[:xf]*=np.linspace(0,1,xf); seg[-xf:]*=np.linspace(1,0,xf)
-    n=min(len(seg),N-pos); mus[pos:pos+n]+=seg[:n]*0.55; pos+=len(seg)-xf
-fo=int(end["start"]*SR)+SR; mus[fo-SR:fo]*=np.linspace(1,0,SR); mus[fo:]=0
-o=at("outro"); i=int(end["start"]*SR); n=min(len(o),N-i); mus[i:i+n]+=o[:n]*1.1
-# duck under speech
-k=int(.3*SR); sm=np.convolve(speech,np.ones(k)/k,"same"); mus*=1-0.82*sm
-mus*=np.clip((T-np.arange(N)/SR)/3,0,1)
-# sfx
-G={"drop":.8,"click":.35,"glitch":.45,"hit":.8,"whoosh":.5,"riser":.35}
-sfx=np.zeros(N); cache={}
+    a = src[it["src"]][int(it["in"] * SR):int(it["out"] * SR)].copy(); a[:f8] *= ramp; a[-f8:] *= ramp[::-1]
+    i = int(it["start"] * SR); n = min(len(a), N - i); dia[i:i + n] += a[:n]; speech[i:i + n] = 1
+dia *= 0.12 / rms(dia[speech > 0])
+D = rms(dia[speech > 0])
+
+# ---------- music bed ----------
+def loop_into(buf, clip, a, b, gain, xf=1.0):
+    xs = int(xf * SR); pos = int(a * SR); end = int(b * SR)
+    while pos < end:
+        seg = clip.copy(); seg[:xs] *= np.linspace(0, 1, xs); seg[-xs:] *= np.linspace(1, 0, xs)
+        n = min(len(seg), N - pos, end + xs - pos)
+        if n <= 0: break
+        buf[pos:pos + n] += seg[:n] * gain; pos += len(seg) - xs
+
+cards = e["cards"]; logo = next(c for c in cards if c["kind"] == "logo"); end = next(c for c in cards if c["kind"] == "end")
+chap = [c for c in cards if c["kind"] == "chapter"]
+beds = {k: load(M(k)) for k in ["intro", "groove", "groove2", "pad", "outro"]}
+for k in beds: beds[k] /= rms(beds[k])
+mus = np.zeros(N)
+# cold open: tension bed, fades into the logo hit
+n = min(len(beds["intro"]), int(logo["start"] * SR) + SR // 2); env = np.ones(n); env[-SR // 2:] = np.linspace(1, 0, SR // 2)
+mus[:n] += beds["intro"][:n] * env
+# chapters alternate between the two grooves; a quiet pad glues everything together
+bounds = [c["start"] for c in chap] + [end["start"]]
+for k in range(len(chap)):
+    loop_into(mus, beds["groove" if k % 2 == 0 else "groove2"], bounds[k], bounds[k + 1], 0.85)
+loop_into(mus, beds["pad"], logo["start"], end["start"] + 1, 0.35, xf=2.0)
+fo = int(end["start"] * SR); mus[fo:fo + SR] *= np.linspace(1, 0, min(SR, N - fo)); mus[fo + SR:] = 0
+o = beds["outro"]; n = min(len(o), N - fo); mus[fo:fo + n] += o[:n] * 1.1
+# duck: music sits ~16 dB under the voice while he talks, opens up on cards and B-roll gaps
+k = int(.35 * SR); sm = np.convolve(speech, np.ones(k) / k, "same")
+mus *= D * (0.16 * sm + 0.55 * (1 - sm))
+mus *= np.clip((T - t) / 3, 0, 1)
+
+# ---------- accents ----------
+sfx = np.zeros(N); cache = {}
+def put(name, at, gain):
+    a = cache.setdefault(name, peaknorm(load(M(name))))
+    i = max(0, int(at * SR)); n = min(len(a), N - i)
+    if n > 0: sfx[i:i + n] += a[:n] * gain * D * 2.2
 for s in e["sfx"]:
-    a=cache.setdefault(s["n"],at(s["n"])); t=s["t"]-(len(a)/SR-.25 if s["n"]=="riser" else 0)
-    i=max(0,int(t*SR)); n=min(len(a),N-i); 
-    duck=0.5 if s["n"] in("click",) and speech[min(i,N-1)] else 1
-    sfx[i:i+n]+=a[:n]*G[s["n"]]*duck
-mix=dia+mus*0.22+sfx*0.25
-mix/=np.abs(mix).max()/0.95
-open(f"{R}/build/v2/mix.f32","wb").write(np.stack([mix,mix],1).astype(np.float32).tobytes())
-subprocess.check_call(["ffmpeg","-y","-v","error","-f","f32le","-ar",str(SR),"-ac","2","-i",f"{R}/build/v2/mix.f32",
-  "-af","highpass=f=60,acompressor=threshold=0.25:ratio=3:attack=10:release=150,loudnorm=I=-14:TP=-1.2:LRA=9","-ar","48000","-c:a","aac","-b:a","256k",f"{R}/build/v2/mix.m4a"])
-# report speech-vs-music balance
-print("dur",T,"speech frac",speech.mean().round(2))
+    n = s["n"]
+    if n == "click": continue                      # replaced by slam-specific accents below
+    if n == "riser": put("riser", s["t"] - 4.0, 0.35); continue
+    put(n, s["t"], {"drop": .9, "glitch": .5, "hit": .9, "whoosh": .45}.get(n, .5))
+for sl in e["slams"]:
+    if sl.get("behind"):
+        put("swell", sl["t"] - 0.45, 0.55); put("impact", sl["t"] + 0.05, 0.35)
+    else:
+        put("impact", sl["t"] - 0.02, 0.7)
+for c in chap: put("piano", c["start"] + 0.15, 0.6)
+
+mix = dia + mus + sfx
+mix /= np.abs(mix).max() / 0.95
+open(f"{R}/build/v2/mix.f32", "wb").write(np.stack([mix, mix], 1).astype(np.float32).tobytes())
+subprocess.check_call(["ffmpeg", "-y", "-v", "error", "-f", "f32le", "-ar", str(SR), "-ac", "2", "-i", f"{R}/build/v2/mix.f32",
+    "-af", "highpass=f=40,acompressor=threshold=0.3:ratio=2.5:attack=10:release=180,loudnorm=I=-14:TP=-1.2:LRA=10",
+    "-ar", "48000", "-c:a", "aac", "-b:a", "256k", f"{R}/build/v2/mix.m4a"])
+# report balance so levels can be sanity-checked without listening
+sp = speech > 0.5
+print(f"dur {T:.1f}s | music under speech {20*np.log10(rms(mus[sp])/D):.1f} dB rel voice | "
+      f"music in gaps {20*np.log10(rms(mus[~sp & (t<end['start'])])/D):.1f} dB rel voice")
