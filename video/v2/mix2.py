@@ -47,7 +47,8 @@ fo = int(end["start"] * SR); mus[fo:fo + SR] *= np.linspace(1, 0, min(SR, N - fo
 o = beds["outro"]; n = min(len(o), N - fo); mus[fo:fo + n] += o[:n] * 1.1
 # duck: music sits ~16 dB under the voice while he talks, opens up on cards and B-roll gaps
 k = int(.35 * SR); sm = np.convolve(speech, np.ones(k) / k, "same")
-mus *= D * (0.2 * sm + 0.6 * (1 - sm))
+under = np.where(t < logo["start"], 0.38, 0.1)     # intro stays loud; ~20 dB under the voice in the main video
+mus *= D * (under * sm + 0.9 * (1 - sm))            # cards, logo and pauses open right up
 mus *= np.clip((T - t) / 3, 0, 1)
 
 # ---------- accents ----------
