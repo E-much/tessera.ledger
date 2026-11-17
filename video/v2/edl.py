@@ -35,15 +35,15 @@ def pieces(src, t0, t1, strip=True):
     return res
 
 # ---------------- the cut ----------------
-COLD = [("C", 83.6, 85.6), ("A", 69.3, 71.4), ("A", 73.3, 77.0), ("D", 135.9, 137.7),
-        ("B", 60.3, 61.9), ("D", 159.9, 161.7), ("A", 124.0, 131.4)]
+COLD = [("C", 83.6, 85.6), ("A", 69.3, 71.4), ("A", 73.3, 77.45), ("D", 135.9, 137.7),
+        ("B", 60.3, 62.45), ("D", 159.9, 162.25), ("A", 124.0, 131.4)]
 CHAPTERS = [
     ("It used to be the beginning.", [("A", 57.4, 71.4)]),
-    ("Now they stay private.", [("A", 0.0, 27.1), ("A", 27.3, 49.0), ("A", 72.0, 94.0), ("A", 100.4, 116.0)]),
-    ("Seventeen years inside the machine.", [("C", 6.1, 21.6), ("C", 39.0, 48.3), ("C", 48.3, 75.7)]),
-    ("Why retail was locked out.", [("B", 7.7, 23.0), ("D", 9.6, 26.8), ("D", 115.2, 137.7)]),
-    ("What changes.", [("D", 137.9, 156.7), ("D", 157.1, 172.7), ("B", 23.4, 29.2), ("B", 41.9, 70.6), ("B", 84.6, 90.3)]),
-    ("Closing the gap.", [("C", 78.6, 99.2), ("A", 117.6, 131.4)]),
+    ("Now they stay private.", [("A", 2.25, 27.1), ("A", 27.3, 49.0), ("A", 72.0, 94.0), ("A", 100.4, 116.0)]),
+    ("Seventeen years inside the machine.", [("C", 6.1, 21.6), ("C", 39.0, 48.22), ("C", 48.38, 75.58)]),
+    ("Why retail was locked out.", [("B", 8.95, 23.0), ("D", 9.6, 26.8), ("D", 99.2, 114.5), ("D", 115.2, 137.7)]),
+    ("What changes.", [("D", 137.9, 156.7), ("D", 157.1, 172.7), ("B", 23.4, 70.6), ("B", 84.6, 90.3)]),
+    ("Closing the gap.", [("C", 78.6, 99.2), ("A", 124.0, 131.4)]),
 ]
 # word (lowercased, punctuation stripped) -> slam text, per source
 SLAMS = {
@@ -131,12 +131,12 @@ cards.append({"start": round(T, 3), "dur": 5.0, "kind": "credits"}); T += 5.0
 # ---- B-roll over dialogue, anchored to phrases
 BROLL = [
     ("billions", "midtown_night", 41.0, 3.2), ("steepest", "f9_a", 11.0, 4.2), ("arrive", "wtc", 76.0, 3.4),
-    ("capital formation", "parkave", 327.9, 3.4), ("machinery", "midtown_day", 99.0, 3.6),
+    ("capital formation", "parkave", 327.9, 3.4), ("machinery", "wtc", 128.0, 3.6),
     ("buy and sell stocks", "midtown_day", 39.6, 3.4), ("agents", "tsq_night", 362.0, 3.4),
-    ("created as a safeguard", "wtc", 205.0, 3.2), ("know you", "midtown_night", 245.9, 3.0),
+    ("created as a safeguard", "wtc", 205.0, 3.2),
     ("human history", "earth", 107.0, 3.6), ("multiple sources", "earth", 268.0, 3.0),
     ("blurring", "midtown_night", 184.0, 3.0),
-    ("bridge the gap", "parkave", 41.0, 3.2), ("private equity space", "f9_b", 6.0, 3.6),
+    ("private equity space", "f9_b", 6.0, 3.6),
 ]
 toks = [norm(c["w"]) for c in caps]
 def find(ph, after=0):

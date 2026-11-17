@@ -50,8 +50,6 @@ function cardChapter(lt,d,c){rect(0,0,W,H,WHITE);
   const s=c.text.slice(0,Math.floor(cl((lt-.25)/(c.text.length*.035))*c.text.length));
   const sz=84,tw=meas(c.text,sz,SANS,500,-2);txt(s,W/2-tw/2,H/2+28,{sz,w:500,col:INK,ls:-2});
   if(s.length<c.text.length||Math.floor(lt*3.5)%2===0)rect(W/2-tw/2+meas(s,sz,SANS,500,-2)+6,H/2-40,34,80,INK);
-  mark(110,110,56,INK,1);txt(pad(c.n,2)+' / 06',W-100,H-90,{sz:18,f:MONO,col:'#7a7d78',al:'right',ls:6});
-  txt('TESSERA  ·  THE ACCESS GAP',100,H-90,{sz:18,f:MONO,col:'#7a7d78',ls:6});
   if(lt>d-.15)rect(0,0,W,H,'#000',(lt-(d-.15))/.15)}
 function cardEnd(lt,d){rect(0,0,W,H,'#000');
   if(lt<3.4){const s='Closing the access gap.';const v=s.slice(0,Math.floor(cl((lt-.3)/1.2)*s.length));const tw=meas(s,80,SANS,500,-2);
