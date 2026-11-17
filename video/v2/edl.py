@@ -58,6 +58,7 @@ SLAMS = {
     ("B", "alleviated"): "ALLEVIATED", ("B", "blurring"): "PUBLIC ⇄ PRIVATE",
     ("C", "tokenization"): "TOKENIZATION",
 }
+BEHIND = {"INVERTED.", "12–15 YEARS PRIVATE", "THE ACCESS GAP", "17 YEARS", "ATOMIC SETTLEMENT", "PROFOUND.", "24/7 ON CHAIN", "TOKENIZATION"}
 CAM = {"A": (0, 286, 958, 539), "B": (0, 286, 958, 539), "C": (0, 286, 958, 539), "D": (0, 191, 638, 359)}
 HOST = {"A": (962, 286, 958, 539), "B": (962, 286, 958, 539), "C": (962, 286, 958, 539), "D": (641, 191, 638, 359)}
 
@@ -84,7 +85,7 @@ def add_piece(p, kind="clip", z=None, slam_ok=True, caption=True):
             key = (p["src"], norm(w["text"]))
             if key in SLAMS and key not in used_slams:
                 used_slams.add(key)
-                slams.append({"t": round(T + w["start"] - p["in"], 3), "text": SLAMS[key]})
+                slams.append({"t": round(T + w["start"] - p["in"], 3), "text": SLAMS[key], "behind": SLAMS[key] in BEHIND})
     T += d
     return it
 

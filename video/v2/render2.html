@@ -92,7 +92,7 @@ async function frame(T){
   let z=(host?1.05:it.zoom)*lerp(1,1.03,lt/Math.max(it.dur,1));
   let sx=0,sy=0;if(sl&&sp<.12){const r=rng(Math.floor(T*30));sx=(r()-.5)*40;sy=(r()-.5)*30;z*=1.06}
   if(cold){z*=lerp(1.0,1.05,lt/it.dur)}
-  if(sl&&!host){z=lerp(1.0,1.025,sp/1.05)*(sp<.12?1.04:1)}
+  if(sl&&sl.behind&&!host){z=lerp(1.0,1.025,sp/1.05)*(sp<.12?1.04:1)}
   x.save();x.translate(W/2+sx,H/2+sy);x.scale(z,z);x.translate(-W/2,-H/2);
   x.filter=cold?'contrast(1.18) saturate(0.6) brightness(0.92)':'contrast(1.06) saturate(0.92)';
   if(im)x.drawImage(im,0,0,W,H);else rect(0,0,W,H,'#111');x.filter='none';
@@ -102,8 +102,15 @@ async function frame(T){
   // vignette
   const g=x.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,H*1.0);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.45)');x.fillStyle=g;x.fillRect(0,0,W,H);
   if(cold){rect(0,0,W,H,'#000',.25);captions(T,true);if(lt<.05)rect(0,0,W,H,'#fff',.6);return}
+  // slam in FRONT of the speaker
+  if(sl&&!sl.behind){const a=sp<.9?1:cl((1.05-sp)/.15);rect(0,0,W,H,'#000',.62*a);
+    let sz=150;while(meas(sl.text,sz,SANS,900,-4)>W*.86)sz-=6;const p=back(sp/.18);
+    x.save();x.translate(W/2,H/2);x.scale(lerp(1.25,1,cl(p)),lerp(1.25,1,cl(p)));
+    txt(sl.text,0,sz*.35,{sz,w:900,al:'center',ls:-4,col:WHITE,a});x.restore();
+    rect(W/2-lerp(0,140,eo(sp/.3)),H/2+sz*.6,lerp(0,280,eo(sp/.3)),8,LIME,a);
+    if(sp<.05)rect(0,0,W,H,'#fff',.35)}
   // slam: text rises from BEHIND the speaker
-  if(sl){const a=sp<.9?1:cl((1.05-sp)/.15);rect(0,0,W,H,'#000',.38*a);
+  else if(sl){const a=sp<.9?1:cl((1.05-sp)/.15);rect(0,0,W,H,'#000',.38*a);
     let sz=190;while(meas(sl.text,sz,SANS,900,-6)>W*.92)sz-=6;
     const headY=H/2+((sl.head??.15)*H-H/2)*z+sy;
     const rise=back(cl(sp/.32)),ty=headY+H*.05-sz*.35+(1-rise)*200;
