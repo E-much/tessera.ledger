@@ -59,10 +59,10 @@ for s in e["sfx"]:
     n = s["n"]
     if n == "click": continue                      # replaced by slam-specific accents below
     if n == "riser": put("riser", s["t"] - 4.0, 0.35); continue
-    put(n, s["t"], {"drop": .9, "glitch": .5, "hit": .9, "whoosh": .45}.get(n, .5))
+    put(n, s["t"], {"drop": .8, "glitch": .4, "hit": .8, "whoosh": .08}.get(n, .5))
 for sl in e["slams"]:
     if sl.get("behind"):
-        put("swell", sl["t"] - 0.45, 0.55); put("impact", sl["t"] + 0.05, 0.35)
+        put("swell", sl["t"] - 0.45, 0.15); put("impact", sl["t"] + 0.05, 0.35)
     else:
         put("impact", sl["t"] - 0.02, 0.7)
 for c in chap: put("piano", c["start"] + 0.15, 0.6)
