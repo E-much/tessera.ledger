@@ -1,0 +1,111 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Tessera Film v2</title>
+<style>@font-face{font-family:"JBM";src:url(../fonts/JetBrainsMono.woff2) format("woff2");font-weight:100 800}
+html,body{margin:0;background:#000}canvas{display:block}</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+const W=1920,H=1080,cv=document.getElementById('c'),x=cv.getContext('2d');
+const LIME='#D2FB95',INK='#121317',WHITE='#F4F4F0';
+const SANS='"Inter Display","Inter",sans-serif',MONO='"JBM",monospace';
+let E=null,MARK=[],CH=[];
+const cl=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-cl(t),3),eio=t=>{t=cl(t);return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2};
+const back=t=>{t=cl(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+const rng=s=>()=>((s=Math.imul(s^s>>>15,1|s)+0x6D2B79F5|0,(s^s>>>14)>>>0)/4294967296);
+function font(sz,f=SANS,w=400){x.font=`${w} ${sz}px ${f}`}
+function txt(s,X,Y,{sz=40,f=SANS,w=400,col=WHITE,al='left',ls=0,a=1}={}){font(sz,f,w);x.letterSpacing=ls+'px';x.textAlign=al;x.textBaseline='alphabetic';x.globalAlpha=a;x.fillStyle=col;x.fillText(s,X,Y);x.globalAlpha=1;x.letterSpacing='0px'}
+function meas(s,sz,f=SANS,w=400,ls=0){font(sz,f,w);x.letterSpacing=ls+'px';const m=x.measureText(s).width;x.letterSpacing='0px';return m}
+function rect(X,Y,w,h,c,a=1){x.globalAlpha=a;x.fillStyle=c;x.fillRect(X,Y,w,h);x.globalAlpha=1}
+// logo: 9 polygons in a 400x400 box
+function setMark(pathStr){MARK=pathStr.trim().split('Z').filter(Boolean).map(s=>{const pts=s.replace('M','').split(' L').map(p=>p.split(',').map(Number));const c=pts.reduce((a,p)=>[a[0]+p[0]/pts.length,a[1]+p[1]/pts.length],[0,0]);return{pts,c}});
+  MARK.sort((a,b)=>b.c[1]-a.c[1]||a.c[0]-b.c[0]);}
+function mark(cx,cy,size,col,prog=1,lt=0){const s=size/400;MARK.forEach((m,i)=>{const p=back(cl((prog*MARK.length*1.0-i*.8)/1.4));if(p<=0)return;
+  const dy=(1-p)*-120,a=cl(p*1.5);x.save();x.globalAlpha=a;x.translate(cx+(m.c[0]-200)*s,cy+(m.c[1]-200)*s+dy*s*2);x.scale(lerp(.6,1,cl(p)),lerp(.6,1,cl(p)));
+  x.beginPath();m.pts.forEach((q,j)=>{const X=(q[0]-m.c[0])*s,Y=(q[1]-m.c[1])*s;j?x.lineTo(X,Y):x.moveTo(X,Y)});x.closePath();x.fillStyle=col;x.fill();x.restore()})}
+// ---------- caption chunks ----------
+function buildChunks(){const c=E.captions;let cur=[];const out=[];
+  c.forEach((w,i)=>{const gap=i?w.t0-c[i-1].t1:0;if(cur.length&&(cur.length>=4||gap>.45||/[.?!,]$/.test(c[i-1].w)&&cur.length>=2)){out.push(cur);cur=[]}cur.push(w)});if(cur.length)out.push(cur);
+  CH=out.map((ws,i)=>({ws,t0:ws[0].t0,t1:Math.min(ws[ws.length-1].t1+.35,out[i+1]?out[i+1][0].t0:1e9)}));}
+function captions(T,big){const ch=CH.find(c=>T>=c.t0&&T<c.t1);if(!ch)return;
+  const sz=big?92:58,y=big?H/2+30:H-120;const words=ch.ws.map(w=>w.w.replace(/^(.*?)[,]$/,'$1'));
+  const sp=meas(' ',sz,SANS,800);const tot=words.reduce((a,w)=>a+meas(w.toUpperCase(),sz,SANS,800),0)+sp*(words.length-1);let X=W/2-tot/2;
+  const pop=eo((T-ch.t0)/.12);
+  words.forEach((w,i)=>{const s=w.toUpperCase(),on=T>=ch.ws[i].t0,cur=on&&(T<ch.ws[i].t1+.05||i===words.length-1&&T<ch.t1);
+    x.save();x.shadowColor='rgba(0,0,0,.85)';x.shadowBlur=18;x.shadowOffsetY=4;
+    txt(s,X,y+(1-pop)*14,{sz,w:800,col:cur?LIME:WHITE,a:on?1:.55});x.restore();X+=meas(s,sz,SANS,800)+sp})}
+// ---------- image cache ----------
+const cache=new Map();
+function loadImg(src){if(cache.has(src))return cache.get(src);const im=new Image();const p=im.decode?(im.src=src,im.decode().then(()=>im).catch(()=>null)):null;cache.set(src,p);if(cache.size>60){cache.delete(cache.keys().next().value)}return p}
+function pad(n,l){return String(n).padStart(l,'0')}
+// ---------- cards ----------
+function cardBlackType(lt,d,c){rect(0,0,W,H,'#000');x.save();x.translate(W/2,H/2);x.rotate(-.05);x.transform(1,0,-.12,1,0,0);
+  const s=c.text.slice(0,Math.floor(cl((lt-.15)/.9)*c.text.length));const sz=110,tw=meas(c.text,sz,MONO,300,10);
+  txt(s,-tw/2,sz*.35,{sz,f:MONO,w:300,ls:10});if(Math.floor(lt*4)%2===0)rect(-tw/2+meas(s,sz,MONO,300,10)+8,-sz*.45,sz*.5,sz*.85,LIME);x.restore()}
+function cardLogo(lt,d){const flash=lt<.08;rect(0,0,W,H,flash?'#fff':LIME);
+  const z=lerp(1,1.04,lt/d);x.save();x.translate(W/2,H/2);x.scale(z,z);x.translate(-W/2,-H/2);
+  mark(W/2,H/2-90,380,INK,cl(lt/1.6),lt);
+  const a=eo((lt-1.7)/.6);txt('Tessera',W/2,H/2+230,{sz:96,w:700,col:INK,al:'center',ls:-2,a});
+  txt('THE ACCESS GAP',W/2,H/2+300,{sz:22,f:MONO,w:500,col:INK,al:'center',ls:12,a:eo((lt-2.3)/.6)*.75});x.restore()}
+function cardChapter(lt,d,c){rect(0,0,W,H,WHITE);
+  const s=c.text.slice(0,Math.floor(cl((lt-.25)/(c.text.length*.035))*c.text.length));
+  const sz=84,tw=meas(c.text,sz,SANS,500,-2);txt(s,W/2-tw/2,H/2+28,{sz,w:500,col:INK,ls:-2});
+  if(s.length<c.text.length||Math.floor(lt*3.5)%2===0)rect(W/2-tw/2+meas(s,sz,SANS,500,-2)+6,H/2-40,34,80,INK);
+  mark(110,110,56,INK,1);txt(pad(c.n,2)+' / 06',W-100,H-90,{sz:18,f:MONO,col:'#7a7d78',al:'right',ls:6});
+  txt('TESSERA  ·  THE ACCESS GAP',100,H-90,{sz:18,f:MONO,col:'#7a7d78',ls:6});
+  if(lt>d-.15)rect(0,0,W,H,'#000',(lt-(d-.15))/.15)}
+function cardEnd(lt,d){rect(0,0,W,H,'#000');
+  if(lt<3.4){const s='Closing the access gap.';const v=s.slice(0,Math.floor(cl((lt-.3)/1.2)*s.length));const tw=meas(s,80,SANS,500,-2);
+    txt(v,W/2-tw/2,H/2+28,{sz:80,w:500,ls:-2});if(Math.floor(lt*3.5)%2===0)rect(W/2-tw/2+meas(v,80,SANS,500,-2)+6,H/2-36,30,74,LIME);return}
+  const l=lt-3.4;rect(0,0,W,H,LIME,1);mark(W/2,H/2-80,300,INK,cl(l/1.3));txt('Tessera',W/2,H/2+170,{sz:80,w:700,col:INK,al:'center',ls:-2,a:eo((l-1.2)/.5)});
+  txt('@Tessera_PE',W/2,H/2+240,{sz:26,f:MONO,w:500,col:INK,al:'center',ls:6,a:eo((l-1.6)/.5)*.8});
+  if(lt>d-.6)rect(0,0,W,H,'#000',(lt-(d-.6))/.6)}
+function cardCredits(lt,d){rect(0,0,W,H,'#000');const a=eo(lt/.6)*cl((d-lt)/.8);
+  [['FEATURING','Dr. Chan Ahn, CEO, Tessera'],['FOOTAGE','Code and Concrete, hosted by Building'],['EDIT','Tessera community cut']].forEach((r,i)=>{
+    txt(r[0],W/2,H/2-120+i*110,{sz:16,f:MONO,col:LIME,al:'center',ls:8,a});txt(r[1],W/2,H/2-80+i*110,{sz:34,w:500,al:'center',a})});
+  txt('Not financial advice. T-Tokens are loan participation rights, not direct equity.',W/2,H-90,{sz:18,col:'#8b8f88',al:'center',a})}
+// ---------- main ----------
+async function frame(T){
+  x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.filter='none';
+  const card=E.cards.find(c=>T>=c.start&&T<c.start+c.dur);
+  if(card){const lt=T-card.start;({black_type:cardBlackType,logo:cardLogo,chapter:cardChapter,end:cardEnd,credits:cardCredits})[card.kind](lt,card.dur,card);return}
+  let it=E.items.find(i=>T>=i.start&&T<i.start+i.dur);
+  if(!it){ // tiny gaps (cold open flashes)
+    rect(0,0,W,H,'#fff',.9);return}
+  const idx=E.items.indexOf(it),lt=T-it.start,cold=it.kind==='cold';
+  const host=it.cutaway&&lt>=it.cutaway[0]&&lt<it.cutaway[1];
+  const fn=Math.min(Math.floor(lt*30)+1,Math.floor((host?it.cutaway[1]:it.dur)*30));
+  const im=await loadImg(`../build/v2/frames/${pad(idx,3)}${host?'h':'c'}/${pad(fn,5)}.jpg`);
+  // slam state
+  const sl=E.slams.find(s=>T>=s.t&&T<s.t+1.05);const sp=sl?(T-sl.t):9;
+  let z=(host?1.05:it.zoom)*lerp(1,1.03,lt/Math.max(it.dur,1));
+  let sx=0,sy=0;if(sl&&sp<.12){const r=rng(Math.floor(T*30));sx=(r()-.5)*40;sy=(r()-.5)*30;z*=1.06}
+  if(cold){z*=lerp(1.0,1.05,lt/it.dur)}
+  x.save();x.translate(W/2+sx,H/2+sy);x.scale(z,z);x.translate(-W/2,-H/2);
+  x.filter=cold?'contrast(1.18) saturate(0.6) brightness(0.92)':'contrast(1.06) saturate(0.92)';
+  if(im)x.drawImage(im,0,0,W,H);else rect(0,0,W,H,'#111');x.filter='none';
+  // cold-open glitch slices on first frames
+  if(cold&&lt<.1&&im){const r=rng(idx*31+Math.floor(lt*30));for(let k=0;k<7;k++){const yy=r()*H,hh=20+r()*80,off=(r()-.5)*120;x.drawImage(im,0,yy*720/H,1280,hh*720/H,off,yy,W,hh)}}
+  x.restore();
+  // vignette
+  const g=x.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,H*1.0);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.45)');x.fillStyle=g;x.fillRect(0,0,W,H);
+  if(cold){rect(0,0,W,H,'#000',.25);captions(T,true);if(lt<.05)rect(0,0,W,H,'#fff',.6);return}
+  // slam
+  if(sl){const a=sp<.9?1:cl((1.05-sp)/.15);rect(0,0,W,H,'#000',.62*a);
+    let sz=150;while(meas(sl.text,sz,SANS,900,-4)>W*.86)sz-=6;const p=back(sp/.18);
+    x.save();x.translate(W/2,H/2);x.scale(lerp(1.25,1,cl(p)),lerp(1.25,1,cl(p)));
+    txt(sl.text,0,sz*.35,{sz,w:900,al:'center',ls:-4,col:WHITE,a});x.restore();
+    rect(W/2-lerp(0,140,eo(sp/.3)),H/2+sz*.6,lerp(0,280,eo(sp/.3)),8,LIME,a);
+    if(sp<.05)rect(0,0,W,H,'#fff',.35)}
+  else captions(T,false);
+  // bug + credit
+  mark(78,74,44,WHITE,1);txt('CODE AND CONCRETE',W-60,82,{sz:15,f:MONO,col:WHITE,al:'right',ls:5,a:.55});
+  if(host)txt('MATTHEW SCHNEIDER  ·  HOST',60,H-60,{sz:16,f:MONO,col:WHITE,ls:5,a:.7});
+  // lower third
+  const lt3=E.items.find(i=>i.lower_third&&T>=i.start&&T<i.start+5.5);
+  if(lt3){const l=T-lt3.start,a=eo(l/.4)*cl((5.5-l)/.4),w=lerp(0,640,eio(l/.5));
+    rect(60,H-330,w,120,INK,.92*a);rect(60,H-330,8,120,LIME,a);
+    txt(lt3.lower_third[0],100,H-272,{sz:44,w:800,a});txt(lt3.lower_third[1],100,H-232,{sz:16,f:MONO,col:LIME,ls:4,a})}
+}
+window.init=(edl,markPath)=>{E=edl;setMark(markPath);buildChunks()};
+window.frameJPEG=async T=>{await frame(T);return cv.toDataURL('image/jpeg',.92)};
+</script></body></html>
