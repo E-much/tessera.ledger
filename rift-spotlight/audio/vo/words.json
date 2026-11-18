@@ -496,160 +496,160 @@
  },
  {
   "id": "rift",
-  "text": "It checks over twenty venues across eight chains, every step of the way, and takes the cheapest route, even if it means walking through three chains to get there.",
+  "text": "It checks over twenty venues across nine chains, every step of the way, and takes the cheapest route, even if it means walking through three chains to get there.",
   "offset": 32.305,
   "words": [
    {
     "w": "It",
     "s": 0.205,
-    "e": 0.366
+    "e": 0.387
    },
    {
     "w": "checks",
-    "s": 0.408,
-    "e": 0.709
+    "s": 0.431,
+    "e": 0.711
    },
    {
     "w": "over",
-    "s": 0.773,
-    "e": 0.967
+    "s": 0.774,
+    "e": 0.979
    },
    {
     "w": "twenty",
-    "s": 1.02,
-    "e": 1.343
+    "s": 1.054,
+    "e": 1.42
    },
    {
     "w": "venues",
-    "s": 1.407,
-    "e": 1.978
+    "s": 1.485,
+    "e": 2.022
    },
    {
     "w": "across",
     "s": 2.269,
-    "e": 2.687
+    "e": 2.645
    },
    {
-    "w": "eight",
-    "s": 2.762,
-    "e": 2.988
+    "w": "nine",
+    "s": 2.721,
+    "e": 2.978
    },
    {
     "w": "chains,",
-    "s": 3.031,
-    "e": 3.686
+    "s": 3.022,
+    "e": 3.602
    },
    {
     "w": "every",
-    "s": 3.977,
-    "e": 4.278
+    "s": 3.817,
+    "e": 4.064
    },
    {
     "w": "step",
-    "s": 4.331,
-    "e": 4.546
+    "s": 4.118,
+    "e": 4.323
    },
    {
     "w": "of",
-    "s": 4.59,
-    "e": 4.633
+    "s": 4.365,
+    "e": 4.419
    },
    {
     "w": "the",
-    "s": 4.676,
-    "e": 4.741
+    "s": 4.462,
+    "e": 4.526
    },
    {
     "w": "way,",
-    "s": 4.783,
-    "e": 5.193
+    "s": 4.57,
+    "e": 4.999
    },
    {
     "w": "and",
-    "s": 5.343,
-    "e": 5.481
+    "s": 5.182,
+    "e": 5.322
    },
    {
     "w": "takes",
-    "s": 5.526,
-    "e": 5.761
+    "s": 5.365,
+    "e": 5.58
    },
    {
     "w": "the",
-    "s": 5.806,
-    "e": 5.869
+    "s": 5.612,
+    "e": 5.676
    },
    {
     "w": "cheapest",
-    "s": 5.913,
-    "e": 6.31
+    "s": 5.731,
+    "e": 6.139
    },
    {
     "w": "route,",
-    "s": 6.375,
-    "e": 6.794
+    "s": 6.193,
+    "e": 6.612
    },
    {
     "w": "even",
-    "s": 7.042,
-    "e": 7.288
+    "s": 6.902,
+    "e": 7.149
    },
    {
     "w": "if",
-    "s": 7.331,
-    "e": 7.395
+    "s": 7.182,
+    "e": 7.247
    },
    {
     "w": "it",
-    "s": 7.449,
-    "e": 7.513
+    "s": 7.289,
+    "e": 7.343
    },
    {
     "w": "means",
-    "s": 7.568,
-    "e": 7.826
+    "s": 7.397,
+    "e": 7.601
    },
    {
     "w": "walking",
-    "s": 7.89,
-    "e": 8.191
+    "s": 7.655,
+    "e": 7.945
    },
    {
     "w": "through",
-    "s": 8.233,
-    "e": 8.45
+    "s": 7.988,
+    "e": 8.203
    },
    {
     "w": "three",
-    "s": 8.504,
-    "e": 8.761
+    "s": 8.257,
+    "e": 8.558
    },
    {
     "w": "chains",
-    "s": 8.804,
-    "e": 9.169
+    "s": 8.611,
+    "e": 9.01
    },
    {
     "w": "to",
-    "s": 9.222,
-    "e": 9.278
+    "s": 9.063,
+    "e": 9.127
    },
    {
     "w": "get",
-    "s": 9.341,
-    "e": 9.503
+    "s": 9.192,
+    "e": 9.353
    },
    {
     "w": "there.",
-    "s": 9.556,
-    "e": 9.955
+    "s": 9.407,
+    "e": 10.568
    }
   ]
  },
  {
   "id": "stimmy",
   "text": "And like my younger ones, it doesn't ask for a stimmy. Zero added fees.",
-  "offset": 42.484,
+  "offset": 42.993,
   "words": [
    {
     "w": "And",
@@ -726,7 +726,7 @@
  {
   "id": "close",
   "text": "Rift. Best price execution, in one click.",
-  "offset": 48.331,
+  "offset": 48.84,
   "words": [
    {
     "w": "Rift.",
