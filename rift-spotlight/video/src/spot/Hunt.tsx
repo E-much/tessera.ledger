@@ -11,10 +11,10 @@ const sec = (f: number) => f / FPS;
 const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 // Real quotes for 10 BTC → ethereum.usdt (api.rift.trade, 15 Nov 2026). Other venues stay unnamed in the hunt.
-const QUOTES = [639767.85, 639798.21, 644165.89];
+const QUOTES = [639767.85, 639798.21, 644165.89]; // [2] = next-best single-hop venue
 const RIFT = 645331.16;
 
-const Blur: React.FC<{ id: string; x: number; y?: number; children: React.ReactNode }> = ({ id, x, y = 0, children }) => {
+export const Blur: React.FC<{ id: string; x: number; y?: number; children: React.ReactNode }> = ({ id, x, y = 0, children }) => {
   const on = x + y > 0.3;
   return (
     <div style={{ position: "absolute", inset: 0, filter: on ? `url(#${id})` : undefined }}>
@@ -30,7 +30,7 @@ const Blur: React.FC<{ id: string; x: number; y?: number; children: React.ReactN
   );
 };
 
-const Big: React.FC<{ children: React.ReactNode; size?: number; color?: string; style?: React.CSSProperties }> = ({ children, size = 130, color = ON.ink, style }) => (
+export const Big: React.FC<{ children: React.ReactNode; size?: number; color?: string; style?: React.CSSProperties }> = ({ children, size = 130, color = ON.ink, style }) => (
   <span style={{ fontFamily: F.sans, fontVariationSettings: "'opsz' 32", fontWeight: 600, fontSize: size, letterSpacing: "-0.05em", lineHeight: 1, color, whiteSpace: "nowrap", ...style }}>{children}</span>
 );
 
@@ -40,90 +40,10 @@ const Cursor: React.FC<{ x: number; y: number; press: number; op?: number }> = (
   </svg>
 );
 
-// ───────────────────────────── the hunt: three generic "tabs"
-const WIN_W = 860, WIN_H = 560;
-
-const Window: React.FC<{ i: number }> = ({ i }) => {
-  const f = useCurrentFrame();
-  const t = sec(f);
-  const tIn = i === 0 ? EV.askIn : EV.q[i];
-  const tOut = i < 2 ? EV.cancel[i]! + 0.08 : EV.sweep;
-  if (t < tIn - 0.05 || t > tOut + 0.6) return null;
-  const k = i === 0 ? p(f, tIn, 0.5, E.snap) : p(f, tIn - 0.12, 0.4, E.snap);
-  const o = p(f, tOut, 0.45, E.exit);
-  // entry: tab 1 rises, later tabs slide in from the right; exit: cancelled tabs drop away, the last one is swept left
-  const ex = i < 2 ? { x: -260 * o, y: 700 * o, r: -14 * o } : { x: -1500 * o, y: 0, r: 0 };
-  const en = i === 0 ? { x: 0, y: (1 - k) * 160 } : { x: (1 - k) * 1100, y: 0 };
-  const blurX = i === 0 ? 0 : (1 - k) * 50 + (i === 2 ? o * 60 : 0);
-  const q = QUOTES[i];
-  const quoteIn = p(f, EV.q[i] - 0.05, 0.4, E.snap);
-  // tab 3: the price moves while you look at it
-  const drift = i === 2 ? p(f, EV.moved, 1.4, E.inOut) : 0;
-  const shown = q - drift * 453.49;
-  const typed = (s: string, a: number) => s.slice(0, Math.round(p(f, a - 0.1, 0.45, E.inOut) * s.length));
-  const better = i === 1 ? p(f, EV.better, 0.35, E.snap) : 0;
-  const isBest = i === 1 ? p(f, EV.isBest, 0.35, E.snap) : 0;
-  const low = i === 0 ? p(f, EV.feelsLow, 0.4, E.settle) : 0;
-  // cursor to "Cancel"
-  const cancelAt = i < 2 ? EV.cancel[i]! : 0;
-  const cm = i < 2 ? p(f, cancelAt - 0.75, 0.6, E.inOut) : 0;
-  const press = i < 2 ? p(f, cancelAt - 0.05, 0.05, E.exit) * (1 - p(f, cancelAt + 0.03, 0.15, E.settle)) : 0;
-  const cancelHot = i < 2 && t >= cancelAt - 0.05;
-  const L = (1920 - WIN_W) / 2, T = (1080 - WIN_H) / 2;
-
-  return (
-    <Blur id={`win${i}`} x={blurX}>
-      <div style={{ position: "absolute", inset: 0, transform: `translate(${en.x + ex.x}px, ${en.y + ex.y}px) rotate(${ex.r}deg) scale(1.25)`, transformOrigin: "50% 50%", opacity: Math.min(1, k * 2) * (1 - o * 0.6) }}>
-        <div style={{ position: "absolute", left: L, top: T, width: WIN_W, height: WIN_H, borderRadius: 26, background: "#FAF7F2", boxShadow: "0 50px 100px rgba(70,25,0,0.35)", overflow: "hidden" }}>
-          {/* window chrome */}
-          <div style={{ height: 58, background: "#EEE9E1", display: "flex", alignItems: "center", gap: 10, paddingLeft: 22 }}>
-            {["#E5534B", "#E5B34B", "#5BB85B"].map((c) => <div key={c} style={{ width: 14, height: 14, borderRadius: 7, background: c, opacity: 0.8 }} />)}
-            <div style={{ marginLeft: 24, padding: "8px 22px", background: "#FAF7F2", borderRadius: "10px 10px 0 0", fontFamily: F.sans, fontSize: 20, color: "#555", alignSelf: "flex-end" }}>Swap · tab {i + 1}</div>
-          </div>
-          <div style={{ padding: "34px 46px" }}>
-            {i === 0 && (
-              <div style={{ display: "flex", gap: 22, marginBottom: 26 }}>
-                {[["You pay", typed("10 BTC", EV.typePay)], ["You get", typed("USDT", EV.typeGet)]].map(([a, b]) => (
-                  <div key={a} style={{ flex: 1, background: "#EFEAE2", borderRadius: 16, padding: "16px 22px" }}>
-                    <div style={{ fontFamily: F.sans, fontSize: 20, color: "#777" }}>{a}</div>
-                    <div style={{ fontFamily: F.mono, fontSize: 40, color: "#1A1A1A", height: 50 }}>{b}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div style={{ opacity: quoteIn, transform: `translateY(${(1 - quoteIn) * 20}px)` }}>
-              <div style={{ fontFamily: F.sans, fontSize: 22, color: "#777", display: "flex", gap: 14, alignItems: "center" }}>
-                Quote
-                {i === 2 && drift > 0.05 && <span style={{ fontSize: 18, color: "#C0392B", background: "#F7DCD8", borderRadius: 8, padding: "3px 10px" }}>price changed</span>}
-              </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginTop: 6 }}>
-                <span style={{ fontFamily: F.mono, fontSize: i === 0 ? 76 : 92, color: i === 2 && drift > 0.05 ? "#C0392B" : lerp(0, 1, low) > 0.5 ? "#8A8A8A" : "#1A1A1A", letterSpacing: "-0.02em" }}>{fmt(shown)}</span>
-                <span style={{ fontFamily: F.sans, fontSize: 30, color: "#888" }}>USDT</span>
-                {i === 1 && <span style={{ fontFamily: F.mono, fontSize: 26, color: "#2E8B57", opacity: better }}>+{fmt(QUOTES[1] - QUOTES[0])}</span>}
-              </div>
-            </div>
-            <div style={{ position: "absolute", left: 46, right: 46, bottom: 40, display: "flex", gap: 18, opacity: quoteIn }}>
-              <div style={{ flex: 1, height: 74, borderRadius: 16, border: `2px solid ${cancelHot ? "#1A1A1A" : "#CFC8BD"}`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.sans, fontSize: 28, fontWeight: 600, color: "#1A1A1A", background: cancelHot ? "#E9E3D9" : "transparent" }}>Cancel</div>
-              <div style={{ flex: 1, height: 74, borderRadius: 16, background: "#1A1A1A", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.sans, fontSize: 28, fontWeight: 600, color: "#FAF7F2" }}>Swap</div>
-            </div>
-          </div>
-        </div>
-        {/* "is it the best?" */}
-        {i === 1 && (
-          <div style={{ position: "absolute", left: L + WIN_W + 10, top: T + 60, opacity: isBest, transform: `scale(${lerp(0.6, 1, isBest)}) rotate(${(1 - isBest) * 20}deg)` }}>
-            <Big size={220} color={ON.accent}>?</Big>
-          </div>
-        )}
-        {i < 2 && cm > 0 && <Cursor x={lerp(L + WIN_W - 40, L + 46 + 230, cm)} y={lerp(T + WIN_H + 80, T + WIN_H - 78, cm)} press={press} op={1 - o} />}
-      </div>
-    </Blur>
-  );
-};
-
 // ───────────────────────────── Rift's own UI
 const VENUES = ["UNIT", "HYPERLIQUID", "CCTP", "COW SWAP", "UNISWAP", "VELORA", "KYBERSWAP", "ACROSS", "MAYAN", "RELAY", "CHAINFLIP", "NEAR", "LI.FI", "OKX", "TRANSIT", "NORDSTERN", "FLY.TRADE", "METRIC"];
 
-const Marquee: React.FC = () => {
+export const Marquee: React.FC = () => {
   const f = useCurrentFrame();
   const t = sec(f);
   if (t < EV.venues - 0.3 || t > EV.venuesEnd + 0.6) return null;
@@ -156,7 +76,7 @@ const TOK = [
 ];
 const HOPS = ["UNIT", "HYPERLIQUID", "CCTP", "COW SWAP"];
 
-const RiftUI: React.FC = () => {
+export const RiftUI: React.FC = () => {
   const f = useCurrentFrame();
   const t = sec(f);
   if (t < EV.sweep || t > EV.phoneIn + 0.5) return null;
@@ -236,7 +156,7 @@ const RiftUI: React.FC = () => {
           })}
           {/* output + comparison (rift.trade's rate comparison) */}
           <div style={{ position: "absolute", right: 60, top: 70, textAlign: "right", opacity: res, transform: `translateX(${(1 - res) * 40}px)` }}>
-            <div style={{ display: "inline-block", fontFamily: F.mono, fontSize: 20, color: C.green, border: "1px solid rgba(34,197,94,0.45)", background: "rgba(34,197,94,0.1)", borderRadius: 8, padding: "6px 12px" }}>+{fmt(RIFT - QUOTES[2])} vs. your best tab</div>
+            <div style={{ display: "inline-block", fontFamily: F.mono, fontSize: 20, color: C.green, border: "1px solid rgba(34,197,94,0.45)", background: "rgba(34,197,94,0.1)", borderRadius: 8, padding: "6px 12px" }}>+{fmt(RIFT - QUOTES[2])} vs. next best</div>
             <div style={{ fontFamily: F.mono, fontSize: 54, color: C.green, marginTop: 14 }}>{fmt(RIFT)}</div>
             <div style={{ fontFamily: F.mono, fontSize: 20, color: C.mute, marginTop: 6 }}>USDT · ethereum</div>
           </div>
@@ -247,7 +167,7 @@ const RiftUI: React.FC = () => {
 };
 
 // ───────────────────────────── 0 added fees · close · creator card
-const Fees: React.FC = () => {
+export const Fees: React.FC = () => {
   const f = useCurrentFrame();
   const t = sec(f);
   if (t < EV.fees - 0.1 || t > EV.closeLogo + 0.2) return null;
@@ -270,7 +190,7 @@ const Fees: React.FC = () => {
 };
 
 // Rift on a phone — tilts in, settles, the tap lands on TRADE on "click"
-const Phone: React.FC = () => {
+export const Phone: React.FC = () => {
   const f = useCurrentFrame();
   const t = sec(f);
   if (t < EV.phoneIn - 0.05 || t > EV.closeLogo + 0.2) return null;
@@ -317,7 +237,7 @@ const Phone: React.FC = () => {
             <div style={{ position: "absolute", left: 24, right: 24, top: 384, borderRadius: 26, background: "#0E1A12", border: "2px solid rgba(34,197,94,0.5)", padding: "20px 24px" }}>
               <div style={{ fontFamily: F.mono, fontSize: 15, color: C.mute }}>You get · best price</div>
               <div style={{ fontFamily: F.mono, fontSize: 42, color: C.green, marginTop: 6 }}>645,331.16</div>
-              <div style={{ fontFamily: F.mono, fontSize: 16, color: C.green, marginTop: 4 }}>+1,165.27 vs. your best tab</div>
+              <div style={{ fontFamily: F.mono, fontSize: 16, color: C.green, marginTop: 4 }}>+1,165.27 vs. next best</div>
               <div style={{ marginTop: 12, height: 52, borderRadius: 12, background: C.pillBlue, border: `2px solid ${C.pillBlueBorder}`, display: "flex", alignItems: "center", paddingLeft: 14, fontFamily: F.mono, fontSize: 22, color: C.ink }}>ethereum.usdt</div>
             </div>
             {/* TRADE */}
@@ -335,7 +255,7 @@ const Phone: React.FC = () => {
   );
 };
 
-const Close: React.FC = () => {
+export const Close: React.FC = () => {
   const f = useCurrentFrame();
   const t = sec(f);
   if (t < EV.closeLogo - 0.2 || t > EV.card + 0.3) return null;
@@ -357,7 +277,7 @@ const Close: React.FC = () => {
   );
 };
 
-const Card: React.FC = () => {
+export const Card: React.FC = () => {
   const f = useCurrentFrame();
   if (sec(f) < EV.card - 0.05) return null;
   const k = p(f, EV.card, 0.6, E.snap);
@@ -380,23 +300,3 @@ const Card: React.FC = () => {
   );
 };
 
-export const Hunt: React.FC = () => {
-  const [handle] = useState(() => delayRender("fonts"));
-  useEffect(() => {
-    Promise.all([document.fonts.load("600 40px InterV"), document.fonts.load("400 20px Sometype")]).then(() => document.fonts.ready).then(() => continueRender(handle));
-  }, [handle]);
-  return (
-    <AbsoluteFill style={{ background: BG, overflow: "hidden" }}>
-      <FontFaces />
-      <Window i={0} />
-      <Window i={1} />
-      <Window i={2} />
-      <Marquee />
-      <RiftUI />
-      <Phone />
-      <Fees />
-      <Close />
-      <Card />
-    </AbsoluteFill>
-  );
-};

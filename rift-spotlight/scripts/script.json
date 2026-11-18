@@ -1,33 +1,38 @@
 [
  {
-  "id": "setup",
-  "tts": "Say you want to swap ten bitcoin into dollars.",
-  "el": "Say you want to swap ten bitcoin into dollars."
+  "id": "boy",
+  "tts": "As a young boy, I always felt bad about leaving the woman I bought from, just because she sold higher than others.",
+  "el": "As a young boy, I always felt bad about leaving the woman I bought from, just because she sold higher than others."
  },
  {
-  "id": "q1",
-  "tts": "First quote comes in. Feels low.",
-  "el": "First quote comes in. Feels low."
+  "id": "excuses",
+  "tts": "I'd think about her age, her bills, the stress of getting the goods here. It's only a small difference, I'd tell myself. I made excuses for her.",
+  "el": "I'd think about her age, her bills, the stress of getting the goods here. It's only a small difference, I'd tell myself. I made excuses for her."
  },
  {
-  "id": "q2",
-  "tts": "So you try somewhere else. Slightly better, but is it the best?",
-  "el": "So you try somewhere else. Slightly better, but is it the best?"
+  "id": "grew",
+  "tts": "Then I grew up, and started sending my younger ones on errands.",
+  "el": "Then I grew up, and started sending my younger ones on errands."
  },
  {
-  "id": "q3",
-  "tts": "One more tab, and now the price has moved.",
-  "el": "One more tab, and now the price has moved."
+  "id": "kids",
+  "tts": "They don't feel bad. They know where it's sold higher, and where it's cheaper, and they'll walk the extra distance to buy it there.",
+  "el": "They don't feel bad. They know where it's sold higher, and where it's cheaper, and they'll walk the extra distance to buy it there."
+ },
+ {
+  "id": "thats",
+  "tts": "That's what Rift does with your money.",
+  "el": "That's what Rift does with your money."
  },
  {
   "id": "rift",
-  "tts": "Rift does that hunting for you. It checks over twenty venues at once, and takes the best route, even if that runs across three chains.",
-  "el": "Rift does that hunting for you. It checks over twenty venues at once, and takes the best route, even if that runs across three chains."
+  "tts": "It checks over twenty venues across eight chains, every step of the way, and takes the cheapest route, even if it means walking through three chains to get there.",
+  "el": "It checks over twenty venues across eight chains, every step of the way, and takes the cheapest route, even if it means walking through three chains to get there."
  },
  {
-  "id": "click",
-  "tts": "One click. No added fees.",
-  "el": "One click. No added fees."
+  "id": "stimmy",
+  "tts": "And like my younger ones, it doesn't ask for a stimmy. Zero added fees.",
+  "el": "And like my younger ones, it doesn't ask for a stimmy. Zero added fees."
  },
  {
   "id": "close",

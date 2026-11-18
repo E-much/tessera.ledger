@@ -293,30 +293,34 @@ def soft_hit(level=1.0):
 # relative SFX levels (pre-mix); final check enforces SFX < VO and < music
 L_TICK, L_CLICK, L_LOCK, L_WHOOSH = 0.05, 0.16, 0.16, 0.06
 
-# the hunt: typing, each tab sliding in, each Cancel click, the price slipping
-for a0 in (EV["typePay"], EV["typeGet"]):
-    for t in np.linspace(a0 - 0.1, a0 + 0.3, 6):
-        add_sfx(None, click(L_CLICK * 0.22), t)
-add_sfx(None, tick(L_TICK * 1.2, 1500), EV["q"][0])
-for t in EV["q"][1:]:
-    add_sfx(None, whoosh(0.34, L_WHOOSH * 0.8), t - 0.3)
-for t in EV["cancel"]:
-    if t is not None:
-        add_sfx(None, click(L_CLICK * 0.8), t)
-        add_sfx(None, whoosh(0.4, L_WHOOSH * 0.6, up=False), t + 0.08)
-for k in range(10):
-    add_sfx(None, tick(L_TICK * 0.6, 1800 - 90 * k), EV["moved"] + k * 0.13)
-# Rift arrives
+# her stall, the others appearing
+add_sfx(None, soft_hit(0.14), 0.15)
+for i in range(3):
+    add_sfx(None, tick(L_TICK, 1600 + 150 * i), EV["others"] + i * 0.12)
+# the excuses: each note lands, then they all fall away
+for t in EV["reasons"]:
+    add_sfx(None, click(L_CLICK * 0.35), t)
+add_sfx(None, whoosh(0.5, L_WHOOSH * 0.7, up=False), EV["excuses"])
+# the errand: the street opens, footsteps, her price struck, the long walk, bought
+add_sfx(None, whoosh(0.5, L_WHOOSH * 0.7), EV["street"] - 0.25)
+for t in list(np.arange(EV["pass"] - 1.1, EV["pass"], 0.22)) + list(np.arange(EV["walk"], EV["buy"] + 0.1, 0.22)):
+    add_sfx(None, tick(L_TICK * 0.7, 900 + 200 * rng.random()), t)
+add_sfx(None, glitch(0.05), EV["pass"])
+add_sfx(None, tick(L_TICK * 1.2, 2000), EV["cheap"])
+add_sfx(None, lock(L_LOCK * 0.7), EV["buy"])
+# the stalls flip into venues, then Rift
+for i in range(4):
+    add_sfx(None, tick(L_TICK, 1800 + 120 * i), EV["morph"] + i * 0.09 + 0.25)
 add_sfx(None, whoosh(0.5, L_WHOOSH), EV["sweep"])
-add_sfx(None, soft_hit(0.2), EV["sweep"] + 0.35)
+add_sfx(None, soft_hit(0.18), EV["sweep"] + 0.35)
 for t in np.arange(EV["venues"], EV["venuesEnd"], 1 / 10):
     add_sfx(None, tick(L_TICK * 0.45, 2100 + 700 * rng.random()), t)
 for k in range(4):
     add_sfx(None, tick(L_TICK * 1.1, 1900), EV["route"] + k * (EV["chains"] - 0.1 - EV["route"]) / 4)
 add_sfx(None, lock(L_LOCK), EV["result"])
-add_sfx(None, whoosh(0.45, L_WHOOSH * 0.9), EV["phoneIn"] - 0.1)  # phone swings in
+# phone, tap, fees, close, card
+add_sfx(None, whoosh(0.45, L_WHOOSH * 0.9), EV["phoneIn"] - 0.1)
 add_sfx(None, click(L_CLICK), EV["click"])
-# fees / close / card
 add_sfx(None, whoosh(0.4, L_WHOOSH * 0.8), EV["fees"] - 0.2)
 add_sfx(None, soft_hit(0.14), EV["fees"])
 add_sfx(None, soft_hit(0.2), EV["closeLogo"])
