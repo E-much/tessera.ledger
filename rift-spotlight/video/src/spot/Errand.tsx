@@ -104,7 +104,7 @@ const Market: React.FC = () => {
   const out = p(f, EV.sweep, 0.45, E.exit);
   const streetK = p(f, EV.street - 0.2, 0.7, E.inOut);
   // the errand: home → past her stall → (beat) → the long walk to the cheapest
-  const r1 = p(f, EV.pass - 1.1, 1.1, E.inOut);
+  const r1 = p(f, EV.runner + 0.35, EV.pass + 0.1 - EV.runner - 0.35, E.inOut); // sets off on "errands", passes her on "sold higher"
   const r2 = p(f, EV.walk, EV.buy - EV.walk + 0.1, E.inOut);
   const runX = lerp(lerp(HOME_X, STALLS[0].x + 120, r1), STALLS[3].x, r2);
   const runOn = p(f, EV.runner - 0.05, 0.35, E.snap);

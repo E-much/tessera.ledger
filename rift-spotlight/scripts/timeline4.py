@@ -27,7 +27,7 @@ E = {
     "morph": w("thats", 2),
     # 6. Rift UI
     "sweep": round(w("rift", 0) - 0.35, 3), "riftIn": w("rift", 0), "venues": w("rift", 3), "venuesEnd": w("rift", 8), "route": w("rift", 14), "chains": w("rift", 24),
-    "result": round(end("rift") - 0.1, 3),
+    "result": round(w("rift", 24) + 0.35, 3),  # lands on "three chains" so it reads before the phone
     # 7. phone, no stimmy, zero fees
     "phoneIn": w("stimmy", 0) - 0.1, "click": w("stimmy", 7), "fees": w("stimmy", 11),
     # 8. close

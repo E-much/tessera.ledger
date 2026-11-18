@@ -304,7 +304,7 @@ for t in EV["reasons"]:
 add_sfx(None, whoosh(0.5, L_WHOOSH * 0.7, up=False), EV["excuses"])
 # the errand: the street opens, footsteps, her price struck, the long walk, bought
 add_sfx(None, whoosh(0.5, L_WHOOSH * 0.7), EV["street"] - 0.25)
-for t in list(np.arange(EV["pass"] - 1.1, EV["pass"], 0.22)) + list(np.arange(EV["walk"], EV["buy"] + 0.1, 0.22)):
+for t in list(np.arange(EV["runner"] + 0.35, EV["pass"], 0.3)) + list(np.arange(EV["walk"], EV["buy"] + 0.1, 0.22)):
     add_sfx(None, tick(L_TICK * 0.7, 900 + 200 * rng.random()), t)
 add_sfx(None, glitch(0.05), EV["pass"])
 add_sfx(None, tick(L_TICK * 1.2, 2000), EV["cheap"])
