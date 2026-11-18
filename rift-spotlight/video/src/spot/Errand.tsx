@@ -57,7 +57,7 @@ const Stall: React.FC<{ i: number; f: number }> = ({ i, f }) => {
           </>
         ) : (
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
-            <VenueLogo id={s.venue} scale={1.3} />
+            <VenueLogo id={s.venue} scale={s.venue === "cowswap" ? 0.95 : s.venue === "unit" ? 1.15 : 1.3} />
             <div style={{ fontFamily: F.mono, fontSize: 18, letterSpacing: "0.2em", color: C.mute }}>VENUE</div>
           </div>
         )}
