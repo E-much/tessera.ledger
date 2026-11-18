@@ -3,7 +3,7 @@ import { AbsoluteFill, continueRender, delayRender, useCurrentFrame } from "remo
 import EV from "../events.json";
 import { BG, C, E, F, FPS, ON, lerp, p } from "../theme";
 import { FontFaces } from "../ui";
-import { Big, Blur, Card, Close, Fees, Marquee, Phone, RiftUI } from "./Hunt";
+import { Big, Blur, Card, Close, Fees, Marquee, Phone, RiftUI, VenueLogo } from "./Hunt";
 
 // "The errand" — the creator's own story: the stall you felt bad leaving, the younger ones who just
 // walk to the cheapest one, and Rift doing that with your money.
@@ -14,10 +14,10 @@ const STREET_Y = 760;
 const HOME_X = 150;
 // her stall is closest to home and dearest; the cheapest is the furthest walk (illustrative prices)
 const STALLS = [
-  { x: 560, price: "₦1,200", venue: "UNIT" },
-  { x: 940, price: "₦1,150", venue: "HYPERLIQUID" },
-  { x: 1320, price: "₦1,100", venue: "CCTP" },
-  { x: 1700, price: "₦950", venue: "COW SWAP" },
+  { x: 560, price: "₦1,200", venue: "unit" },
+  { x: 940, price: "₦1,150", venue: "hyperliquid" },
+  { x: 1320, price: "₦1,100", venue: "cctp" },
+  { x: 1700, price: "₦950", venue: "cowswap" },
 ];
 const SW = 300, SH = 330;
 const REASONS = [
@@ -57,7 +57,7 @@ const Stall: React.FC<{ i: number; f: number }> = ({ i, f }) => {
           </>
         ) : (
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 14 }}>
-            <div style={{ fontFamily: F.mono, fontSize: 30, letterSpacing: "0.1em", color: C.white, border: `2px solid ${C.orange}`, borderRadius: 999, padding: "8px 22px", background: "#22150A" }}>{s.venue}</div>
+            <VenueLogo id={s.venue} scale={1.3} />
             <div style={{ fontFamily: F.mono, fontSize: 18, letterSpacing: "0.2em", color: C.mute }}>VENUE</div>
           </div>
         )}

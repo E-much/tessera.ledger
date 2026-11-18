@@ -41,27 +41,63 @@ const Cursor: React.FC<{ x: number; y: number; press: number; op?: number }> = (
 );
 
 // ───────────────────────────── Rift's own UI
-const VENUES = ["UNIT", "HYPERLIQUID", "CCTP", "COW SWAP", "UNISWAP", "VELORA", "KYBERSWAP", "ACROSS", "MAYAN", "RELAY", "CHAINFLIP", "NEAR", "LI.FI", "OKX", "TRANSIT", "NORDSTERN", "FLY.TRADE", "METRIC"];
+// Venue logos as served on rift.trade (/images/...). CoW Swap's mark is black → light chip.
+export const LOGOS: Record<string, { src: string; h: number; light?: boolean; label?: string }> = {
+  unit: { src: "logos/unit.png", h: 40 },
+  hyperliquid: { src: "logos/hyperliquid.svg", h: 46 },
+  cctp: { src: "logos/circle.svg", h: 44, label: "CCTP" },
+  cowswap: { src: "logos/cowswap.svg", h: 40, light: true },
+  uniswap: { src: "logos/uniswap.svg", h: 40 },
+  velora: { src: "logos/velora.svg", h: 40 },
+  kyberswap: { src: "logos/kyberswap.svg", h: 40 },
+  across: { src: "logos/across.svg", h: 30 },
+  mayan: { src: "logos/mayan.svg", h: 36 },
+  chainflip: { src: "logos/chainflip.webp", h: 38 },
+  near: { src: "logos/near.svg", h: 34 },
+  lifi: { src: "logos/lifi.svg", h: 34 },
+  okx: { src: "logos/okx.png", h: 34 },
+  nordstern: { src: "logos/nordstern.svg", h: 44 },
+  fly: { src: "logos/fly.svg", h: 40 },
+  metric: { src: "logos/metric.svg", h: 46 },
+};
+
+/** A venue logo on its chip (dark by default, light for dark marks). */
+export const VenueLogo: React.FC<{ id: string; scale?: number; chip?: boolean; style?: React.CSSProperties }> = ({ id, scale = 1, chip = true, style }) => {
+  const L = LOGOS[id];
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: 10 * scale, padding: chip ? `${12 * scale}px ${22 * scale}px` : 0, borderRadius: 16 * scale, background: chip ? (L.light ? "#FAF1E4" : "#16100A") : "transparent", border: chip && !L.light ? `${1.5 * scale}px solid ${C.orange}` : "none", ...style }}>
+      <Img src={staticFile(L.src)} style={{ height: L.h * scale, width: "auto", display: "block" }} />
+      {L.label && <span style={{ fontFamily: F.mono, fontSize: 20 * scale, letterSpacing: "0.1em", color: C.white }}>{L.label}</span>}
+    </div>
+  );
+};
+
+const STRIP = Object.keys(LOGOS);
 
 export const Marquee: React.FC = () => {
   const f = useCurrentFrame();
   const t = sec(f);
   if (t < EV.venues - 0.3 || t > EV.venuesEnd + 0.6) return null;
   const k = p(f, EV.venues - 0.2, 0.4, E.snap) * (1 - p(f, EV.venuesEnd, 0.45, E.exit));
+  const CHIP = 300;
+  const W = STRIP.length * CHIP;
   const row = (y: number, dir: number, speed: number, off: number) => {
-    const shift = ((t - EV.venues) * speed * dir + 2800) % 1400;
-    const rot = [...VENUES.slice(off % VENUES.length), ...VENUES.slice(0, off % VENUES.length)];
-    const txt = [...rot, ...rot].join("   ·   ");
+    const shift = (((t - EV.venues) * speed * dir) % W + W) % W;
+    const rot = [...STRIP.slice(off), ...STRIP.slice(0, off)];
     return (
-      <div style={{ position: "absolute", left: -1400 + shift, top: y, whiteSpace: "nowrap", fontFamily: F.mono, fontSize: 64, letterSpacing: "0.06em", color: ON.ink, opacity: 0.9 }}>{txt}</div>
+      <div style={{ position: "absolute", left: -W + shift, top: y, display: "flex" }}>
+        {[...rot, ...rot, ...rot].map((id, j) => (
+          <div key={j} style={{ width: CHIP, display: "flex", justifyContent: "center" }}>
+            <VenueLogo id={id} />
+          </div>
+        ))}
+      </div>
     );
   };
   return (
     <div style={{ position: "absolute", inset: 0, opacity: k }}>
-      {row(52, 1, 420, 0)}
-      {row(140, -1, 300, 7)}
-      {row(860, 1, 360, 12)}
-      {row(948, -1, 460, 4)}
+      {row(70, 1, 380, 0)}
+      {row(880, -1, 320, 8)}
     </div>
   );
 };
@@ -74,7 +110,7 @@ const TOK = [
   { x: 1050, tk: "USDC", chain: "Ethereum" },
   { x: 1260, tk: "USDT", chain: "Ethereum" },
 ];
-const HOPS = ["UNIT", "HYPERLIQUID", "CCTP", "COW SWAP"];
+const HOPS = ["unit", "hyperliquid", "cctp", "cowswap"];
 
 export const RiftUI: React.FC = () => {
   const f = useCurrentFrame();
@@ -137,7 +173,9 @@ export const RiftUI: React.FC = () => {
           {HOPS.map((h, j) => {
             const k = Math.max(0, Math.min(1, (draw - j) * 2));
             return (
-              <div key={h} style={{ position: "absolute", left: (TOK[j].x + TOK[j + 1].x) / 2 - RX, top: 96, transform: `translate(-50%, ${(1 - k) * 10}px)`, opacity: k, fontFamily: F.mono, fontSize: 17, letterSpacing: "0.1em", color: C.white, background: "#22150A", border: `1.5px solid ${C.orange}`, borderRadius: 999, padding: "4px 12px", whiteSpace: "nowrap" }}>{h}</div>
+              <div key={h} style={{ position: "absolute", left: (TOK[j].x + TOK[j + 1].x) / 2 - RX, top: 64, transform: `translate(-50%, ${(1 - k) * 10}px)`, opacity: k }}>
+                <VenueLogo id={h} scale={0.62} />
+              </div>
             );
           })}
           {/* three chains */}
@@ -265,7 +303,7 @@ export const Close: React.FC = () => {
   return (
     <div style={{ position: "absolute", inset: 0, opacity: 1 - o, transform: `scale(${lerp(1, 0.9, o)})` }}>
       <div style={{ position: "absolute", left: 0, width: 1920, top: 250, textAlign: "center", opacity: Math.min(1, r * 2), transform: `scale(${lerp(1.5, 1, r)})` }}>
-        <Big size={280}>Rift<span style={{ color: ON.accent }}>.</span></Big>
+        <Img src={staticFile("logos/rift-full.svg")} style={{ height: 200, width: "auto", display: "inline-block" }} />
       </div>
       {/* rift.trade's hero line */}
       <div style={{ position: "absolute", left: 0, width: 1920, top: 640, textAlign: "center", opacity: h, transform: `translateY(${(1 - h) * 30}px)` }}>
