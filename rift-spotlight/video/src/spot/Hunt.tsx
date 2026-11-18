@@ -126,6 +126,7 @@ export const RiftUI: React.FC = () => {
   const keys = [
     { t: EV.riftIn, x: 960, y: 540, s: 1 },
     { t: EV.route, x: 960, y: 640, s: 1.16 },
+    { t: EV.result + 0.1, x: 960, y: 590, s: 0.97 },
   ];
   let cx = 960, cy = 540, cs = 1;
   for (let i = 1; i < keys.length; i++) {
@@ -199,6 +200,25 @@ export const RiftUI: React.FC = () => {
             <div style={{ fontFamily: F.mono, fontSize: 20, color: C.mute, marginTop: 6 }}>USDT · ethereum</div>
           </div>
         </div>
+
+        {/* the venues it beat — red rows, as on rift.trade */}
+        {[{ id: "near", v: QUOTES[2] }, { id: "lifi", v: QUOTES[0] }].map((c, j) => {
+          const k = p(f, EV.result + 0.15 + j * 0.12, 0.4, E.snap);
+          return (
+            <div key={c.id} style={{ position: "absolute", left: RX + j * 510, top: 790, width: 494, height: 112, borderRadius: 24, background: "#2A1414", opacity: k, transform: `translateY(${(1 - k) * 24}px)`, boxShadow: "0 30px 60px rgba(70,25,0,0.3)" }}>
+              <div style={{ position: "absolute", left: 30, top: 34 }}>
+                <VenueLogo id={c.id} chip={false} scale={1.1} />
+              </div>
+              <div style={{ position: "absolute", right: 30, top: 18, textAlign: "right", fontFamily: F.mono }}>
+                <div style={{ fontSize: 38, color: "#FF5A4E" }}>{fmt(c.v)}</div>
+                <div style={{ fontSize: 22, color: "#FF5A4E", marginTop: 2 }}>{(((c.v - RIFT) / RIFT) * 100).toFixed(2)}%</div>
+              </div>
+            </div>
+          );
+        })}
+        <div style={{ position: "absolute", left: RX + 1020, top: 790, width: 480, height: 112, borderRadius: 24, border: "1.5px dashed rgba(255,255,255,0.25)", background: "#14100C", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.mono, fontSize: 22, letterSpacing: "0.08em", color: "#9CA3AF", opacity: p(f, EV.result + 0.4, 0.4, E.snap) }}>
+          SHOW ALL (5) ⌄
+        </div>
       </div>
     </Blur>
   );
@@ -238,6 +258,7 @@ export const Phone: React.FC = () => {
   const tap = p(f, EV.click - 0.04, 0.4, E.settle);
   const press = p(f, EV.click - 0.05, 0.05, E.exit) * (1 - p(f, EV.click + 0.03, 0.2, E.settle));
   const done = p(f, EV.click + 0.08, 0.35, E.snap);
+  const scroll = p(f, EV.click + 0.45, 0.8, E.inOut); // after the tap, scroll to the result
   const ry = lerp(38, -10, k) + lerp(0, 4, toLeft);
   const x = lerp(960, 560, toLeft) + (1 - k) * 380 - o * 900;
   const PW = 430, PH = 880;
@@ -258,34 +279,54 @@ export const Phone: React.FC = () => {
             transformStyle: "preserve-3d",
           }}
         >
-          {/* screen */}
+          {/* screen — rift.trade mobile layout */}
           <div style={{ position: "absolute", inset: 14, borderRadius: 58, background: "#050506", overflow: "hidden" }}>
-            <div style={{ position: "absolute", left: "50%", top: 16, width: 120, height: 34, borderRadius: 17, background: "#000", transform: "translateX(-50%)" }} />
-            <div style={{ position: "absolute", left: 30, top: 74, display: "flex", alignItems: "center", gap: 12 }}>
-              <Logo size={46} />
-              <span style={{ fontFamily: F.sans, fontWeight: 600, fontSize: 26, color: C.white, letterSpacing: "-0.02em" }}>Swap</span>
+            <div style={{ position: "absolute", left: "50%", top: 16, width: 120, height: 34, borderRadius: 17, background: "#000", transform: "translateX(-50%)", zIndex: 3 }} />
+            <div style={{ position: "absolute", left: 0, right: 0, top: 0, transform: `translateY(${-scroll * 300}px)` }}>
+              {/* header */}
+              <div style={{ position: "absolute", left: 28, top: 70 }}>
+                <Img src={staticFile("logos/rift-full.svg")} style={{ height: 34, width: "auto" }} />
+              </div>
+              {/* input card */}
+              <div style={{ position: "absolute", left: 18, right: 18, top: 128, borderRadius: 28, background: "#141416", border: "1px solid rgba(255,255,255,0.08)", padding: 16, height: 404, boxSizing: "border-box" }}>
+                <div style={{ height: 92, borderRadius: 18, background: "rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 18px" }}>
+                  <span style={{ fontFamily: F.sans, fontSize: 52, fontWeight: 500, color: C.white, letterSpacing: "-0.03em" }}>10 BTC</span>
+                  <span style={{ fontFamily: F.mono, fontSize: 12, letterSpacing: "0.2em", color: "#6B7280" }}>← EDIT ME</span>
+                </div>
+                <div style={{ fontFamily: F.sans, fontSize: 20, color: C.mute, margin: "10px 6px 14px" }}>10 BTC ⇅</div>
+                <div style={{ height: 58, borderRadius: 14, background: "#3A2A10", border: "2px solid #F7931A", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.sans, fontSize: 24, color: C.ink }}>bitcoin.btc ⌄</div>
+                <div style={{ margin: "8px auto", width: 34, height: 34, borderRadius: 17, border: "1px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 16 }}>↓</div>
+                <div style={{ height: 58, borderRadius: 14, background: "#123B2E", border: "2px solid #26A17B", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.sans, fontSize: 24, color: C.ink }}>ethereum.usdt ⌄</div>
+                <div style={{ marginTop: 14, height: 70, borderRadius: 999, background: press > 0.3 ? "#B85E08" : C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.mono, fontSize: 28, fontWeight: 600, color: C.white, transform: `scale(${1 - 0.05 * press})` }}>
+                  {done > 0.5 ? "✓ ORDER PLACED" : "TRADE →"}
+                </div>
+                {t >= EV.click - 0.04 && tap < 1 && (
+                  <div style={{ position: "absolute", left: "50%", top: 346, width: 40 + 160 * tap, height: 40 + 160 * tap, borderRadius: 999, border: `3px solid rgba(255,255,255,${0.9 * (1 - tap)})`, transform: "translate(-50%, -50%)" }} />
+                )}
+              </div>
+              {/* RIFT card */}
+              <div style={{ position: "absolute", left: 18, right: 18, top: 552, borderRadius: 28, background: "#0E1A12", border: "2px solid rgba(34,197,94,0.5)", padding: "18px 20px", height: 250, boxSizing: "border-box" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <Img src={staticFile("logos/rift-full.svg")} style={{ height: 22, width: "auto" }} />
+                  <span style={{ fontFamily: F.mono, fontSize: 12, color: C.green, border: "1px solid rgba(34,197,94,0.45)", borderRadius: 8, padding: "4px 7px", whiteSpace: "nowrap" }}>+1,165.27 | +0.18%</span>
+                </div>
+                <div style={{ textAlign: "right", fontFamily: F.sans, fontSize: 44, fontWeight: 500, color: C.green, marginTop: 16 }}>645,331.16</div>
+                <div style={{ textAlign: "right", fontFamily: F.sans, fontSize: 17, color: C.mute }}>645331.161586 USDT</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 18, gap: 4 }}>
+                  {["unit", "hyperliquid", "cctp", "cowswap"].map((id) => <VenueLogo key={id} id={id} scale={0.34} />)}
+                </div>
+              </div>
+              {/* venues it beat */}
+              {[{ id: "near", v: 644165.89, d: "-0.18%" }, { id: "lifi", v: 639767.85, d: "-0.86%" }].map((c, j) => (
+                <div key={c.id} style={{ position: "absolute", left: 18, right: 18, top: 818 + j * 100, height: 88, borderRadius: 22, background: "#2A1414", display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 20px" }}>
+                  <VenueLogo id={c.id} chip={false} scale={0.8} />
+                  <div style={{ textAlign: "right", fontFamily: F.sans }}>
+                    <div style={{ fontSize: 28, color: "#FF5A4E" }}>{fmt(c.v)}</div>
+                    <div style={{ fontSize: 16, color: "#FF5A4E" }}>{c.d}</div>
+                  </div>
+                </div>
+              ))}
             </div>
-            {/* you pay / you get */}
-            <div style={{ position: "absolute", left: 24, right: 24, top: 150, borderRadius: 26, background: "#121214", padding: "22px 24px" }}>
-              <div style={{ fontFamily: F.mono, fontSize: 15, color: C.mute }}>You send</div>
-              <div style={{ fontFamily: F.mono, fontSize: 44, color: C.white, marginTop: 6 }}>10 BTC</div>
-              <div style={{ marginTop: 12, height: 52, borderRadius: 12, background: C.pillBlue, border: `2px solid ${C.pillBlueBorder}`, display: "flex", alignItems: "center", paddingLeft: 14, fontFamily: F.mono, fontSize: 22, color: C.ink }}>bitcoin.btc</div>
-            </div>
-            <div style={{ position: "absolute", left: "50%", top: 352, width: 44, height: 44, borderRadius: 22, background: "#1C1C20", transform: "translateX(-50%)", display: "flex", alignItems: "center", justifyContent: "center", color: C.mute, fontSize: 20 }}>↓</div>
-            <div style={{ position: "absolute", left: 24, right: 24, top: 384, borderRadius: 26, background: "#0E1A12", border: "2px solid rgba(34,197,94,0.5)", padding: "20px 24px" }}>
-              <div style={{ fontFamily: F.mono, fontSize: 15, color: C.mute }}>You get · best price</div>
-              <div style={{ fontFamily: F.mono, fontSize: 42, color: C.green, marginTop: 6 }}>645,331.16</div>
-              <div style={{ fontFamily: F.mono, fontSize: 16, color: C.green, marginTop: 4 }}>+1,165.27 vs. next best</div>
-              <div style={{ marginTop: 12, height: 52, borderRadius: 12, background: C.pillBlue, border: `2px solid ${C.pillBlueBorder}`, display: "flex", alignItems: "center", paddingLeft: 14, fontFamily: F.mono, fontSize: 22, color: C.ink }}>ethereum.usdt</div>
-            </div>
-            {/* TRADE */}
-            <div style={{ position: "absolute", left: 24, right: 24, bottom: 54, height: 92, borderRadius: 999, background: press > 0.3 ? "#B85E08" : C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.mono, fontSize: 32, fontWeight: 600, color: C.white, transform: `scale(${1 - 0.05 * press})` }}>
-              {done > 0.5 ? "✓ ORDER PLACED" : "TRADE →"}
-            </div>
-            {/* tap */}
-            {t >= EV.click - 0.04 && tap < 1 && (
-              <div style={{ position: "absolute", left: "50%", bottom: 100, width: 40 + 160 * tap, height: 40 + 160 * tap, borderRadius: 999, border: `3px solid rgba(255,255,255,${0.9 * (1 - tap)})`, transform: "translate(-50%, 50%)" }} />
-            )}
           </div>
         </div>
       </div>

@@ -294,7 +294,8 @@ def soft_hit(level=1.0):
 L_TICK, L_CLICK, L_LOCK, L_WHOOSH = 0.05, 0.16, 0.16, 0.06
 
 # her stall, the others appearing
-add_sfx(None, soft_hit(0.14), 0.15)
+add_sfx(None, whoosh(0.45, L_WHOOSH * 0.7), EV["herStall"] - 0.3)  # photo slides away
+add_sfx(None, soft_hit(0.14), EV["herStall"])
 for i in range(3):
     add_sfx(None, tick(L_TICK, 1600 + 150 * i), EV["others"] + i * 0.12)
 # the excuses: each note lands, then they all fall away

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { AbsoluteFill, continueRender, delayRender, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, continueRender, delayRender, staticFile, useCurrentFrame } from "remotion";
 import EV from "../events.json";
 import { BG, C, E, F, FPS, ON, lerp, p } from "../theme";
 import { FontFaces } from "../ui";
@@ -30,7 +30,7 @@ const REASONS = [
 const Stall: React.FC<{ i: number; f: number }> = ({ i, f }) => {
   const t = sec(f);
   const s = STALLS[i];
-  const k = i === 0 ? p(f, 0.1, 0.6, E.snap) : p(f, EV.others - 0.05 + (i - 1) * 0.12, 0.45, E.snap);
+  const k = i === 0 ? p(f, EV.herStall - 0.15, 0.6, E.snap) : p(f, EV.others - 0.05 + (i - 1) * 0.12, 0.45, E.snap);
   const crossed = i === 0 ? p(f, EV.pass, 0.35, E.snap) : 0;
   const cheapest = i === 3 ? p(f, EV.cheap, 0.4, E.snap) : 0;
   const bought = i === 3 ? p(f, EV.buy, 0.35, E.snap) : 0;
@@ -63,6 +63,25 @@ const Stall: React.FC<{ i: number; f: number }> = ({ i, f }) => {
         )}
       </div>
     </div>
+  );
+};
+
+/** "As a young boy…" — the photo, framed, slow push-in; slides away as her stall arrives. */
+const Boy: React.FC = () => {
+  const f = useCurrentFrame();
+  const t = sec(f);
+  if (t > EV.herStall + 0.6) return null;
+  const k = p(f, 0.0, 0.7, E.snap);
+  const o = p(f, EV.herStall - 0.25, 0.5, E.inOut);
+  const push = lerp(1, 1.07, p(f, 0, EV.herStall, E.inOut));
+  return (
+    <Blur id="boy" x={o * 40}>
+      <div style={{ position: "absolute", inset: 0, opacity: Math.min(1, k * 1.5) * (1 - o), transform: `translateX(${-o * 700}px) scale(${lerp(0.92, 1, k)})` }}>
+        <div style={{ position: "absolute", left: (1920 - 1020) / 2, top: (1080 - 680) / 2, width: 1020, height: 680, borderRadius: 34, overflow: "hidden", boxShadow: "0 50px 100px rgba(70,25,0,0.4)" }}>
+          <Img src={staticFile("boy.jpg")} style={{ width: "100%", height: "100%", objectFit: "cover", transform: `scale(${push})`, transformOrigin: "50% 35%" }} />
+        </div>
+      </div>
+    </Blur>
   );
 };
 
@@ -133,6 +152,7 @@ export const Errand: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: BG, overflow: "hidden" }}>
       <FontFaces />
+      <Boy />
       <Market />
       <Marquee />
       <RiftUI />
