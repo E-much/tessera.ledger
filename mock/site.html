@@ -1,0 +1,53 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+:root{--bg:#050705;--card:#0f140f;--line:rgba(195,234,110,.18);--lime:#c3ea6e;--ink:#f0f5ec;--mute:#8b9986;--red:#f26a57}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--bg);color:var(--ink);font-family:Inter,"Inter Display",system-ui,sans-serif;width:540px}
+.mono{font-family:"DejaVu Sans Mono",monospace}
+.top{display:flex;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--line);font-size:10px;letter-spacing:.12em}
+.top b{color:var(--lime)}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);margin-right:6px}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:18px 20px}
+.logo{font-weight:900;font-size:20px;letter-spacing:-.02em}.logo span{color:var(--lime)}
+.btn{background:var(--lime);color:#050705;font-weight:800;padding:10px 16px;border-radius:10px;font-size:13px}
+.hero{padding:56px 20px 40px;background:radial-gradient(120% 60% at 50% 0%,rgba(195,234,110,.18),transparent 70%)}
+.pill{display:inline-block;border:1px solid var(--line);color:var(--lime);border-radius:99px;padding:6px 12px;font-size:10px;letter-spacing:.2em;margin-bottom:22px}
+h1{font-size:50px;line-height:1.02;letter-spacing:-.04em;font-weight:900}h1 em{font-style:normal;color:var(--lime)}
+.sub{color:var(--mute);font-size:16px;line-height:1.5;margin:20px 0 28px}
+.ctas{display:flex;gap:10px}.ghost{border:1px solid var(--line);padding:10px 16px;border-radius:10px;font-weight:700;font-size:13px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 28px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.stat small{color:var(--mute);font-size:10px;letter-spacing:.15em}.stat div{font-size:28px;font-weight:900;margin-top:6px}.up{color:var(--lime);font-size:12px}
+.sec{padding:24px 20px}.sec h2{font-size:26px;letter-spacing:-.03em;margin-bottom:6px}.sec p{color:var(--mute);font-size:13px;margin-bottom:16px}
+.row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:8px}
+.row b{font-size:15px}.row .mono{font-size:11px;color:var(--mute)}.g{color:var(--lime);font-weight:800}.r{color:var(--red);font-weight:800}
+.chart{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:8px}
+.steps{display:grid;gap:10px}.step{display:flex;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.n{width:30px;height:30px;border-radius:8px;background:var(--lime);color:#050705;font-weight:900;display:grid;place-items:center;flex:none}
+.step b{display:block;margin-bottom:3px}.step span{color:var(--mute);font-size:13px}
+.cta{margin:20px;padding:30px 22px;border-radius:18px;background:var(--lime);color:#050705}.cta h2{font-size:30px;letter-spacing:-.03em;line-height:1.05}.cta p{margin:10px 0 18px;font-size:14px}
+.cta .btn{background:#050705;color:var(--lime);display:inline-block}
+</style></head><body>
+<div class="top mono"><span><span class="dot"></span><b>ORACLE: LIVE</b></span><span>SOLANA MAINNET</span></div>
+<div class="nav"><div class="logo">TESSERA<span>.</span>DESK</div><div class="btn">Launch App</div></div>
+<div class="hero"><div class="pill mono">PRE-IPO · ON-CHAIN</div>
+<h1>Own a piece of tomorrow's <em>giants</em>. Today.</h1>
+<p class="sub">Track, compare and simulate exits on tokenized pre-IPO exposure. One terminal, live on Solana.</p>
+<div class="ctas"><div class="btn">Open Terminal →</div><div class="ghost">How it works</div></div></div>
+<div class="stats">
+<div class="stat"><small class="mono">TOTAL TVL</small><div>$48.2M</div><span class="up">▲ 12.4% 7d</span></div>
+<div class="stat"><small class="mono">T-TOKENS LIVE</small><div>17</div><span class="up">▲ 3 new</span></div>
+<div class="stat"><small class="mono">AVG NAV SPREAD</small><div>-3.1%</div><span class="up">discount</span></div>
+<div class="stat"><small class="mono">HOLDERS</small><div>9,412</div><span class="up">▲ 840 30d</span></div></div>
+<div class="sec"><h2>Arbitrage Desk</h2><p>Spot price vs. proof-of-reserve NAV, updated live.</p>
+<div class="row"><div><b>tSPACEX</b><br><span class="mono">NAV $212.40</span></div><span class="g">-4.2%</span></div>
+<div class="row"><div><b>tOPENAI</b><br><span class="mono">NAV $96.10</span></div><span class="g">-2.8%</span></div>
+<div class="row"><div><b>tSTRIPE</b><br><span class="mono">NAV $41.75</span></div><span class="r">+1.3%</span></div>
+<div class="row"><div><b>tDATABRICKS</b><br><span class="mono">NAV $73.02</span></div><span class="g">-5.6%</span></div>
+<div class="chart"><svg viewBox="0 0 500 160" width="100%"><defs><linearGradient id="f" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#c3ea6e" stop-opacity=".35"/><stop offset="1" stop-color="#c3ea6e" stop-opacity="0"/></linearGradient></defs>
+<path d="M0 130 L40 120 L80 124 L120 100 L160 106 L200 80 L240 86 L280 62 L320 70 L360 44 L400 50 L440 28 L500 18 L500 160 L0 160Z" fill="url(#f)"/>
+<path d="M0 130 L40 120 L80 124 L120 100 L160 106 L200 80 L240 86 L280 62 L320 70 L360 44 L400 50 L440 28 L500 18" fill="none" stroke="#c3ea6e" stroke-width="3"/></svg></div></div>
+<div class="sec"><h2>Exit Simulator</h2><p>Model your return at IPO in three steps.</p><div class="steps">
+<div class="step"><div class="n">1</div><div><b>Pick a T-Token</b><span>Choose from 17 live pre-IPO pools.</span></div></div>
+<div class="step"><div class="n">2</div><div><b>Set an exit valuation</b><span>Drag to your IPO price target.</span></div></div>
+<div class="step"><div class="n">3</div><div><b>See your payout</b><span>Net of fees, waterfall included.</span></div></div></div></div>
+<div class="cta"><h2>Start tracking in 30 seconds.</h2><p>Free terminal. No sign-up to browse.</p><div class="btn">Open Tessera Desk →</div></div>
+<div style="height:30px"></div>
+</body></html>
