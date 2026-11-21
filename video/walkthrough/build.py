@@ -24,14 +24,16 @@ PIECES = [
     ('main', 38.3,  52.1,  "verification code … no one can get into your account"),
     ('main', 60.9,  62.3,  "So let's go."),
     ('op',   36.7,  41.26, "So this is my portfolio. Don't mind me, I'm a broke… (cut before the swear word)"),
-    ('main', 72.3,  77.45, "wow, look at the UI, I'm so in love with this"),
+    ('main', 72.3,  74.3,  "wow, look at the UI"),
+    #           75.1-81.9  removed: "I'm so in love in the UI with this" + stumble; the clean take follows
+    ('main', 82.0,  83.1,  "so much in love with this"),
     ('main', 83.3,  88.3,  "this is my current portfolio, and this is what we're trading with"),
     ('main', 90.2,  98.3,  "before I trade anything … let's go for Kalshi"),
     ('main', 99.3,  125.95, "read about Kalshi … loan participation rights … no voting or governance rights, just the token"),
     ('main', 132.9, 143.15, "you don't need access to the app, the company or the board meeting"),
     ('main', 144.4, 146.3, "just come here with $1, $2"),
     ('main', 156.3, 160.0, "SpaceX, it's the same thing there as well"),
-    ('main', 161.1, 169.85, "one company is coming as well, very soon, you'll have access to that too"),
+    ('main', 165.75, 169.85, "a company is coming as well, very soon, you'll have access to that too"),   # starts after the 'one, uh, one company' stumble
     ('main', 175.7, 181.45, "let's trade Kalshi … let me just buy $10"),
     ('main', 205.4, 210.35, "I'm just buying $10 of these. So then boom"),
     ('main', 211.6, 219.6, "settles on-chain, it's fast, they're using Solana"),
@@ -43,8 +45,7 @@ PIECES = [
     ('main', 263.4, 266.3, "I'm now a Kalshi, I'm now a SpaceX"),
     ('main', 268.6, 280.1, "the UI is very clean … really welcoming"),
     ('main', 281.3, 289.4, "my activities so far, my buys and sells, these are real"),
-    ('main', 290.1, 297.9, "the companies: SpaceX, OpenAI, Kalshi, and one is coming"),
-    ('main', 301.0, 302.6, "so we have access to them now"),
+    ('main', 290.1, 306.4, "the companies … one of those private companies is coming … we have access to them now, let's catch them while they still print"),
     ('main', 309.2, 312.2, "what else? Okay, let's come here"),
     ('main', 315.4, 324.15, "export account: my recovery key is here, I can reveal it if I want"),
     ('main', 333.1, 338.5, "if you lose it you can still get back in with Apple, Google or email"),
@@ -75,7 +76,7 @@ PANEL = [
     ('main', 90.2,  S + '02-dashboard.mp4', 18.0),
     ('main', 97.5,  S + '03-kalshi.mp4', 0.0),
     ('main', 156.3, S + '04-spacex.mp4', 0.0),
-    ('main', 161.1, S + '08-companies.mp4', 7.0),             # 'one company is coming' -> Coming soon row
+    ('main', 165.75, S + '08-companies.mp4', 7.0),            # 'a company is coming' -> Coming soon row
     ('main', 175.7, S + '05-buy-kalshi.mp4', 26.0),
     ('main', 180.5, S + '05-buy-kalshi.mp4', 31.9),           # '$10' typed as he says it
     ('main', 205.4, S + '05-buy-kalshi.mp4', 42.0),
@@ -104,7 +105,8 @@ FIX = {'Kaoshi': 'Kalshi', 'Kaoshi.': 'Kalshi.', 'Kaoshi,': 'Kalshi,', 'Cauchy':
 MERGE = [(('space', 'X'), 'SpaceX'), (('space', 'X,'), 'SpaceX,'), (('space', 'X.'), 'SpaceX.'), (('open', 'AI'), 'OpenAI'),
          (('open', 'AI.'), 'OpenAI.'), (('T', 'Kalshi'), 'T-Kalshi'), (('T', 'Kalshi,'), 'T-Kalshi,'), (('T', 'OpenAI'), 'T-OpenAI'),
          (('T', 'SpaceX.'), 'T-SpaceX.'), (('T', 'tokens'), 'T-tokens')]
-CONTEXT_FIX = {('main', 264.0): 'now', ('main', 265.2): 'now'}   # "I'm not a Kalshi" -> "I'm now a Kalshi"
+CONTEXT_FIX = {('main', 264.0): 'now', ('main', 265.2): 'now',
+               ('main', 304.08): 'catch', ('main', 304.9): 'while', ('main', 305.72): 'still', ('main', 306.0): 'print.'}   # "I'm not a Kalshi" -> "I'm now a Kalshi"
 FILLERS = {'um,', 'um', 'uh,', 'uh', 'Um,', 'Uh,'}
 GAP, PAD_IN, PAD_OUT = 0.55, 0.10, 0.14
 
