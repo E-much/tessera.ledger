@@ -1,0 +1,75 @@
+{
+ "source": "raw/screen.mp4",
+ "crop": "1280:658:0:34",
+ "note": "Source seconds. Skipped: 0-2.5 recorder UI, 9-89 waiting on sign-in, 339-381 settings + recovery key, 444+ frozen confirmation.",
+ "segments": [
+  {
+   "id": "01-signin",
+   "in": 2.5,
+   "out": 9.0,
+   "blur": true,
+   "what": "Welcome back: Apple / Google / email"
+  },
+  {
+   "id": "02-dashboard",
+   "in": 89.5,
+   "out": 126.0,
+   "what": "Portfolio: balance, holdings, performance, activity"
+  },
+  {
+   "id": "03-kalshi",
+   "in": 126.0,
+   "out": 170.0,
+   "what": "Kalshi page: chart, stats, about, Buy/Sell"
+  },
+  {
+   "id": "04-spacex",
+   "in": 181.0,
+   "out": 187.0,
+   "what": "SpaceX page"
+  },
+  {
+   "id": "05-buy-kalshi",
+   "in": 201.0,
+   "out": 261.0,
+   "what": "Buy T-Kalshi $10, confirm, success"
+  },
+  {
+   "id": "06-buy-spacex",
+   "in": 267.0,
+   "out": 297.0,
+   "what": "Buy T-SpaceX $7, success"
+  },
+  {
+   "id": "07-activity",
+   "in": 309.0,
+   "out": 317.0,
+   "what": "Activity history"
+  },
+  {
+   "id": "08-companies",
+   "in": 317.0,
+   "out": 337.0,
+   "what": "Companies: available now + Coming soon (REDACTED)"
+  },
+  {
+   "id": "09-auction",
+   "in": 381.5,
+   "out": 396.5,
+   "what": "Auction: how presales work, next presale TBD"
+  },
+  {
+   "id": "10-buy-openai",
+   "in": 398.5,
+   "out": 445.0,
+   "what": "Buy T-OpenAI $7, success"
+  }
+ ],
+ "blur_box": {
+  "x": 508,
+  "y": 413,
+  "w": 264,
+  "h": 29,
+  "note": "inside of the email field, crop coordinates"
+ }
+}
