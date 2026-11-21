@@ -9,7 +9,7 @@ timeline.json:
   "captions": {"words": "words.json", "offset": -0.8, "fix": {"E": "E-much", "-much.": ""}, "drop": ["nigga."]},
   "audio": "raw/build/opener_voice.wav" }
 """
-import json, sys, subprocess, numpy as np
+import json, sys, subprocess, numpy as np, cv2
 from PIL import Image, ImageDraw, ImageFont
 
 W, H, BG = 1920, 1080, (12, 12, 12)
@@ -103,7 +103,19 @@ for f in range(N):
         fr[:] = active.next().astype(np.float32); strip.next()
         img = Image.fromarray(fr.astype(np.uint8)); enc.stdin.write(img.tobytes()); continue
     if active is not None:
-        p = active.next().astype(np.float32)
+        p = active.next()
+        z = 1.0
+        for zm in T.get('zooms', []):     # ease in 0.45s, hold, ease out 0.45s
+            a, d = zm['at'], zm['dur']
+            if a <= t <= a + d:
+                k = min(1, (t - a) / .45, (a + d - t) / .45); k = k * k * (3 - 2 * k)
+                z = 1 + (zm['z'] - 1) * k; zcx, zcy = zm['cx'], zm['cy']
+        if z > 1.001:
+            cw, ch = PW / z, PH / z
+            x0 = min(max(zcx * PW - cw / 2, 0), PW - cw); y0 = min(max(zcy * PH - ch / 2, 0), PH - ch)
+            M = np.float32([[z, 0, -x0 * z], [0, z, -y0 * z]])
+            p = cv2.warpAffine(p, M, (PW, PH), flags=cv2.INTER_CUBIC)
+        p = p.astype(np.float32)
         fr[PY:PY + PH, PX:PX + PW] = p * PMASK + fr[PY:PY + PH, PX:PX + PW] * (1 - PMASK)
     s = strip.next().astype(np.float32)
     fr[SY:SY + SH, SX:SX + SW] = s * SMASK + fr[SY:SY + SH, SX:SX + SW] * (1 - SMASK)

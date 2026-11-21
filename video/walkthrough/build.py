@@ -87,7 +87,7 @@ PANEL = [
     ('main', 268.6, S + '02-dashboard.mp4', 6.0),
     ('main', 281.3, S + '07-activity.mp4', 0.0),
     ('main', 290.1, S + '08-companies.mp4', 3.0),
-    ('main', 295.3, S + '09-auction.mp4', 0.0),
+    ('main', 295.3, S + '09-auction.mp4', 3.0),              # skip the Account page (shows the email)
     ('main', 309.2, S + '11-recovery.mp4', 0.0),
     ('main', 339.6, S + '03-kalshi.mp4', 30.0),
     ('main', 346.4, S + 'card-availability.png', 0.0),
@@ -96,6 +96,10 @@ PANEL = [
     ('main', 394.3, S + '10-buy-openai.mp4', 36.0),
     ('main', 405.3, S + '08-companies.mp4', 0.0),
 ]
+# ---- zoom-ins on the panel: (source, source time, duration, centre x, centre y, zoom) ---------------
+ZOOMS = [('op', 29.7, 2.6, .5, .33, 1.6), ('main', 180.6, 2.4, .5, .33, 1.6), ('main', 208.3, 4.2, .5, .45, 1.45),
+         ('main', 248.3, 2.4, .5, .33, 1.6), ('main', 261.0, 3.6, .5, .45, 1.45), ('main', 295.8, 3.4, .5, .55, 1.3),
+         ('main', 316.5, 4.0, .5, .5, 1.4), ('main', 377.5, 2.6, .5, .33, 1.6)]
 CLOSING = {'file': 'raw/seg/closing.mp4', 'from': 0.0, 'full': True}   # Tessera end card (tessera.pe)
 
 # ---- caption corrections (whisper mishearings) ----------------------------------------------------
@@ -250,6 +254,7 @@ timeline = {'duration': round(TALK + END_CARD, 3), 'fps': 30,
             'strip': {'file': 'raw/build/talk_strip.mp4', 'from': 0},
             'panel': panel,
             'captions': {'words': 'final_words.json', 'offset': 0},
+            'zooms': [{'at': round(to_out(k, x), 3), 'dur': d, 'cx': cx, 'cy': cy, 'z': z} for k, x, d, cx, cy, z in ZOOMS],
             'audio': 'raw/build/talk_mix.wav'}
 json.dump(timeline, open('final.timeline.json', 'w'), indent=1)
 print(f'{len(out_ranges)} cuts, talk {TALK:.1f}s, total {TALK + END_CARD:.1f}s')
