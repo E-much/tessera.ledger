@@ -20,20 +20,20 @@ PIECES = [
     ('op',   6.0,   15.05, "Tessera launched their web app … a Solana wallet ready for them"),
     #           15.5-18.3 removed: "the seed phrase, the recovery phrase" (Tessera calls it a recovery key)
     ('op',   18.12, 35.30, "and it is well secured … let's explore the whole thing together"),   # cut points set in measured silences
-    ('main', 31.0,  37.0,  "I'm signing in with my Gmail, you guys should see my portfolio"),
+    ('main', 30.70, 37.0,  "I'm signing in with my Gmail, you guys should see my portfolio"),
     ('main', 38.3,  52.1,  "verification code … no one can get into your account"),
-    ('main', 60.9,  62.3,  "So let's go."),
+    ('main', 61.12, 62.3,  "So let's go."),
     ('op',   36.7,  41.26, "So this is my portfolio. Don't mind me, I'm a broke… (cut before the swear word)"),
-    ('main', 72.3,  75.04, "wow, look at the UI"),   # 'UI' is really 74.4-75.0; cut in the measured gap before "I'm"
+    ('main', 72.44, 75.04, "wow, look at the UI"),   # 'UI' is really 74.4-75.0; cut in the measured gap before "I'm"
     #           75.1-81.9  removed: "I'm so in love in the UI with this" + stumble; the clean take follows
     ('main', 82.0,  83.1,  "so much in love with this"),
     ('main', 83.3,  88.3,  "this is my current portfolio, and this is what we're trading with"),
     ('main', 90.2,  98.3,  "before I trade anything … let's go for Kalshi"),
-    ('main', 99.3,  125.95, "read about Kalshi … loan participation rights … no voting or governance rights, just the token"),
+    ('main', 99.3,  125.94, "read about Kalshi … loan participation rights … no voting or governance rights, just the token"),
     ('main', 132.9, 143.15, "you don't need access to the app, the company or the board meeting"),
-    ('main', 144.4, 146.3, "just come here with $1, $2"),
+    ('main', 144.04, 146.78, "just come here with $1, $2"),
     ('main', 156.3, 160.0, "SpaceX, it's the same thing there as well"),
-    ('main', 165.75, 169.85, "a company is coming as well, very soon, you'll have access to that too"),   # starts after the 'one, uh, one company' stumble
+    ('main', 165.76, 169.85, "a company is coming as well, very soon, you'll have access to that too"),   # starts after the 'one, uh, one company' stumble
     ('main', 175.7, 181.45, "let's trade Kalshi … let me just buy $10"),
     ('main', 205.4, 210.35, "I'm just buying $10 of these. So then boom"),
     ('main', 211.6, 219.6, "settles on-chain, it's fast, they're using Solana"),
@@ -49,13 +49,13 @@ PIECES = [
     ('main', 309.2, 312.2, "what else? Okay, let's come here"),
     ('main', 315.4, 324.15, "export account: my recovery key is here, I can reveal it if I want"),
     ('main', 333.1, 338.5, "if you lose it you can still get back in with Apple, Google or email"),
-    ('main', 339.6, 341.45, "it's really nice, I really love the app"),
+    ('main', 339.36, 341.45, "it's really nice, I really love the app"),
     ('main', 346.4, 351.7, "it's not open to US people"),
     #           357.6-358.6  removed: quests (not live yet)
     ('main', 369.0, 371.45, "Oh sorry, I didn't get to OpenAI"),
     ('main', 375.35, 380.3, "let me just get maybe seven dollars worth of this"),
     #           381.3-393.8  removed: "I already made some money … gonna make more"
-    ('main', 394.3, 411.1, "the T-tokens … three of them: T-Kalshi, T-OpenAI and T-SpaceX"),
+    ('main', 394.3, 411.6, "the T-tokens … three of them: T-Kalshi, T-OpenAI and T-SpaceX"),
     #           413.4-419.8 removed: "See you" + standing up / shouting at the kids
 ]
 END_CARD = 5.0   # seconds of closing card after the last word
@@ -76,7 +76,7 @@ PANEL = [
     ('main', 90.2,  S + '02-dashboard.mp4', 18.0),
     ('main', 97.5,  S + '03-kalshi.mp4', 0.0),
     ('main', 156.3, S + '04-spacex.mp4', 0.0),
-    ('main', 165.75, S + '08-companies.mp4', 7.0),            # 'a company is coming' -> Coming soon row
+    ('main', 165.76, S + '08-companies.mp4', 7.0),            # 'a company is coming' -> Coming soon row
     ('main', 175.7, S + '05-buy-kalshi.mp4', 26.0),
     ('main', 180.5, S + '05-buy-kalshi.mp4', 31.9),           # '$10' typed as he says it
     ('main', 205.4, S + '05-buy-kalshi.mp4', 42.0),
@@ -138,8 +138,8 @@ for k, s, e, _ in PIECES:
     cur = s
     for a, b in zip(ws, ws[1:]):
         if b['s'] - a['e'] > LONG:
-            ranges.append((k, fa(cur), fa(a['e'] + KEEP_AFTER))); cur = b['s'] - KEEP_BEFORE
-    ranges.append((k, fa(cur), fa(e)))
+            ranges.append((k, cur, a['e'] + KEEP_AFTER)); cur = b['s'] - KEEP_BEFORE
+    ranges.append((k, cur, e))
 # snap every cut point to real silence in the voice (whisper timings can be ~0.3s off),
 # without crossing into words that were deliberately left out
 import soundfile as _sf, numpy as _np
@@ -147,29 +147,36 @@ ENV = {}
 for _k in SRC:
     _a, _sr = _sf.read(SRC[_k]['voice'].replace('_dn.wav', '.wav').replace('main_voice.wav', 'main_voice_raw.wav')); _h = int(_sr * .01)
     ENV[_k] = (20 * _np.log10(_np.array([_np.sqrt((_a[i*_h:(i+1)*_h] ** 2).mean()) for i in range(len(_a) // _h)]) + 1e-9), SRC[_k]['voice0'])
-def loud(k, x):
-    db, v0 = ENV[k]; i = int((x - v0) * 100); return 0 <= i < len(db) and db[i] > -38
-def snap(k, x, direction, lo, hi):
-    y = x
-    for _ in range(50):                        # up to 0.5 s
-        if not loud(k, y) and not loud(k, y + .01 * direction) and not loud(k, y + .02 * direction): return y
-        y2 = y + .01 * direction
-        if not (lo <= y2 <= hi): return y
-        y = y2
-    return x
+def env_at(k, t0, t1):
+    db, v0 = ENV[k]; i0, i1 = max(0, int((t0 - v0) * 100)), min(len(db), int((t1 - v0) * 100))
+    return db[i0:i1], v0
+def quietest(k, t0, t1):
+    """time of the quietest 30 ms point in [t0, t1] (works even with background noise)"""
+    seg, v0 = env_at(k, t0, t1)
+    if len(seg) < 3: return None
+    from scipy.ndimage import maximum_filter1d as _mf
+    sm = _mf(seg, 8, mode='nearest')            # loudest point in each 80 ms window: pauses inside words (30-60 ms) don't qualify
+    return t0 + (int(_np.argmin(sm)) + .5) / 100
 kept_words = {k: [] for k in SRC}
-for k, s, e, _ in PIECES:
+for k, s, e, *_ in PIECES:
     kept_words[k] += [w for w in WORDS[k] if s - .05 <= w['s'] < e - .02]
 def bounds(k, x):                              # nearest left-out word on either side
     out = [w for w in WORDS[k] if w not in kept_words[k]]
-    lo = max([w['e'] + .02 for w in out if w['e'] <= x + .02] or [-1e9])
-    hi = min([w['s'] - .02 for w in out if w['s'] >= x - .02] or [1e9])
+    lo = max([w['e'] for w in out if w['e'] <= x + .02] or [-1e9])
+    hi = min([w['s'] + .12 for w in out if w['s'] >= x - .02] or [1e9])
     return lo, hi
+EXACT = {(k, round(t, 2)) for k, t in [('op', 15.05), ('op', 18.12), ('op', 41.26), ('main', 75.04), ('main', 30.70), ('main', 61.12),
+                                        ('main', 72.44), ('main', 144.04), ('main', 146.78), ('main', 339.36),
+                                        ('main', 125.94), ('main', 165.76)]}   # measured by hand
+def snap_start(k, x):
+    if (k, round(x, 2)) in EXACT: return x
+    lo, _ = bounds(k, x); q = quietest(k, max(x - .4, lo), x + .05); return x if q is None else q
+def snap_end(k, x):
+    if (k, round(x, 2)) in EXACT: return x
+    _, hi = bounds(k, x); q = quietest(k, x - .05, min(x + .6, hi)); return x if q is None else q
 snapped = []
 for k, s, e in ranges:
-    lo, hi = bounds(k, s); s2 = snap(k, s, -1, lo, hi)
-    lo, hi = bounds(k, e); e2 = snap(k, e, +1, lo, hi)
-    snapped.append((k, fa(s2), fa(e2)))
+    snapped.append((k, fa(snap_start(k, s)), fa(snap_end(k, e))))
 ranges = [r for r in snapped if r[2] - r[1] >= 2 / FPS]
 # merge ranges that now touch or overlap
 merged = []
