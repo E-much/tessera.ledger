@@ -15,7 +15,11 @@ SRC = {  # strip video (already graded/cropped), cleaned voice, word timings, an
 
 # ---- what's kept, in order: (source, start, end, note) -------------------------------------------
 PIECES = [
-    ('op',   1.0,   35.30, "GM GM guys, this is E-much … let's explore the whole thing together"),
+    ('op',   1.0,   4.55,  "GM GM guys, this is E-much. So"),
+    #           4.5-6.0   removed: "just two days ago" (dates the video)
+    ('op',   6.0,   15.05, "Tessera launched their web app … a Solana wallet ready for them"),
+    #           15.5-18.3 removed: "the seed phrase, the recovery phrase" (Tessera calls it a recovery key)
+    ('op',   18.12, 35.30, "and it is well secured … let's explore the whole thing together"),   # cut points set in measured silences
     ('main', 31.0,  37.0,  "I'm signing in with my Gmail, you guys should see my portfolio"),
     ('main', 38.3,  52.1,  "verification code … no one can get into your account"),
     ('main', 60.9,  62.3,  "So let's go."),
@@ -57,7 +61,7 @@ S = 'raw/seg/'
 PANEL = [
     ('op',   1.0,   S + 'closing.mp4', 0.3),
     ('op',   5.6,   S + '01-signin.mp4', 0.0, 0.68),
-    ('op',   15.4,  S + '11-recovery.mp4', 0.0),
+    ('op',   18.12, S + '11-recovery.mp4', 0.0),
     ('op',   21.4,  S + '05-buy-kalshi.mp4', 21.9),
     ('op',   29.7,  S + '05-buy-kalshi.mp4', 30.35),           # '$1' on screen as he says 'just a dollar'
     ('op',   31.8,  S + '08-companies.mp4', 0.0),
@@ -119,16 +123,17 @@ WORDS = {k: load_words(k) for k in SRC}
 # ---- split pieces at long gaps and fillers -> ranges -----------------------------------------------
 ranges = []   # (src, s, e)
 for k, s, e, _ in PIECES:
-    ws = [w for w in WORDS[k] if w['s'] >= s - 0.05 and w['e'] <= e + 0.2 and w['w'] not in FILLERS]
-    allw = [w for w in WORDS[k] if w['s'] >= s - 0.05 and w['e'] <= e + 0.2]
+    inside = lambda w: w['s'] >= s - 0.05 and w['s'] < e - 0.02 and w['e'] <= e + 0.2
+    ws = [w for w in WORDS[k] if inside(w) and w['w'] not in FILLERS]
+    allw = [w for w in WORDS[k] if inside(w)]
     fill = [w for w in allw if w['w'] in FILLERS]
     if not ws: continue
-    cur = [max(s, ws[0]['s'] - PAD_IN), None]
+    cur = [s if ws[0]['s'] - s < 0.4 else ws[0]['s'] - PAD_IN, None]   # an explicit cut point close to the first word wins
     for a, b in zip(ws, ws[1:]):
         filler_between = any(a['e'] <= f['s'] and f['e'] <= b['s'] + 0.01 for f in fill)
         if b['s'] - a['e'] > GAP or filler_between:
             cur[1] = a['e'] + PAD_OUT; ranges.append((k, cur[0], cur[1])); cur = [b['s'] - PAD_IN, None]
-    cur[1] = min(e, ws[-1]['e'] + PAD_OUT) if ws[-1]['e'] < e else e
+    cur[1] = e if e - ws[-1]['e'] < 0.4 else ws[-1]['e'] + PAD_OUT
     ranges.append((k, cur[0], cur[1]))
 
 out_ranges, t = [], 0.0

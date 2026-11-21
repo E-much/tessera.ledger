@@ -1,5 +1,5 @@
 {
- "duration": 208.3,
+ "duration": 204.25,
  "fps": 30,
  "strip": {
   "file": "raw/build/talk_strip.mp4",
@@ -14,181 +14,181 @@
   },
   {
    "file": "raw/seg/01-signin.mp4",
-   "at": 4.12,
+   "at": 3.07,
    "from": 0.0,
    "speed": 0.68
   },
   {
    "file": "raw/seg/11-recovery.mp4",
-   "at": 13.12,
+   "at": 11.7,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/05-buy-kalshi.mp4",
-   "at": 19.04,
+   "at": 14.98,
    "from": 21.9,
    "speed": 1.0
   },
   {
    "file": "raw/seg/05-buy-kalshi.mp4",
-   "at": 27.34,
+   "at": 23.28,
    "from": 30.35,
    "speed": 1.0
   },
   {
    "file": "raw/seg/08-companies.mp4",
-   "at": 29.06,
+   "at": 25.0,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/01-signin.mp4",
-   "at": 32.56,
+   "at": 28.5,
    "from": 2.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/01b-verify.mp4",
-   "at": 37.84,
+   "at": 33.86,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/02-dashboard.mp4",
-   "at": 51.64,
+   "at": 47.66,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/02-dashboard.mp4",
-   "at": 66.97,
+   "at": 63.05,
    "from": 18.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/03-kalshi.mp4",
-   "at": 74.21,
+   "at": 70.35,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/04-spacex.mp4",
-   "at": 100.7,
+   "at": 96.54,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/05-buy-kalshi.mp4",
-   "at": 103.88,
+   "at": 99.72,
    "from": 26.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/05-buy-kalshi.mp4",
-   "at": 108.08,
+   "at": 103.92,
    "from": 31.9,
    "speed": 1.0
   },
   {
    "file": "raw/seg/05-buy-kalshi.mp4",
-   "at": 108.92,
+   "at": 104.87,
    "from": 42.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/05-buy-kalshi.mp4",
-   "at": 111.62,
+   "at": 107.57,
    "from": 52.05,
    "speed": 1.0
   },
   {
    "file": "raw/seg/06-buy-spacex.mp4",
-   "at": 127.86,
+   "at": 123.81,
    "from": 12.8,
    "speed": 1.0
   },
   {
    "file": "raw/seg/06-buy-spacex.mp4",
-   "at": 130.41,
+   "at": 126.36,
    "from": 21.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/06-buy-spacex.mp4",
-   "at": 133.11,
+   "at": 129.06,
    "from": 26.8,
    "speed": 1.0
   },
   {
    "file": "raw/seg/02-dashboard.mp4",
-   "at": 135.53,
+   "at": 131.48,
    "from": 6.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/07-activity.mp4",
-   "at": 146.49,
+   "at": 142.44,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/08-companies.mp4",
-   "at": 152.93,
+   "at": 148.88,
    "from": 3.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/09-auction.mp4",
-   "at": 158.13,
+   "at": 154.08,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/11-recovery.mp4",
-   "at": 160.73,
+   "at": 156.68,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/03-kalshi.mp4",
-   "at": 173.1,
+   "at": 169.05,
    "from": 30.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/card-availability.png",
-   "at": 174.61,
+   "at": 170.56,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/10-buy-openai.mp4",
-   "at": 179.25,
+   "at": 175.2,
    "from": 2.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/10-buy-openai.mp4",
-   "at": 180.81,
+   "at": 176.76,
    "from": 7.5,
    "speed": 1.0
   },
   {
    "file": "raw/seg/10-buy-openai.mp4",
-   "at": 185.76,
+   "at": 181.71,
    "from": 36.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/08-companies.mp4",
-   "at": 196.36,
+   "at": 192.31,
    "from": 0.0,
    "speed": 1.0
   },
   {
    "file": "raw/seg/closing.mp4",
-   "at": 203.3,
+   "at": 199.25,
    "from": 0.0,
    "full": true
   }
