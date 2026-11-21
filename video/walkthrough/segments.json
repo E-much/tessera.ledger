@@ -1,7 +1,7 @@
 {
  "source": "raw/screen.mp4",
  "crop": "1280:658:0:34",
- "note": "Source seconds. Skipped: 0-2.5 recorder UI, 9-89 waiting on sign-in, 339-381 settings + recovery key, 444+ frozen confirmation.",
+ "note": "Source seconds. Skipped: 0-2.5 recorder UI, 9-89 waiting on sign-in, 339-348 and 356-381 settings (key never revealed; 348.5-356 kept as 11-recovery), 444+ frozen confirmation.",
  "segments": [
   {
    "id": "01-signin",
@@ -63,6 +63,12 @@
    "in": 398.5,
    "out": 445.0,
    "what": "Buy T-OpenAI $7, success"
+  },
+  {
+   "id": "11-recovery",
+   "in": 348.5,
+   "out": 356.0,
+   "what": "Export account: recovery key stays hidden ('Tap to reveal' checked every 0.5s)"
   }
  ],
  "blur_box": {

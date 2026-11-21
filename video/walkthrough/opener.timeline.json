@@ -1,0 +1,13 @@
+{ "duration": 41.3, "fps": 30,
+  "strip": {"file": "raw/build/opener_strip.mp4", "from": 0},
+  "panel": [
+    {"file": "../tessera-app/tessera-app.mp4", "at": 0.0,  "from": 22.3},
+    {"file": "raw/seg/01-signin.mp4",          "at": 4.8,  "from": 0, "speed": 0.68},
+    {"file": "raw/seg/11-recovery.mp4",        "at": 14.6, "from": 0},
+    {"file": "raw/seg/05-buy-kalshi.mp4",      "at": 20.6, "from": 21.9},
+    {"file": "raw/seg/08-companies.mp4",       "at": 31.0, "from": 0},
+    {"file": "raw/seg/02-dashboard.mp4",       "at": 36.8, "from": 3.5}
+  ],
+  "captions": {"words": "opener_words.json", "offset": -0.8,
+               "fix": {"E": "E-much.", "-much.": "", "broadcast": "broke…"}, "drop": ["nigga."]},
+  "audio": "raw/build/opener_voice.wav" }

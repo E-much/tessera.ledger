@@ -36,6 +36,8 @@ def bokeh_room(h, w, seed=4):
         cx, cy, r = rng.random() * w, rng.random() * h * .7, rng.uniform(.02, .06) * w
         cv2.circle(img, (int(cx), int(cy)), int(r), tuple(float(v) for v in np.array([.9, .55, .3]) * rng.uniform(.15, .4)), -1)
     return cv2.GaussianBlur(np.clip(img, 0, 1), (0, 0), w * .02)
+from functools import lru_cache
+@lru_cache(maxsize=4)
 def vignette(h, w, k=.55):
     yy, xx = np.mgrid[0:h, 0:w]; d = np.sqrt(((xx - w / 2) / (w / 2)) ** 2 + ((yy - h * .42) / (h * .6)) ** 2)
     return (1 - k * np.clip(d - .35, 0, 1) ** 1.5)[..., None]
@@ -47,7 +49,8 @@ def grade_frame(rgb, mode='room', mask=None):
     if mode == 'grade':
         out = warm(curve(x, lift=-.06, gain=.82, contrast=.22), 1.07, .98, .86)
     elif mode == 'room':
-        bg = cv2.GaussianBlur(x, (0, 0), w * .012)
+        small = cv2.resize(x, (w // 4, h // 4), interpolation=cv2.INTER_AREA)   # blur at quarter size: same look, ~16x cheaper
+        bg = cv2.resize(cv2.GaussianBlur(small, (0, 0), w * .003), (w, h), interpolation=cv2.INTER_LINEAR)
         bg = warm(rolloff(curve(bg, lift=-.10, gain=.50, contrast=.2), .5, .7), 1.22, .93, .82)
         out = person * m + bg * (1 - m)
     else:
