@@ -101,10 +101,10 @@ CLOSING = {'file': 'raw/seg/closing.mp4', 'from': 0.0, 'full': True}   # Tessera
 # ---- caption corrections (whisper mishearings) ----------------------------------------------------
 FIX = {'Kaoshi': 'Kalshi', 'Kaoshi.': 'Kalshi.', 'Kaoshi,': 'Kalshi,', 'Cauchy': 'Kalshi', 'Cauchy,': 'Kalshi,',
        'Tesla': 'Tessera', 'bots,': 'boom,', 'Shane,': 'chain,', 'introduction': 'transaction', 'organized': 'tokenized',
-       'us': 'US', 'yes,': 'US', 'beat': 'did', 'broadcast': 'broke *ss', 'nigga.': '****.', 'E': 'E-much.', '-much.': ''}
+       'us': 'US', 'bags': 'buys', 'sales.': 'sells.', 'rating.': 'trading.', 'yes,': 'US', 'beat': 'did', 'broadcast': 'broke *ss', 'nigga.': '****.', 'E': 'E-much.', '-much.': ''}
 MERGE = [(('space', 'X'), 'SpaceX'), (('space', 'X,'), 'SpaceX,'), (('space', 'X.'), 'SpaceX.'), (('open', 'AI'), 'OpenAI'),
          (('open', 'AI.'), 'OpenAI.'), (('T', 'Kalshi'), 'T-Kalshi'), (('T', 'Kalshi,'), 'T-Kalshi,'), (('T', 'OpenAI'), 'T-OpenAI'),
-         (('T', 'SpaceX.'), 'T-SpaceX.'), (('T', 'tokens'), 'T-tokens')]
+         (('T', 'SpaceX.'), 'T-SpaceX.'), (('T', 'tokens'), 'T-tokens'), (('T', 'culture'), 'T-Kalshi')]
 CONTEXT_FIX = {('main', 264.0): 'now', ('main', 265.2): 'now',
                ('main', 304.08): 'catch', ('main', 304.9): 'while', ('main', 305.72): 'still', ('main', 306.0): 'print.'}   # "I'm not a Kalshi" -> "I'm now a Kalshi"
 FILLERS = {'um,', 'um', 'uh,', 'uh', 'Um,', 'Uh,'}
