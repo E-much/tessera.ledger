@@ -176,7 +176,8 @@ def snap_end(k, x):
     _, hi = bounds(k, x); q = quietest(k, x - .05, min(x + .6, hi)); return x if q is None else q
 snapped = []
 for k, s, e in ranges:
-    snapped.append((k, fa(snap_start(k, s)), fa(snap_end(k, e))))
+    s0 = max(SRC[k]['strip0'], SRC[k]['voice0'])          # never before the start of the processed files
+    snapped.append((k, fa(max(s0, snap_start(k, s))), fa(snap_end(k, e))))
 ranges = [r for r in snapped if r[2] - r[1] >= 2 / FPS]
 # merge ranges that now touch or overlap
 merged = []
@@ -209,6 +210,8 @@ for i, (k, s, e, o) in enumerate(out_ranges):
     fade = min(0.012, d / 4)
     subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-ss', f'{s - src["voice0"]:.4f}', '-i', src['voice'], '-t', f'{nf / FPS:.4f}',
                     '-af', f'afade=t=in:d={fade},afade=t=out:st={d - fade:.3f}:d={fade}', '-ar', '48000', '-ac', '1', a], check=True)
+    got = _sf.info(a).frames / 48000
+    assert abs(got - nf / FPS) < 0.002, f'audio piece {i} is {got:.3f}s, expected {nf / FPS:.3f}s'
     vlist.append(v); alist.append(a)
 open('raw/build/parts/v.txt', 'w').write(''.join(f"file '{os.path.basename(v)}'\n" for v in vlist))
 open('raw/build/parts/a.txt', 'w').write(''.join(f"file '{os.path.basename(a)}'\n" for a in alist))
