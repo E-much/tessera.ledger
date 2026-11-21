@@ -14,7 +14,7 @@ ap.add_argument('src'); ap.add_argument('out')
 ap.add_argument('--start', type=float, default=0); ap.add_argument('--end', type=float, default=None)
 ap.add_argument('--fps', type=int, default=30); ap.add_argument('--w', type=int, default=500); ap.add_argument('--h', type=int, default=1028)
 ap.add_argument('--cx', type=float, default=.47); ap.add_argument('--cy', type=float, default=.11); ap.add_argument('--zoom', type=float, default=.74)
-ap.add_argument('--mode', default='room')
+ap.add_argument('--mode', default='clean')
 a = ap.parse_args()
 
 info = json.loads(subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height:stream_side_data=rotation',
@@ -25,6 +25,13 @@ if abs(rot) == 90: sw, sh = sh, sw                     # ffmpeg auto-rotates on 
 cw = int(sw * a.zoom) // 2 * 2; ch = int(cw * a.h / a.w) // 2 * 2
 x0 = int(sw * a.cx - cw / 2); y0 = int(sh * a.cy)
 x0 = max(0, min(sw - cw, x0)); y0 = max(0, min(sh - ch, y0))
+CLEAN = ("hqdn3d=1.5:1.5:3:3,eq=contrast=1.06:brightness=-0.005:saturation=1.04,"
+         "curves=master='0/0 0.25/0.27 0.5/0.52 0.85/0.80 1/0.90',unsharp=5:5:0.5")
+if a.mode == 'clean':   # natural camera look: no temperature change, no background treatment; pure ffmpeg = fast
+    vf = f"fps={a.fps},crop={cw}:{ch}:{x0}:{y0},{CLEAN},scale={a.w}:{a.h}:flags=lanczos"
+    subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-ss', str(a.start)] + (['-to', str(a.end)] if a.end else []) +
+                   ['-i', a.src, '-vf', vf, '-an', '-c:v', 'libx264', '-crf', '14', '-preset', 'medium', '-pix_fmt', 'yuv420p', a.out], check=True)
+    print(f'clean crop {cw}x{ch}@{x0},{y0} -> {a.w}x{a.h}'); sys.exit(0)
 # work at 2x the output size for a clean mask and grade, then downscale
 WW, WH = a.w * 2, a.h * 2
 vf = f"fps={a.fps},crop={cw}:{ch}:{x0}:{y0},scale={WW}:{WH}:flags=lanczos"

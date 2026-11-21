@@ -8,7 +8,7 @@ Template: Ola's video, https://x.com/thegreatola/status/2117394660565958979
 |---|---|---|
 | Canvas | full frame | near-black `#0c0c0c` |
 | Screen panel | x 24 → 1372 (1348 wide), vertically centred, rounded corners | the screen recording; gentle zooms only |
-| Face strip | x 1396 → 1896 (500 wide), y 24 → 1052 | you, cropped head-to-chest from the portrait 4K footage, background softly blurred |
+| Face strip | x 1396 → 1896 (500 wide), y 24 → 1052 | you, cropped head-to-chest from the portrait 4K footage, natural colours (clean mode: no temperature change, no background treatment) |
 | Captions | centred under the screen panel, around y 1000 | white bold, a dark rounded pill behind, 3–6 words at a time, word-by-word timing |
 | Margins | 24 px everywhere | same gap between panel and face strip |
 
