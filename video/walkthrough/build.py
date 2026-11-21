@@ -24,7 +24,7 @@ PIECES = [
     ('main', 38.3,  52.1,  "verification code … no one can get into your account"),
     ('main', 60.9,  62.3,  "So let's go."),
     ('op',   36.7,  41.26, "So this is my portfolio. Don't mind me, I'm a broke… (cut before the swear word)"),
-    ('main', 72.3,  74.3,  "wow, look at the UI"),
+    ('main', 72.3,  75.04, "wow, look at the UI"),   # 'UI' is really 74.4-75.0; cut in the measured gap before "I'm"
     #           75.1-81.9  removed: "I'm so in love in the UI with this" + stumble; the clean take follows
     ('main', 82.0,  83.1,  "so much in love with this"),
     ('main', 83.3,  88.3,  "this is my current portfolio, and this is what we're trading with"),
