@@ -1,18 +1,17 @@
-"""Reduce background noise (kids, other people) in a cleaned voice track.
-1) spectral noise reduction (noisereduce, non-stationary) under the speech
-2) gate: everything outside the speaker's own words (from the word-timed transcript) is pulled down ~30 dB
-usage: python3 denoise.py <in.wav> <words.json> <src_offset> <out.wav>
-src_offset = source time at the start of in.wav (words are in source time)"""
-import sys, json, numpy as np, soundfile as sf, noisereduce as nr
-from scipy.ndimage import uniform_filter1d
-src, words_f, off, out = sys.argv[1], sys.argv[2], float(sys.argv[3]), sys.argv[4]
-a, sr = sf.read(src)
-red = nr.reduce_noise(y=a, sr=sr, stationary=False, prop_decrease=0.65, time_mask_smooth_ms=80, freq_mask_smooth_hz=400, n_jobs=-1)
-keep = np.zeros(len(a))
-for w in json.load(open(words_f)):
-    s = int(max(0, (w['s'] - off - 0.12) * sr)); e = int(min(len(a), (w['e'] - off + 0.18) * sr))
-    if e > s: keep[s:e] = 1
-keep = uniform_filter1d(keep, int(0.06 * sr))              # 60 ms soft edges
-gain = 0.03 + 0.97 * keep                                   # ~ -30 dB between words
-sf.write(out, (red * gain).astype(np.float32), sr, subtype='FLOAT')
-print('ok', out, f'speech kept {keep.mean() * 100:.0f}%')
+"""Gentle background-noise reduction that never touches the speaker's words.
+1) light spectral noise reduction (noisereduce, non-stationary, 35%)
+2) energy-based downward expander: only parts quieter than -40 dBFS (true pauses) are pulled down ~12 dB,
+   with slow release so word endings stay intact. (No transcript timing involved.)
+usage: python3 denoise.py <in.wav> <out.wav>"""
+import sys, numpy as np, soundfile as sf, noisereduce as nr
+from scipy.ndimage import maximum_filter1d, uniform_filter1d
+a, sr = sf.read(sys.argv[1])
+red = nr.reduce_noise(y=a, sr=sr, stationary=False, prop_decrease=0.35, time_mask_smooth_ms=100, n_jobs=-1)
+hop = int(0.01 * sr); n = len(a) // hop
+env = np.array([np.sqrt((a[i * hop:(i + 1) * hop] ** 2).mean()) for i in range(n)])
+db = 20 * np.log10(env + 1e-9)
+speech = maximum_filter1d((db > -40).astype(float), 35)          # hold 350 ms around any voice
+g = np.where(speech > 0, 1.0, 10 ** (-12 / 20))
+g = uniform_filter1d(g, 8)                                          # 80 ms smoothing
+gain = np.repeat(g, hop); gain = np.pad(gain, (0, len(a) - len(gain)), constant_values=gain[-1])
+sf.write(sys.argv[2], (red * gain).astype(np.float32), sr, subtype='FLOAT'); print('ok', sys.argv[2])

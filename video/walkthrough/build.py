@@ -138,7 +138,43 @@ for k, s, e, _ in PIECES:
         if b['s'] - a['e'] > LONG:
             ranges.append((k, fa(cur), fa(a['e'] + KEEP_AFTER))); cur = b['s'] - KEEP_BEFORE
     ranges.append((k, fa(cur), fa(e)))
-ranges = [r for r in ranges if r[2] - r[1] >= 2 / FPS]
+# snap every cut point to real silence in the voice (whisper timings can be ~0.3s off),
+# without crossing into words that were deliberately left out
+import soundfile as _sf, numpy as _np
+ENV = {}
+for _k in SRC:
+    _a, _sr = _sf.read(SRC[_k]['voice'].replace('_dn.wav', '.wav').replace('main_voice.wav', 'main_voice_raw.wav')); _h = int(_sr * .01)
+    ENV[_k] = (20 * _np.log10(_np.array([_np.sqrt((_a[i*_h:(i+1)*_h] ** 2).mean()) for i in range(len(_a) // _h)]) + 1e-9), SRC[_k]['voice0'])
+def loud(k, x):
+    db, v0 = ENV[k]; i = int((x - v0) * 100); return 0 <= i < len(db) and db[i] > -38
+def snap(k, x, direction, lo, hi):
+    y = x
+    for _ in range(50):                        # up to 0.5 s
+        if not loud(k, y) and not loud(k, y + .01 * direction) and not loud(k, y + .02 * direction): return y
+        y2 = y + .01 * direction
+        if not (lo <= y2 <= hi): return y
+        y = y2
+    return x
+kept_words = {k: [] for k in SRC}
+for k, s, e, _ in PIECES:
+    kept_words[k] += [w for w in WORDS[k] if s - .05 <= w['s'] < e - .02]
+def bounds(k, x):                              # nearest left-out word on either side
+    out = [w for w in WORDS[k] if w not in kept_words[k]]
+    lo = max([w['e'] + .02 for w in out if w['e'] <= x + .02] or [-1e9])
+    hi = min([w['s'] - .02 for w in out if w['s'] >= x - .02] or [1e9])
+    return lo, hi
+snapped = []
+for k, s, e in ranges:
+    lo, hi = bounds(k, s); s2 = snap(k, s, -1, lo, hi)
+    lo, hi = bounds(k, e); e2 = snap(k, e, +1, lo, hi)
+    snapped.append((k, fa(s2), fa(e2)))
+ranges = [r for r in snapped if r[2] - r[1] >= 2 / FPS]
+# merge ranges that now touch or overlap
+merged = []
+for r in ranges:
+    if merged and merged[-1][0] == r[0] and r[1] <= merged[-1][2] + 1e-6: merged[-1] = (r[0], merged[-1][1], max(merged[-1][2], r[2]))
+    else: merged.append(r)
+ranges = merged
 
 out_ranges, t = [], 0.0
 for k, s, e in ranges:
