@@ -23,7 +23,7 @@ PIECES = [
     ('main', 30.70, 37.0,  "I'm signing in with my Gmail, you guys should see my portfolio"),
     ('main', 38.3,  52.1,  "verification code … no one can get into your account"),
     ('main', 61.12, 62.3,  "So let's go."),
-    ('op',   36.7,  41.26, "So this is my portfolio. Don't mind me, I'm a broke… (cut before the swear word)"),
+    ('op',   36.7,  41.86, "So this is my portfolio. Don't mind me, I'm a broke-*ss ****  (both words bleeped, see BLEEPS)"),
     ('main', 72.44, 75.04, "wow, look at the UI"),   # 'UI' is really 74.4-75.0; cut in the measured gap before "I'm"
     #           75.1-81.9  removed: "I'm so in love in the UI with this" + stumble; the clean take follows
     ('main', 82.0,  83.1,  "so much in love with this"),
@@ -101,7 +101,7 @@ CLOSING = {'file': 'raw/seg/closing.mp4', 'from': 0.0, 'full': True}   # Tessera
 # ---- caption corrections (whisper mishearings) ----------------------------------------------------
 FIX = {'Kaoshi': 'Kalshi', 'Kaoshi.': 'Kalshi.', 'Kaoshi,': 'Kalshi,', 'Cauchy': 'Kalshi', 'Cauchy,': 'Kalshi,',
        'Tesla': 'Tessera', 'bots,': 'boom,', 'Shane,': 'chain,', 'introduction': 'transaction', 'organized': 'tokenized',
-       'us': 'US', 'yes,': 'US', 'beat': 'did', 'broadcast': 'broke…', 'E': 'E-much.', '-much.': ''}
+       'us': 'US', 'yes,': 'US', 'beat': 'did', 'broadcast': 'broke *ss', 'nigga.': '****.', 'E': 'E-much.', '-much.': ''}
 MERGE = [(('space', 'X'), 'SpaceX'), (('space', 'X,'), 'SpaceX,'), (('space', 'X.'), 'SpaceX.'), (('open', 'AI'), 'OpenAI'),
          (('open', 'AI.'), 'OpenAI.'), (('T', 'Kalshi'), 'T-Kalshi'), (('T', 'Kalshi,'), 'T-Kalshi,'), (('T', 'OpenAI'), 'T-OpenAI'),
          (('T', 'SpaceX.'), 'T-SpaceX.'), (('T', 'tokens'), 'T-tokens')]
@@ -165,7 +165,7 @@ def bounds(k, x):                              # nearest left-out word on either
     lo = max([w['e'] for w in out if w['e'] <= x + .02] or [-1e9])
     hi = min([w['s'] + .12 for w in out if w['s'] >= x - .02] or [1e9])
     return lo, hi
-EXACT = {(k, round(t, 2)) for k, t in [('op', 15.05), ('op', 18.12), ('op', 41.26), ('main', 75.04), ('main', 30.70), ('main', 61.12),
+EXACT = {(k, round(t, 2)) for k, t in [('op', 15.05), ('op', 18.12), ('op', 41.86), ('main', 75.04), ('main', 30.70), ('main', 61.12),
                                         ('main', 72.44), ('main', 144.04), ('main', 146.78), ('main', 339.36),
                                         ('main', 125.94), ('main', 165.76)]}   # measured by hand
 def snap_start(k, x):
@@ -215,11 +215,22 @@ open('raw/build/parts/a.txt', 'w').write(''.join(f"file '{os.path.basename(a)}'\
 subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', 'raw/build/parts/v.txt', '-c', 'copy', 'raw/build/talk_strip.mp4'], check=True)
 subprocess.run(['ffmpeg', '-loglevel', 'error', '-y', '-f', 'concat', '-safe', '0', '-i', 'raw/build/parts/a.txt', '-c', 'copy', 'raw/build/talk_voice.wav'], check=True)
 
+# ---- bleeps: "ass" and the n-word in the opener (already silent in the cleaned voice) get a TV-style beep
+BLEEPS = [('op', 41.20, 41.38), ('op', 41.41, 41.84)]
+_v, _sr = _sf.read('raw/build/talk_voice.wav')
+for k, bs, be in BLEEPS:
+    o1, o2 = to_out(k, bs), to_out(k, be); i1, i2 = int(o1 * _sr), int(o2 * _sr)
+    n = i2 - i1; t = _np.arange(n) / _sr
+    beep = 0.18 * _np.sin(2 * _np.pi * 1000 * t)
+    f = min(int(.008 * _sr), n // 4); beep[:f] *= _np.linspace(0, 1, f); beep[-f:] *= _np.linspace(1, 0, f)
+    _v[i1:i2] = beep
+_sf.write('raw/build/talk_voice.wav', _v, _sr)
+
 # ---- captions in output time ----------------------------------------------------------------------
 cap = []
 for k, s, e, o in out_ranges:
     for w in WORDS[k]:
-        if w['w'] in FILLERS or w['w'] in ('nigga.', 'nigga'): continue
+        if w['w'] in FILLERS: continue
         if w['s'] >= s - 0.02 and w['s'] < e - 0.02:   # any word that starts inside the kept range
             cap.append({'w': w['w'], 's': round(o + w['s'] - s, 3), 'e': round(o + min(w['e'], e) - s, 3)})
 json.dump(cap, open('final_words.json', 'w'), indent=0)
