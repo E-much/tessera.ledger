@@ -11,6 +11,13 @@
    "what": "Welcome back: Apple / Google / email"
   },
   {
+   "id": "01b-verify",
+   "in": 63.0,
+   "out": 88.0,
+   "blur": true,
+   "what": "Verification code page (email + code fields blurred)"
+  },
+  {
    "id": "02-dashboard",
    "in": 89.5,
    "out": 126.0,
@@ -38,7 +45,7 @@
    "id": "06-buy-spacex",
    "in": 267.0,
    "out": 297.0,
-   "what": "Buy T-SpaceX $7, success"
+   "what": "Buy T-SpaceX $7, success (Windows battery popup at 10.7-12.5s: never used in the edit)"
   },
   {
    "id": "07-activity",

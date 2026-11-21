@@ -29,12 +29,14 @@ PMASK, SMASK = rmask(PW, PH, 22), rmask(SW, SH, 28)
 class Reader:
     """Sequential frame reader for one clip, scaled/cropped to w x h."""
     def __init__(self, file, w, h, start=0.0, speed=1.0, fit='cover'):
+        img = file.lower().endswith(('.png', '.jpg'))
         vf = (f"setpts=PTS/{speed},fps={FPS}," if speed != 1.0 else f"fps={FPS},") + "format=rgb24,"
         if fit == 'cover': vf += f"scale={w}:{h}:force_original_aspect_ratio=increase:flags=lanczos,crop={w}:{h}"
         else: vf += f"scale={w}:{h}:flags=lanczos"
         vf += ",unsharp=5:5:0.4"
         self.w, self.h, self.last = w, h, None
-        self.p = subprocess.Popen(['ffmpeg', '-loglevel', 'error', '-ss', str(start), '-i', file, '-vf', vf, '-an',
+        src = ['-loop', '1', '-i', file] if img else ['-ss', str(start), '-i', file]
+        self.p = subprocess.Popen(['ffmpeg', '-loglevel', 'error', *src, '-vf', vf, '-an',
                                    '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-'], stdout=subprocess.PIPE)
     def next(self):
         b = self.p.stdout.read(self.w * self.h * 3)
@@ -69,8 +71,9 @@ def caption_img(chunk, t):
     """word-by-word: words appear as they're spoken; text lowercase like the template."""
     shown = [w['w'] for w in chunk if w['s'] <= t + 0.05]
     if not shown: return None
-    full = ' '.join(w['w'] for w in chunk).lower().rstrip('.,')
-    txt = ' '.join(shown).lower().rstrip('.,')
+    low = lambda w: w if sum(ch.isupper() for ch in w) >= 2 else w.lower()   # keep US, SpaceX, OpenAI, T-Kalshi
+    full = ' '.join(low(w['w']) for w in chunk).rstrip('.,')
+    txt = ' '.join(low(w) for w in shown).rstrip('.,')
     d = ImageDraw.Draw(Image.new('L', (1, 1)))
     fw = d.textlength(full, font=FONT); tw = d.textlength(txt, font=FONT)
     img = Image.new('RGBA', (int(fw) + 48, 76), (0, 0, 0, 0)); dd = ImageDraw.Draw(img)
@@ -93,6 +96,12 @@ for f in range(N):
         if active is not None: active.p.kill()
         active = Reader(c['file'], PW, PH, c.get('from', 0), c.get('speed', 1.0), c.get('fit', 'cover'))
     fr = base.copy()
+    full = active is not None and clips[ci].get('full')
+    if full:
+        if active.w != W:
+            active.p.kill(); c = clips[ci]; active = Reader(c['file'], W, H, c.get('from', 0) + (t - c['at']), c.get('speed', 1.0), 'cover')
+        fr[:] = active.next().astype(np.float32); strip.next()
+        img = Image.fromarray(fr.astype(np.uint8)); enc.stdin.write(img.tobytes()); continue
     if active is not None:
         p = active.next().astype(np.float32)
         fr[PY:PY + PH, PX:PX + PW] = p * PMASK + fr[PY:PY + PH, PX:PX + PW] * (1 - PMASK)

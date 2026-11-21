@@ -331,7 +331,7 @@ function ending(c,t){
   c.fillText('Private markets. ',960-150,420+(1-tk)*20);const w1=c.measureText('Private markets. ').width;
   const w2=c.measureText('Within reach.').width;const hk=eio(P(t,23.3,23.8));c.fillStyle=C.lime;rr(c,960-150+w1/2-6,420-44+(1-tk)*20,(w2+12)*hk,58,10);c.fill();
   c.fillStyle=C.ink;c.textAlign='left';c.fillText('Within reach.',960-150+w1/2,420+(1-tk)*20);c.restore();
-  const uk=eo5(P(t,23.6,24.1));c.save();c.globalAlpha=uk;font(c,30,600,1);c.fillStyle='#3d3f38';c.textAlign='center';c.fillText('app.tessera.fun',960,488);c.restore();
+  const uk=eo5(P(t,23.6,24.1));c.save();c.globalAlpha=uk;font(c,30,600,1);c.fillStyle='#3d3f38';c.textAlign='center';c.fillText('tessera.pe',960,488);c.restore();
   // cards riding the ribbon
   ['spacex','openai','kalshi','soon'].forEach((key,i)=>{const a=P(t,22.5+i*0.18,23.2+i*0.18);if(a<=0)return;
     const x=330+i*420, y=Math.max(620,ribbonY(t,x)-95)+Math.sin(t*1.3+i)*6;coCard(c,key,x+(1-eo5(a))*300,y,[-0.07,0.04,-0.05,0.06][i],Math.min(1,a*2),0.95)});
