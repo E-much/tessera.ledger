@@ -15,9 +15,9 @@ SRC = {  # strip video (already graded/cropped), cleaned voice, word timings, an
 
 # ---- what's kept, in order: (source, start, end, note) -------------------------------------------
 PIECES = [
-    ('op',   1.0,   4.55,  "GM GM guys, this is E-much. So"),
-    #           4.5-6.0   removed: "just two days ago" (dates the video)
-    ('op',   6.0,   15.05, "Tessera launched their web app … a Solana wallet ready for them"),
+    ('op',   1.0,   4.91,  "GM GM guys, this is E-much. So just"),
+    #           4.91-5.06 removed: "two" -> "So just days ago, Tessera launched…"
+    ('op',   5.06,  15.05, "days ago, Tessera launched their web app … a Solana wallet ready for them"),
     #           15.5-18.3 removed: "the seed phrase, the recovery phrase" (Tessera calls it a recovery key)
     ('op',   18.12, 35.30, "and it is well secured … let's explore the whole thing together"),   # cut points set in measured silences
     ('main', 30.70, 37.0,  "I'm signing in with my Gmail, you guys should see my portfolio"),
@@ -41,7 +41,7 @@ PIECES = [
     ('main', 226.4, 234.75, "more exposure to Kalshi, but no voting rights. Don't forget that"),
     #           235.0-247.0  removed: "buy more to make more money … Christmas is coming"
     ('main', 248.0, 250.55, "let me just buy $7 worth of this one as well"),
-    ('main', 258.1, 261.1, "let me confirm my transaction and boom"),
+    ('main', 258.1, 262.12, "let me confirm my transaction and boom"),
     ('main', 263.4, 266.3, "I'm now a Kalshi, I'm now a SpaceX"),
     ('main', 268.6, 280.1, "the UI is very clean … really welcoming"),
     ('main', 281.3, 289.4, "my activities so far, my buys and sells, these are real"),
@@ -109,7 +109,7 @@ FIX = {'Kaoshi': 'Kalshi', 'Kaoshi.': 'Kalshi.', 'Kaoshi,': 'Kalshi,', 'Cauchy':
 MERGE = [(('space', 'X'), 'SpaceX'), (('space', 'X,'), 'SpaceX,'), (('space', 'X.'), 'SpaceX.'), (('open', 'AI'), 'OpenAI'),
          (('open', 'AI.'), 'OpenAI.'), (('T', 'Kalshi'), 'T-Kalshi'), (('T', 'Kalshi,'), 'T-Kalshi,'), (('T', 'OpenAI'), 'T-OpenAI'),
          (('T', 'SpaceX.'), 'T-SpaceX.'), (('T', 'tokens'), 'T-tokens'), (('T', 'culture'), 'T-Kalshi')]
-CONTEXT_FIX = {('main', 264.0): 'now', ('main', 265.2): 'now',
+CONTEXT_FIX = {('op', 4.84): '', ('main', 264.0): 'now', ('main', 265.2): 'now',
                ('main', 304.08): 'catch', ('main', 304.9): 'while', ('main', 305.72): 'still', ('main', 306.0): 'print.'}   # "I'm not a Kalshi" -> "I'm now a Kalshi"
 FILLERS = {'um,', 'um', 'uh,', 'uh', 'Um,', 'Uh,'}
 GAP, PAD_IN, PAD_OUT = 0.55, 0.10, 0.14
@@ -171,7 +171,7 @@ def bounds(k, x):                              # nearest left-out word on either
     return lo, hi
 EXACT = {(k, round(t, 2)) for k, t in [('op', 15.05), ('op', 18.12), ('op', 41.86), ('main', 75.04), ('main', 30.70), ('main', 61.12),
                                         ('main', 72.44), ('main', 144.04), ('main', 146.78), ('main', 339.36),
-                                        ('main', 125.94), ('main', 165.76)]}   # measured by hand
+                                        ('main', 125.94), ('main', 165.76), ('op', 4.91), ('op', 5.06), ('main', 262.12)]}   # measured by hand
 def snap_start(k, x):
     if (k, round(x, 2)) in EXACT: return x
     lo, _ = bounds(k, x); q = quietest(k, max(x - .4, lo), x + .05); return x if q is None else q
