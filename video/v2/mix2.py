@@ -31,25 +31,13 @@ def loop_into(buf, clip, a, b, gain, xf=1.0):
 
 cards = e["cards"]; logo = next(c for c in cards if c["kind"] == "logo"); end = next(c for c in cards if c["kind"] == "end")
 chap = [c for c in cards if c["kind"] == "chapter"]
-beds = {k: load(M(v)) for k, v in {"intro": "epic_intro", "groove": "epic_a", "groove2": "epic_b", "pad": "pad", "outro": "epic_outro"}.items()}
-beds["groove"] = beds["groove"][int(4.2 * SR):]  # skip its quiet build so the loop stays driving
-for k in beds: beds[k] /= rms(beds[k])
-mus = np.zeros(N)
-# cold open: tension bed, fades into the logo hit
-n = min(len(beds["intro"]), int(logo["start"] * SR) + SR // 2); env = np.ones(n); env[-SR // 2:] = np.linspace(1, 0, SR // 2)
-mus[:n] += beds["intro"][:n] * env
-# chapters alternate between the two grooves; a quiet pad glues everything together
-bounds = [c["start"] for c in chap] + [end["start"]]
-for k in range(len(chap)):
-    loop_into(mus, beds["groove" if k % 2 == 0 else "groove2"], bounds[k], bounds[k + 1], 0.85)
-loop_into(mus, beds["pad"], logo["start"], end["start"] + 1, 0.2, xf=2.0)
-fo = int(end["start"] * SR); mus[fo:fo + SR] *= np.linspace(1, 0, min(SR, N - fo)); mus[fo + SR:] = 0
-o = beds["outro"]; n = min(len(o), N - fo); mus[fo:fo + n] += o[:n] * 1.1
+song = load(M("user_song_bed")); song /= rms(song)   # the user's chosen track, pre-looped on whole beats
+mus = np.zeros(N); n = min(len(song), N); mus[:n] = song[:n]
 # duck: music sits ~16 dB under the voice while he talks, opens up on cards and B-roll gaps
 k = int(.35 * SR); sm = np.convolve(speech, np.ones(k) / k, "same")
 under = np.where(t < logo["start"], 0.38, 0.1)     # intro stays loud; ~20 dB under the voice in the main video
 mus *= D * (under * sm + 0.9 * (1 - sm))            # cards, logo and pauses open right up
-mus *= np.clip((T - t) / 3, 0, 1)
+mus *= np.clip((T - t) / 4, 0, 1)   # long fade over the credits
 
 # ---------- accents ----------
 sfx = np.zeros(N); cache = {}
@@ -60,14 +48,14 @@ def put(name, at, gain):
 for s in e["sfx"]:
     n = s["n"]
     if n == "click": continue                      # replaced by slam-specific accents below
-    if n == "riser": put("riser", s["t"] - 4.0, 0.35); continue
+    if n == "riser": continue                      # the song carries the build now
     put(n, s["t"], {"drop": .8, "glitch": .4, "hit": .8, "whoosh": .08}.get(n, .5))
 for sl in e["slams"]:
     if sl.get("behind"):
         put("swell", sl["t"] - 0.45, 0.15); put("impact", sl["t"] + 0.05, 0.35)
     else:
         put("impact", sl["t"] - 0.02, 0.7)
-for c in chap: put("piano", c["start"] + 0.15, 0.6)
+# (no piano: it could clash with the song's key)
 
 mix = dia + mus + sfx
 mix /= np.abs(mix).max() / 0.95
