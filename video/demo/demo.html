@@ -1,0 +1,75 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Tessera FAQ Demo</title>
+<style>@font-face{font-family:"JBM";src:url(../fonts/JetBrainsMono.woff2) format("woff2");font-weight:100 800}
+html,body{margin:0;background:#000}canvas{display:block}</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+const W=1920,H=1080,x=document.getElementById('c').getContext('2d');
+const LIME='#D2FB95',INK='#121317',WHITE='#F4F4F0',MUTE='#8b8f88';
+const SANS='"Inter",sans-serif',MONO='"JBM",monospace';
+let S=null,MARK=[];const SPEECH_AT=1.6,Q='What is Tessera?';
+const cl=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t,eo=t=>1-Math.pow(1-cl(t),3);
+const back=t=>{t=cl(t);const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+function txt(s,X,Y,{sz=40,f=SANS,w=400,col=WHITE,al='left',a=1,ls=0}={}){x.font=`${w} ${sz}px ${f}`;x.letterSpacing=ls+'px';x.textAlign=al;x.globalAlpha=a;x.fillStyle=col;x.fillText(s,X,Y);x.globalAlpha=1;x.letterSpacing='0px'}
+function meas(s,sz,f=SANS,w=400){x.font=`${w} ${sz}px ${f}`;return x.measureText(s).width}
+function rr(X,Y,w,h,r,fill,stroke,lw=2){x.beginPath();x.roundRect(X,Y,w,h,r);if(fill){x.fillStyle=fill;x.fill()}if(stroke){x.strokeStyle=stroke;x.lineWidth=lw;x.stroke()}}
+function setMark(p){MARK=p.trim().split('Z').filter(Boolean).map(s=>s.replace('M','').split(' L').map(q=>q.split(',').map(Number)))}
+function mark(cx,cy,size,col){const s=size/400;x.save();x.translate(cx-size/2,cy-size/2);x.scale(s,s);x.fillStyle=col;MARK.forEach(m=>{x.beginPath();m.forEach((q,j)=>j?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));x.closePath();x.fill()});x.restore()}
+// ---------- flat illustrated presenter ----------
+function presenter(cx,cy,T){
+  const st=T-SPEECH_AT,fi=Math.floor(st*30),m=(st>=0&&fi<S.mouth.length)?S.mouth[fi]:0;
+  const bob=Math.sin(T*2.1)*4+(m*6),tilt=Math.sin(T*1.3)*0.025;
+  x.save();x.translate(cx,cy);
+  // shoulders / tee
+  x.fillStyle='#1b1d21';x.beginPath();x.moveTo(-250,330);x.bezierCurveTo(-240,170,-140,120,0,118);x.bezierCurveTo(140,120,240,170,250,330);x.closePath();x.fill();
+  mark(150,230,52,LIME);
+  // neck
+  x.fillStyle='#b7795a';rr(-42,40,84,100,30,'#b7795a');
+  x.translate(0,bob*0.4);x.rotate(tilt);
+  // head
+  x.fillStyle='#c98e6b';x.beginPath();x.ellipse(0,-40,118,140,0,0,7);x.fill();
+  // ears
+  x.beginPath();x.ellipse(-118,-30,18,30,0,0,7);x.ellipse(118,-30,18,30,0,0,7);x.fill();
+  // hair
+  x.fillStyle='#22180f';x.beginPath();x.moveTo(-122,-50);x.bezierCurveTo(-140,-190,-30,-215,30,-198);x.bezierCurveTo(120,-190,140,-120,124,-52);x.bezierCurveTo(100,-120,40,-140,-20,-128);x.bezierCurveTo(-70,-120,-100,-100,-122,-50);x.fill();
+  // brows (lift a little on stressed words)
+  const lift=m>.7?6:0;x.fillStyle='#22180f';rr(-78,-78-lift,52,10,5,'#22180f');rr(26,-78-lift,52,10,5,'#22180f');
+  // eyes with blink
+  const bl=(T%3.4)<0.12?0.15:1;x.fillStyle='#16110d';x.beginPath();x.ellipse(-52,-46,11,13*bl,0,0,7);x.ellipse(52,-46,11,13*bl,0,0,7);x.fill();
+  // nose
+  x.strokeStyle='#a8694c';x.lineWidth=5;x.lineCap='round';x.beginPath();x.moveTo(2,-30);x.quadraticCurveTo(-12,8,6,14);x.stroke();
+  // mouth: opens with the voice
+  const mo=4+m*26;x.fillStyle='#5a2a22';x.beginPath();x.ellipse(0,50,34-m*6,mo/2+2,0,0,7);x.fill();
+  if(m>.25){x.fillStyle='#f3efe9';x.fillRect(-24,50-mo/2+1,48,Math.min(8,mo/3))}
+  x.restore();
+}
+function frame(T){
+  x.setTransform(1,0,0,1,0,0);x.fillStyle='#050605';x.fillRect(0,0,W,H);
+  // presenter tile
+  const a0=eo(T/.5);x.globalAlpha=a0;rr(120,150,700,780,36,'#0e100e','rgba(210,251,149,.25)',2);
+  x.save();x.beginPath();x.roundRect(120,150,700,780,36);x.clip();
+  const g=x.createRadialGradient(470,480,40,470,480,520);g.addColorStop(0,'rgba(210,251,149,.16)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(120,150,700,780);
+  presenter(470,610,T);x.restore();
+  rr(150,870,250,40,20,'rgba(0,0,0,.55)');x.fillStyle=LIME;x.beginPath();x.arc(172,890,7,0,7);x.fill();
+  txt('AI PRESENTER',190,897,{sz:16,f:MONO,col:WHITE,ls:3});x.globalAlpha=1;
+  // search bar
+  const sy=230;rr(900,sy,900,110,55,'#f4f4f0');
+  x.strokeStyle=INK;x.lineWidth=5;x.beginPath();x.arc(965,sy+52,18,0,7);x.stroke();x.beginPath();x.moveTo(978,sy+66);x.lineTo(994,sy+82);x.stroke();
+  const n=Math.floor(cl((T-.35)/1.0)*Q.length),q=Q.slice(0,n);txt(q,1020,sy+70,{sz:44,w:500,col:INK});
+  if(n<Q.length||Math.floor(T*2.5)%2===0){x.fillStyle=INK;x.fillRect(1024+meas(q,44,SANS,500),sy+30,4,52)}
+  // answer bubble
+  const ap=eo((T-1.45)/.35);if(ap>0){x.globalAlpha=ap;
+    const by=sy+170+(1-ap)*30;rr(900,by,900,360,32,'#121412','rgba(210,251,149,.35)',2);
+    mark(950,by+55,40,LIME);txt('Tessera',985,by+66,{sz:28,w:700,col:WHITE});txt('ANSWER',1770,by+64,{sz:15,f:MONO,col:MUTE,al:'right',ls:4});
+    let X=950,Y=by+150;const st=T-SPEECH_AT;
+    S.words.forEach(w=>{const on=st>=w.t0-.05,cur=on&&st<w.t1;const s=w.w+' ',ww=meas(s,54,SANS,700);
+      if(X+ww>1760){X=950;Y+=72}
+      if(on){const p=eo((st-w.t0+.05)/.15);txt(w.w,X,Y+(1-p)*14,{sz:54,w:700,col:cur?LIME:WHITE,a:p})}
+      X+=ww});
+    x.globalAlpha=1}
+  mark(80,70,40,WHITE);txt('TESSERA FAQ',110,80,{sz:16,f:MONO,col:WHITE,ls:5,a:.6});
+  if(T>5.1)x.fillStyle='rgba(0,0,0,'+cl((T-5.1)/.4)+')',x.fillRect(0,0,W,H);
+}
+window.init=(s,m)=>{S=s;setMark(m)};
+window.frameJPEG=T=>{frame(T);return document.getElementById('c').toDataURL('image/jpeg',.92)};
+</script></body></html>

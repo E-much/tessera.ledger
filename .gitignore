@@ -1,2 +1,6 @@
 video/build/
 video/*.mp4
+video/demo/*.mp4
+video/demo/*.jpg
+video/demo/tts.json
+video/demo/t.mp3
