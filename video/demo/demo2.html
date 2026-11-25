@@ -1,0 +1,90 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Tessera Motion Demo</title>
+<style>@font-face{font-family:"JBM";src:url(../fonts/JetBrainsMono.woff2) format("woff2");font-weight:100 800}
+html,body{margin:0;background:#000}canvas{display:block}</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+const W=1920,H=1080,cv=document.getElementById('c'),x=cv.getContext('2d');
+const LIME='#D2FB95',INK='#121317',WHITE='#F4F4F0',MUTE='#8b8f88';
+const SANS='"Inter Display","Inter",sans-serif',MONO='"JBM",monospace';
+const BEAT=0.493;let MARK=[];
+const cl=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-cl(t),4),eio=t=>{t=cl(t);return t<.5?8*t*t*t*t:1-Math.pow(-2*t+2,4)/2};
+const rng=s=>()=>((s=Math.imul(s^s>>>15,1|s)+0x6D2B79F5|0,(s^s>>>14)>>>0)/4294967296);
+function font(sz,f=SANS,w=400){x.font=`${w} ${sz}px ${f}`}
+function txt(s,X,Y,{sz=40,f=SANS,w=400,col=WHITE,al='left',a=1,ls=0}={}){font(sz,f,w);x.letterSpacing=ls+'px';x.textAlign=al;x.globalAlpha=a;x.fillStyle=col;x.fillText(s,X,Y);x.globalAlpha=1;x.letterSpacing='0px'}
+function meas(s,sz,f=SANS,w=400,ls=0){font(sz,f,w);x.letterSpacing=ls+'px';const m=x.measureText(s).width;x.letterSpacing='0px';return m}
+function setMark(p){MARK=p.trim().split('Z').filter(Boolean).map(s=>{const pts=s.replace('M','').split(' L').map(q=>q.split(',').map(Number));const c=pts.reduce((a,q)=>[a[0]+q[0]/pts.length,a[1]+q[1]/pts.length],[0,0]);return{pts,c}})}
+// ---------- isometric cube (same geometry family as the Tessera mark) ----------
+function cube(cx,cy,s,shade=1,alpha=1,lime=false){
+  const h=s*0.5,top=lime?'#D2FB95':`rgb(${46*shade|0},${49*shade|0},${55*shade|0})`,l=lime?'#a7cc6e':`rgb(${30*shade|0},${32*shade|0},${37*shade|0})`,r=lime?'#7d9d4c':`rgb(${20*shade|0},${21*shade|0},${25*shade|0})`;
+  x.globalAlpha=alpha;
+  x.fillStyle=top;x.beginPath();x.moveTo(cx,cy-s);x.lineTo(cx+s*.87,cy-h);x.lineTo(cx,cy);x.lineTo(cx-s*.87,cy-h);x.closePath();x.fill();
+  x.fillStyle=l;x.beginPath();x.moveTo(cx-s*.87,cy-h);x.lineTo(cx,cy);x.lineTo(cx,cy+s);x.lineTo(cx-s*.87,cy+h);x.closePath();x.fill();
+  x.fillStyle=r;x.beginPath();x.moveTo(cx+s*.87,cy-h);x.lineTo(cx,cy);x.lineTo(cx,cy+s);x.lineTo(cx+s*.87,cy+h);x.closePath();x.fill();
+  // crisp lime rim on the top edge
+  x.strokeStyle=lime?'rgba(255,255,255,.35)':'rgba(210,251,149,.22)';x.lineWidth=Math.max(1,s*.02);x.beginPath();x.moveTo(cx-s*.87,cy-h);x.lineTo(cx,cy-s);x.lineTo(cx+s*.87,cy-h);x.stroke();
+  x.globalAlpha=1}
+// a 3D field of cubes with perspective + depth-of-field
+const FIELD=(()=>{const r=rng(11),a=[];for(let i=0;i<70;i++)a.push({x:(r()-.5)*3400,y:(r()-.5)*2000,z:300+r()*2600,s:40+r()*70,lime:r()<.12,ph:r()*6});return a.sort((p,q)=>q.z-p.z)})();
+function field(T,{push=0,focus=900,dim=1,drift=1}={}){
+  const camZ=T*120*drift+push;
+  FIELD.forEach(c=>{let z=c.z-camZ;z=((z%2900)+2900)%2900+150;const p=900/z;
+    const X=W/2+(c.x+Math.sin(T*.4+c.ph)*40)*p,Y=H/2+(c.y+Math.cos(T*.3+c.ph)*30)*p,S=c.s*p;
+    if(X<-200||X>W+200||Y<-200||Y>H+200)return;
+    const blur=Math.min(18,Math.abs(z-focus)/90);x.filter=blur>0.6?`blur(${blur.toFixed(1)}px)`:'none';
+    cube(X,Y,S,1+(1-z/3000)*.6,cl((3000-z)/900)*dim,c.lime)});
+  x.filter='none'}
+function vignette(a=.75){const g=x.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*1.05);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,`rgba(0,0,0,${a})`);x.fillStyle=g;x.fillRect(0,0,W,H)}
+function glow(X,Y,r,a){const g=x.createRadialGradient(X,Y,0,X,Y,r);g.addColorStop(0,`rgba(210,251,149,${a})`);g.addColorStop(1,'rgba(210,251,149,0)');x.fillStyle=g;x.fillRect(X-r,Y-r,r*2,r*2)}
+// masked line reveal: text slides up from behind an invisible edge, word by word
+function reveal(line,X,Y,sz,t0,T,{w=700,col=WHITE,hl=[],al='left',stagger=.07}={}){
+  const words=line.split(' ');let tot=meas(line,sz,SANS,w,-sz*.03);let cx=al==='center'?X-tot/2:X;
+  words.forEach((wd,i)=>{const p=eo((T-t0-i*stagger)/.55);const ww=meas(wd+' ',sz,SANS,w,-sz*.03);
+    x.save();x.beginPath();x.rect(cx-10,Y-sz*1.05,ww+20,sz*1.35);x.clip();
+    txt(wd,cx,Y+(1-p)*sz*1.2,{sz,w,col:hl.includes(i)?LIME:col,ls:-sz*.03});x.restore();cx+=ww})}
+// ---------- scenes ----------
+const Q='What is Tessera?';
+function sceneSearch(T){ // 0 → 8 beats
+  x.fillStyle='#030403';x.fillRect(0,0,W,H);field(T,{dim:.55,focus:2400});vignette(.85);
+  const zin=eio((T-3.0)/.45);const sc=1+zin*2.6;
+  x.save();x.translate(W/2,H/2);x.scale(sc,sc);x.translate(-W/2,-H/2);x.globalAlpha=1-zin*.9;
+  const a=eo(T/.6),bw=1100,bh=130,bx=W/2-bw/2,by=H/2-bh/2+(1-a)*40;
+  x.shadowColor='rgba(210,251,149,.25)';x.shadowBlur=60;x.fillStyle='rgba(244,244,240,'+(.97*a)+')';x.beginPath();x.roundRect(bx,by,bw,bh,65);x.fill();x.shadowBlur=0;
+  x.strokeStyle=INK;x.lineWidth=6;x.beginPath();x.arc(bx+80,by+60,22,0,7);x.stroke();x.beginPath();x.moveTo(bx+96,by+77);x.lineTo(bx+115,by+96);x.stroke();
+  const n=Math.floor(cl((T-.55)/1.1)*Q.length),q=Q.slice(0,n);txt(q,bx+150,by+84,{sz:56,w:500,col:INK,ls:-1});
+  if(n<Q.length||Math.floor(T*2.6)%2===0){x.fillStyle=INK;x.fillRect(bx+156+meas(q,56,SANS,500,-1),by+34,5,64)}
+  // enter key pulse
+  const ek=cl((T-2.2)/.5);if(ek>0){x.strokeStyle=`rgba(210,251,149,${1-ek})`;x.lineWidth=4;x.beginPath();x.roundRect(bx-ek*40,by-ek*40,bw+ek*80,bh+ek*80,65+ek*40);x.stroke()}
+  txt('01 / 10',W/2,by+bh+90,{sz:18,f:MONO,col:MUTE,al:'center',ls:8,a:a*.8});
+  x.restore();x.globalAlpha=1;
+  if(zin>0){x.fillStyle=`rgba(255,255,255,${Math.sin(zin*Math.PI)*.12})`;x.fillRect(0,0,W,H)}}
+function sceneStatement(T){ // starts at 3.45
+  const t=T-3.45;x.fillStyle='#030403';x.fillRect(0,0,W,H);
+  field(T+3,{push:t*260,focus:700,dim:.9});vignette(.8);glow(W*.5,H*.5,700,.07);
+  reveal('Get exposure to the names',W/2,H/2-30,118,.15,t,{al:'center'});
+  reveal("that aren't on the stock market yet.",W/2,H/2+110,118,.15+BEAT*2,t,{al:'center',hl:[6]});
+  const la=eo((t-BEAT*5)/.5);txt('TESSERA  ·  FAQ 01',W/2,H-110,{sz:18,f:MONO,col:LIME,al:'center',ls:10,a:la*.9})}
+function sceneAssemble(T){ // starts at 3.45 + 8 beats
+  const t=T-(3.45+BEAT*8);x.fillStyle='#030403';x.fillRect(0,0,W,H);field(T+6,{dim:.35,focus:2600,drift:.5});vignette(.85);
+  // logo faces fly in from depth and lock into place
+  const cx=W*.3,cy=H/2,size=520,s=size/400;glow(cx,cy,520,.10*eo(t/1.2));
+  MARK.forEach((m,i)=>{const p=eo((t-i*.06)/.9);const r=rng(i*97+5);const fx=(r()-.5)*1400,fy=(r()-.5)*900,fz=1+r()*2.5;
+    const k=lerp(fz,1,p),ox=lerp(fx,0,p),oy=lerp(fy,0,p),rot=lerp((r()-.5)*2.2,0,p);
+    x.save();x.globalAlpha=cl(p*1.4);x.translate(cx+(m.c[0]-200)*s+ox,cy+(m.c[1]-200)*s+oy);x.rotate(rot);x.scale(k,k);
+    x.beginPath();m.pts.forEach((q,j)=>{const X=(q[0]-m.c[0])*s,Y=(q[1]-m.c[1])*s;j?x.lineTo(X,Y):x.moveTo(X,Y)});x.closePath();x.fillStyle=LIME;x.fill();x.restore()});
+  x.globalAlpha=1;
+  reveal('Tokenised',W*.55,H/2-70,104,.5,t,{});
+  reveal('private-market',W*.55,H/2+40,104,.5+BEAT,t,{col:LIME});
+  reveal('instruments.',W*.55,H/2+150,104,.5+BEAT*2,t,{});
+  txt('ISSUED BY TESSERA WORKS FOUNDATION SUBSIDIARIES',W*.55,H/2+240,{sz:18,f:MONO,col:MUTE,ls:5,a:eo((t-BEAT*5)/.6)})}
+function frame(T){x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;x.filter='none';
+  if(T<3.45)sceneSearch(T);else if(T<3.45+BEAT*8)sceneStatement(T);else sceneAssemble(T);
+  // beat-cut flash
+  [3.45,3.45+BEAT*8].forEach(c=>{const d=T-c;if(d>=0&&d<.1){x.fillStyle=`rgba(210,251,149,${(1-d/.1)*.18})`;x.fillRect(0,0,W,H)}});
+  if(T<.4){x.fillStyle=`rgba(0,0,0,${1-T/.4})`;x.fillRect(0,0,W,H)}
+  if(T>10.6){x.fillStyle=`rgba(0,0,0,${cl((T-10.6)/.5)})`;x.fillRect(0,0,W,H)}}
+// 2-sample motion blur for fast moves
+window.init=m=>setMark(m);
+window.frameJPEG=T=>{frame(T);return cv.toDataURL('image/jpeg',.93)};
+</script></body></html>
