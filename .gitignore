@@ -5,3 +5,5 @@ video/demo/*.jpg
 video/demo/tts.json
 video/demo/t.mp3
 video/demo/*.txt
+video/demo/clip/
+video/demo/*.wav
