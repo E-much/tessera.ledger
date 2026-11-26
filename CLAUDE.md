@@ -34,15 +34,17 @@ many rounds of feedback; follow them without being asked again.
 
 - The owner records themselves answering each FAQ question, **one short clip per question** (Q1, Q2, ...),
   uploaded straight into the chat (Google Drive is unreliable on their network). They look into the camera.
-- **No other voice asks the questions** (not a sibling, no AI voice). Each question is typed into the search bar,
-  "searching…", then a "found" result card of their video expands to full screen and they answer; zoom back out to the
-  search bar for the next question.
-- Make it **dramatic, on a WHITE background** (demo: `video/demo/demo5.html`; dark search bar on off-white, light scan tiles,
-  white pause instead of black, no letterbox). Slow push on the search bar, heavy keystrokes over
-  ticking tension, a "SCANNING 1,284 ANSWERS" wall of rejected results with a riser, a beat of black silence, then FOUND
-  (bass drop, lime flash, shockwave, shake, card slams in) and the card bursts full screen as the letterbox opens.
-  **Full dramatic version on the first and last question; a short ~2 s version of the same look for the ones in between.**
-- Same treatment as the interview cuts: captions, keyword hits (some behind them), a few FAQ visuals, their song, white cards.
+- **One search only, at the start** (no repeated search per question). A chat box types the owner's request:
+  "Can you find me a video that explains everything I need to know about Tessera before I start?"
+  The assistant replies "On it. Searching…", then the dramatic search, then "Found it." and the owner's video plays.
+- **No other voice** (not a sibling, no AI voice). Between answers, a **white card with the next FAQ question** (text only).
+- Make the search **dramatic, on a WHITE background** (demo: `video/demo/demo5.html`): dark search/chat bar on off-white,
+  slow push, heavy keystrokes over ticking tension, a "SCANNING 1,284 ANSWERS" wall of rejected results with a riser,
+  a white pause of silence, then FOUND (bass drop, lime flash, dark shockwave ring, shake, card slams in) and the card
+  bursts full screen. No letterbox on white.
+- Use a **plain, unbranded assistant** in the chat, not a copy of Tessera's official "AI Support Chat", so it is not
+  mistaken for an official Tessera video.
+- Same treatment as the interview cuts: captions, keyword hits (some behind them), a few FAQ visuals, their song.
 - The FAQ text is saved in `video/sources/faq/faq.md`; the animated FAQ video engine is in `video/faq/`.
 
 ## Sound
