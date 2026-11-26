@@ -32,12 +32,12 @@ many rounds of feedback; follow them without being asked again.
 
 ## Planned: owner's own FAQ answers ("search and found" format)
 
-- The owner records himself answering each FAQ question, **one short clip per question** (Q1, Q2, ...),
-  uploaded straight into the chat (Google Drive is unreliable on his network). Looks into the camera.
-- **No other voice asks the questions** (not his brother, no AI voice). Each question is typed into the search bar,
-  "searching…", then a "found" result card of his video expands to full screen and he answers; zoom back out to the
+- The owner records themselves answering each FAQ question, **one short clip per question** (Q1, Q2, ...),
+  uploaded straight into the chat (Google Drive is unreliable on their network). They look into the camera.
+- **No other voice asks the questions** (not a sibling, no AI voice). Each question is typed into the search bar,
+  "searching…", then a "found" result card of their video expands to full screen and they answer; zoom back out to the
   search bar for the next question.
-- Same treatment as the interview cuts: captions, keyword hits (some behind him), a few FAQ visuals, his song, white cards.
+- Same treatment as the interview cuts: captions, keyword hits (some behind them), a few FAQ visuals, their song, white cards.
 - The FAQ text is saved in `video/sources/faq/faq.md`; the animated FAQ video engine is in `video/faq/`.
 
 ## Sound
