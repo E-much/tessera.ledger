@@ -37,6 +37,10 @@ many rounds of feedback; follow them without being asked again.
 - **No other voice asks the questions** (not a sibling, no AI voice). Each question is typed into the search bar,
   "searching…", then a "found" result card of their video expands to full screen and they answer; zoom back out to the
   search bar for the next question.
+- Make it **dramatic** (demo: `video/demo/demo4.html`): letterbox bars, slow push on the search bar, heavy keystrokes over
+  ticking tension, a "SCANNING 1,284 ANSWERS" wall of rejected results with a riser, a beat of black silence, then FOUND
+  (bass drop, lime flash, shockwave, shake, card slams in) and the card bursts full screen as the letterbox opens.
+  **Full dramatic version on the first and last question; a short ~2 s version of the same look for the ones in between.**
 - Same treatment as the interview cuts: captions, keyword hits (some behind them), a few FAQ visuals, their song, white cards.
 - The FAQ text is saved in `video/sources/faq/faq.md`; the animated FAQ video engine is in `video/faq/`.
 
