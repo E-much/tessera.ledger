@@ -38,16 +38,12 @@ many rounds of feedback; follow them without being asked again.
   "Can you find me a video that explains everything I need to know about Tessera before I start?"
   The assistant replies "On it. Searching…", then the dramatic search, then "Found it." and the owner's video plays.
 - **No other voice** (not a sibling, no AI voice). Between answers, a **white card with the next FAQ question** (text only).
-- Make the search **dramatic, on a WHITE background** (demo: `video/demo/demo5.html`): dark search/chat bar on off-white,
-  slow push, heavy keystrokes over ticking tension, a "SCANNING 1,284 ANSWERS" wall of rejected results with a riser,
-  a white pause of silence, then FOUND (bass drop, lime flash, dark shockwave ring, shake, card slams in) and the card
-  bursts full screen. No letterbox on white.
 - **Chosen opening: `video/demo/phone3d.html`** (real CSS 3D, 60 fps, rendered by `render_phone3d.js`), modelled on the
-  Pretty_zee reference studied frame by frame: **one continuous camera move, no cuts**. Phone home screen with apps
-  (incl. a Tessera app) → lime tap ripple on Google → Google opens out of its icon → the page **explodes out of the
+  Pretty_zee reference studied frame by frame: **one continuous camera move, no cuts**. The phone shows **the owner's real home screen**
+  (`video/assets/owner_home_screen.png`) with a Google icon added in the empty slot → lime tap ripple on Google → Google opens out of its icon → the page **explodes out of the
   phone** into 3D (logo, search bar, tiles) → question types → "On it. Searching…" + results streaming past in depth →
   silence → "Found ▢ it." with the video card between the words, hand-drawn circle, lime underline, and **the owner's
-  song drops in right at FOUND** → camera dives into the card → full-screen answer. Depth-of-field follows what is read.
+  song drops in right at FOUND** → camera dives into the card → full-screen answer. Depth-of-field follows what is read. **Motion blur** (4 sub-frames per frame). White background.
 - Don't copy Tessera's official "AI Support Chat" for this, so it is not mistaken for an official Tessera video.
 - Same treatment as the interview cuts: captions, keyword hits (some behind them), a few FAQ visuals, their song.
 - The FAQ text is saved in `video/sources/faq/faq.md`; the animated FAQ video engine is in `video/faq/`.
