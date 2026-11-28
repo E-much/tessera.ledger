@@ -186,7 +186,7 @@ async function frame(t){setCam(t);let FOC=camAt(t)[1];if(t>T_EXPL+.3&&t<T_FOUND)
   // explode: Google page pieces leave the phone (inner ones hide as the floating copies take over)
   const inner=1-cl(ex*4);['g-logo','g-pill','g-tiles'].forEach(id=>$(id).style.opacity=t<T_EXPL?1:inner);
   const vis=t>=T_EXPL?1:0,gone=1-eo((t-T_FOUND+.5)/.4);
-  place('fLogo',{x:lerp(0,-20,ex),y:lerp(-145,-360,ex),z:lerp(4,180,ex),rx:lerp(0,-8,ex),s:lerp(.46,1,ex),o:vis*gone*(1-eo((t-T_ENTER)/.4)),focus:FOC});
+  place('fLogo',{x:lerp(0,-380,ex),y:lerp(-145,-330,ex),z:lerp(4,220,ex),rx:lerp(0,-8,ex),ry:lerp(0,14,ex),s:lerp(.46,1,ex),o:vis*gone*(1-eo((t-T_ENTER)/.4)),focus:FOC});
   place('fSearch',{x:lerp(0,0,ex),y:lerp(-40,-60,ex),z:lerp(4,420,ex),rx:lerp(0,-4,ex),ry:lerp(0,4,ex),s:lerp(.37,1,ex),o:vis*gone,focus:FOC});
   place('fTiles',{x:0,y:lerp(55,250,ex),z:lerp(4,160,ex),rx:lerp(0,10,ex),s:lerp(.5,1,ex),o:vis*gone*(1-eo((t-T_ENTER)/.4)),focus:FOC});
   // typing
