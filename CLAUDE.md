@@ -42,10 +42,12 @@ many rounds of feedback; follow them without being asked again.
   slow push, heavy keystrokes over ticking tension, a "SCANNING 1,284 ANSWERS" wall of rejected results with a riser,
   a white pause of silence, then FOUND (bass drop, lime flash, dark shockwave ring, shake, card slams in) and the card
   bursts full screen. No letterbox on white.
-- **Chosen opening: `video/demo/demo7.html`** — a 3D phone swoops in on white (Pretty_zee style); the phone shows a
-  **Google search page** (owner's choice, multicolour "Google" wordmark); the question types in, mirrored on a big floating
-  card; "On it. Searching…", rejected results fly out, white pause, FOUND with a black hand-drawn circle around the video
-  result ("Everything you need to know about Tessera · @emuch4pf"), then the camera dives into the screen.
+- **Chosen opening: `video/demo/phone3d.html`** (real CSS 3D, 60 fps, rendered by `render_phone3d.js`), modelled on the
+  Pretty_zee reference studied frame by frame: **one continuous camera move, no cuts**. Phone home screen with apps
+  (incl. a Tessera app) → lime tap ripple on Google → Google opens out of its icon → the page **explodes out of the
+  phone** into 3D (logo, search bar, tiles) → question types → "On it. Searching…" + results streaming past in depth →
+  silence → "Found ▢ it." with the video card between the words, hand-drawn circle, lime underline, and **the owner's
+  song drops in right at FOUND** → camera dives into the card → full-screen answer. Depth-of-field follows what is read.
 - Don't copy Tessera's official "AI Support Chat" for this, so it is not mistaken for an official Tessera video.
 - Same treatment as the interview cuts: captions, keyword hits (some behind them), a few FAQ visuals, their song.
 - The FAQ text is saved in `video/sources/faq/faq.md`; the animated FAQ video engine is in `video/faq/`.
