@@ -21,7 +21,7 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#F2F2EE}
 .glare{position:absolute;inset:0;border-radius:60px;pointer-events:none;z-index:30;background:linear-gradient(115deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.22) 45%,rgba(255,255,255,0) 60%)}
 .status{position:absolute;left:0;right:0;top:20px;height:30px;font:600 17px Outfit;color:#111;padding:0 40px;display:flex;justify-content:space-between;z-index:10}
 /* home screen */
-#home{position:absolute;inset:0;background:linear-gradient(160deg,#e9f7d0 0%,#d2fb95 35%,#a8d86a 70%,#6f9a3a 100%)}
+#home{position:absolute;inset:0;background:#000}
 .grid{position:absolute;left:26px;right:26px;top:90px;display:grid;grid-template-columns:repeat(4,1fr);row-gap:26px}
 .app{display:flex;flex-direction:column;align-items:center;gap:6px;font:500 12.5px Outfit;color:#132}
 .ic{width:70px;height:70px;border-radius:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 10px rgba(0,0,0,.12);position:relative;overflow:hidden}
@@ -60,8 +60,11 @@ html,body{width:1920px;height:1080px;overflow:hidden;background:#F2F2EE}
       <div class="ph-layer" style="transform:translateZ(-8px)"></div><div class="ph-layer" style="transform:translateZ(-4px)"></div>
       <div class="ph-body"></div>
       <div class="ph-screen" id="screen">
-        <div class="status"><span>9:41</span><span>●●● ▮</span></div><div class="island"></div>
-        <div id="home"><div class="grid" id="grid"></div><div class="dock" id="dock"></div></div>
+        <div class="island"></div>
+        <div id="home"><img src="../assets/owner_home_screen.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
+          <div id="gIcon" style="position:absolute;left:305.8px;top:566.6px;width:62px;height:62px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25)"><div id="gGlyph" style="width:36px;height:36px"></div></div>
+          <div style="position:absolute;left:286.7px;width:100px;top:633px;text-align:center;font:600 11.2px Inter,sans-serif;color:#fff;letter-spacing:.1px">Google</div>
+        </div>
         <div id="gapp">
           <div id="g-logo" style="position:absolute;left:0;right:0;top:250px;text-align:center"></div>
           <div id="g-pill" class="gpill" style="position:absolute;left:24px;right:24px;top:350px"><span>🔍</span><span style="color:#9aa0a6">Search Google or type a URL</span></div>
@@ -141,7 +144,7 @@ function appEl(a,i){const bg=a[1];const badge=(a[0]==='Messages'?'<div class="ba
   return `<div class="app" id="app-${a[2]}${i??''}"><div class="ic" style="background:${bg}">${glyph(a[2])}${badge}</div>${i===undefined?'':`<span>${a[0]}</span>`}</div>`}
 function gword(sz){return [['G','#4285F4'],['o','#EA4335'],['o','#FBBC05'],['g','#4285F4'],['l','#34A853'],['e','#EA4335']].map(([c,col])=>`<span style="color:${col}">${c}</span>`).join('')}
 function tiles(sz){const cs=['#4285F4','#34A853','#FBBC05','#EA4335'];return cs.map(c=>`<div class="tile" style="width:${sz}px;height:${sz}px"><div style="width:${sz*.36}px;height:${sz*.36}px;border-radius:${sz*.1}px;background:${c}"></div></div>`).join('')}
-function build(mark){MARKPATH=mark;$('grid').innerHTML=APPS.map((a,i)=>appEl(a,i)).join('');$('dock').innerHTML=DOCK.map(a=>appEl(a)).join('');
+function build(mark){MARKPATH=mark;$('gGlyph').innerHTML=glyph('goo').replace('<svg ','<svg style="width:36px;height:36px" ');
   $('g-logo').innerHTML=`<span class="gword">${gword()}</span>`;$('g-tiles').innerHTML=tiles(66);
   $('fLogo').innerHTML=`<span class="gword" style="font-size:140px;letter-spacing:-4px">${gword()}</span>`;$('fTiles').innerHTML=tiles(130);
   let h='';for(let i=0;i<14;i++)h+=`<div class="o card res" id="r${i}"><div class="l1"></div><div class="l2"></div><div class="l3"></div><svg class="x" viewBox="0 0 24 24"><path d="M5 5l14 14M19 5L5 19" stroke="#5f6368" stroke-width="2.6" stroke-linecap="round"/></svg></div>`;$('results').innerHTML=h;
@@ -177,7 +180,7 @@ async function frame(t){setCam(t);let FOC=camAt(t)[1];if(t>T_EXPL+.3&&t<T_FOUND)
   place('phone',{x:0,y:0,z:0,rx:lerp(0,6,ex),ry:lerp(0,-14,ex)+Math.sin(t*.6)*1.5,rz:lerp(-4,0,eio(t/2.2)),s:1,o:1-eo((t-T_FOUND+.6)/.4),w:420,h:880,focus:FOC,maxB:10});
   $('glare').style.backgroundPosition=`${-200+t*40}px 0`;
   // tap + app opening out of the Google icon
-  const GX=68.5,GY=479;const rp=cl((t-T_TAP)/.45);const R=$('ripple');if(rp>0&&rp<1){R.style.opacity=1-rp;const rs=20+rp*120;R.style.left=(GX-rs/2)+'px';R.style.top=(GY-rs/2)+'px';R.style.width=R.style.height=rs+'px'}else R.style.opacity=0;
+  const GX=336.8,GY=597.6;const rp=cl((t-T_TAP)/.45);const R=$('ripple');if(rp>0&&rp<1){R.style.opacity=1-rp;const rs=20+rp*120;R.style.left=(GX-rs/2)+'px';R.style.top=(GY-rs/2)+'px';R.style.width=R.style.height=rs+'px'}else R.style.opacity=0;
   const op=eo5((t-T_OPEN)/OPEN_D);const ga=$('gapp');ga.style.opacity=cl(op*1.6);ga.style.transformOrigin=`${GX}px ${GY}px`;ga.style.transform=`scale(${lerp(.18,1,op)})`;ga.style.borderRadius=lerp(18,0,op)+'px';
   $('home').style.transform=`scale(${lerp(1,1.12,op)})`;$('home').style.opacity=1-cl(op*1.4);
   // explode: Google page pieces leave the phone (inner ones hide as the floating copies take over)
