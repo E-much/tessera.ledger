@@ -7,6 +7,9 @@ const R=__dirname,FPS=60;const words=JSON.parse(fs.readFileSync(R+'/clip_words.j
  const shot=async t=>{await pg.evaluate(t=>renderAt(t),t);return await pg.screenshot({type:'jpeg',quality:92})};
  if(process.argv[2]==='still'){for(const t of process.argv[3].split(',').map(Number))fs.writeFileSync(`${R}/p3_${t}.jpg`,await shot(t));await b.close();return}
  const [f0,f1,out]=[+process.argv[3],+process.argv[4],process.argv[5]];
- const ff=spawn('ffmpeg',['-y','-loglevel','error','-f','image2pipe','-framerate',String(FPS),'-c:v','mjpeg','-i','-','-c:v','libx264','-crf','17','-pix_fmt','yuv420p','-r',String(FPS),out],{stdio:['pipe','inherit','inherit']});
- for(let f=f0;f<f1;f++){const buf=await shot(f/FPS);if(!ff.stdin.write(buf))await new Promise(r=>ff.stdin.once('drain',r))}
+ // motion blur: 4 sub-frames per frame across a 180-degree shutter, averaged by ffmpeg
+ const SUB=4,SHUT=0.5;
+ const ff=spawn('ffmpeg',['-y','-loglevel','error','-f','image2pipe','-framerate',String(FPS*SUB),'-c:v','mjpeg','-i','-',
+   '-vf',`tmix=frames=${SUB}:weights='1 1 1 1',select='eq(mod(n\\,${SUB})\\,${SUB-1})',setpts=N/${FPS}/TB`,'-c:v','libx264','-crf','17','-pix_fmt','yuv420p','-r',String(FPS),out],{stdio:['pipe','inherit','inherit']});
+ for(let f=f0;f<f1;f++)for(let k=0;k<SUB;k++){const buf=await shot(f/FPS+k*(SHUT/FPS)/SUB);if(!ff.stdin.write(buf))await new Promise(r=>ff.stdin.once('drain',r))}
  ff.stdin.end();await new Promise(r=>ff.on('close',r));await b.close()})();
