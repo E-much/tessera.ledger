@@ -35,3 +35,6 @@ U.S. Space Force Falcon 9 launches (public domain). Credit them in the end card.
 
 - LayerZero teaser (the original reference): https://x.com/layerzero_core/status/2112197348919214328
 - Naomi Metzger's video editing "cookbook" (not yet read): https://x.com/naometzger/status/2125612819219669037 → https://github.com/naomimetzger/cookbook
+- Pretty_zee (@Zee_zartt) "motion graphic with claude" (33 s, white/pink 3D UI showcase): https://x.com/zee_zartt/status/2126179213124452406
+  Saved as `references/2126179213124452406.mp4` (+ `.post.json`). Ideas: 3D phone the camera swoops around and dives into,
+  floating real UI cards on a soft light background, circled/underlined details, text split around an object.
