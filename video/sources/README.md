@@ -38,3 +38,9 @@ U.S. Space Force Falcon 9 launches (public domain). Credit them in the end card.
 - Pretty_zee (@Zee_zartt) "motion graphic with claude" (33 s, white/pink 3D UI showcase): https://x.com/zee_zartt/status/2126179213124452406
   Saved as `references/2126179213124452406.mp4` (+ `.post.json`). Ideas: 3D phone the camera swoops around and dives into,
   floating real UI cards on a soft light background, circled/underlined details, text split around an object.
+- Tessera official "Private equity for everyone" (56 s, @Tessera_PE, speaker @devmajesty): https://x.com/tessera_pe/status/2019139136851177765
+  Saved as `references/2019139136851177765.mp4`. Locked-off wide shot, speaker centred in a brown armchair, white cyclorama
+  studio, two glowing lime cubes either side, giant lime headline behind the head, small white-on-dark-pill captions;
+  dark lime-wave logo intro and "PRIVATE EQUITIES FOR EVERYONE" + logo outro.
+  Plan for the owner: virtual set (AI cut-out of the owner filmed waist-up against a plain wall, composited into a digital
+  version of this studio with their own headline). Ask for a 10 s test clip first.
