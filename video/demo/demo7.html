@@ -1,0 +1,108 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Phone Search Demo</title>
+<style>@font-face{font-family:"JBM";src:url(../fonts/JetBrainsMono.woff2) format("woff2");font-weight:100 800}
+@font-face{font-family:"Outfit";src:url(../fonts/Outfit.woff2) format("woff2");font-weight:100 900}
+html,body{margin:0;background:#fff}canvas{display:block}</style></head>
+<body><canvas id="c" width="1920" height="1080"></canvas>
+<script>
+const W=1920,H=1080,cv=document.getElementById('c'),x=cv.getContext('2d');
+const LIME='#D2FB95',INK='#121317',WHITE='#F4F4F0',BG='#F2F2EE';
+const SANS='"Inter Display","Inter",sans-serif',APP='"Outfit",sans-serif',MONO='"JBM",monospace';
+const Q='Can you find me a video that explains everything I need to know about Tessera before I start?';
+const T_TYPE=1.0,TYPE_D=2.9,T_SCAN=4.05,T_FOUND=5.55,T_DIVE=6.25,DIVE=.55,T_PLAY=T_DIVE+DIVE,CLIP0=1.7;
+let WORDS=[],MARK=[];
+const cl=(v,a=0,b=1)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t;
+const eo=t=>1-Math.pow(1-cl(t),4),eio=t=>{t=cl(t);return t<.5?8*t*t*t*t:1-Math.pow(-2*t+2,4)/2};
+const back=t=>{t=cl(t);const c1=1.6,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2)};
+function txtc(c,s,X,Y,{sz=40,f=SANS,w=400,col=INK,al='left',a=1,ls=0}={}){c.font=`${w} ${sz}px ${f}`;c.letterSpacing=ls+'px';c.textAlign=al;c.globalAlpha=a;c.fillStyle=col;c.fillText(s,X,Y);c.globalAlpha=1;c.letterSpacing='0px'}
+const txt=(s,X,Y,o)=>txtc(x,s,X,Y,o);
+function measc(c,s,sz,f=SANS,w=400){c.font=`${w} ${sz}px ${f}`;return c.measureText(s).width}
+function rrc(c,X,Y,w,h,r,fill,stroke,lw=2,a=1){c.globalAlpha=a;c.beginPath();c.roundRect(X,Y,w,h,r);if(fill){c.fillStyle=fill;c.fill()}if(stroke){c.strokeStyle=stroke;c.lineWidth=lw;c.stroke()}c.globalAlpha=1}
+const rr=(...a)=>rrc(x,...a);
+function wrap(c,s,maxW,sz,f=APP,w=400){c.font=`${w} ${sz}px ${f}`;const out=[];let cur='';s.split(' ').forEach(t=>{const n=cur?cur+' '+t:t;if(c.measureText(n).width>maxW){out.push(cur);cur=t}else cur=n});if(cur)out.push(cur);return out}
+function setMark(p){MARK=p.trim().split('Z').filter(Boolean).map(s=>s.replace('M','').split(' L').map(q=>q.split(',').map(Number)))}
+function mark(cx,cy,size,col,a=1){const s=size/400;x.save();x.globalAlpha=a;x.translate(cx-size/2,cy-size/2);x.scale(s,s);x.fillStyle=col;MARK.forEach(m=>{x.beginPath();m.forEach((q,j)=>j?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));x.closePath();x.fill()});x.restore()}
+const cache=new Map();function img(n){const k=Math.max(1,Math.min(222,n));if(cache.has(k))return cache.get(k);const im=new Image();im.src=`clip/${String(k).padStart(5,'0')}.jpg`;const p=im.decode().then(()=>im);cache.set(k,p);return p}
+// ---------- phone screen (drawn into its own canvas) ----------
+const SW=780,SH=1690,scr=document.createElement('canvas');scr.width=SW;scr.height=SH;const s=scr.getContext('2d');
+const CARD={x:50,y:560,w:680,h:383};
+function drawScreen(T,thumb){s.setTransform(1,0,0,1,0,0);s.fillStyle='#ffffff';s.fillRect(0,0,SW,SH);
+  txtc(s,'9:41',70,78,{sz:34,f:APP,w:600});rrc(s,SW-150,52,80,34,10,null,INK,3);rrc(s,SW-145,57,60,24,6,INK);
+  const typed=Math.floor(cl((T-T_TYPE)/TYPE_D)*Q.length),q=Q.slice(0,typed);const searching=T>=T_SCAN-.1;
+  const up=eio((T-(T_SCAN-.3))/.4);
+  // generic search home: wordmark + big pill
+  const wa=1-up;{const L=[['G','#4285F4'],['o','#EA4335'],['o','#FBBC05'],['g','#4285F4'],['l','#34A853'],['e','#EA4335']];const sz=120;let tw=0;L.forEach(([c])=>tw+=measc(s,c,sz,SANS,500));let X=SW/2-tw/2;
+  L.forEach(([c,col])=>{txtc(s,c,X,lerp(480,260,up),{sz,f:SANS,w:500,col,a:wa,ls:-2});X+=measc(s,c,sz,SANS,500)})}
+  const lines=wrap(s,q||' ',SW-230,40);const py=lerp(560,150,up),ph=Math.max(110,lines.length*54+56);
+  s.shadowColor='rgba(0,0,0,.12)';s.shadowBlur=30;s.shadowOffsetY=8;rrc(s,40,py,SW-80,ph,55,'#ffffff','#dfe1e5',2);s.shadowBlur=0;s.shadowOffsetY=0;
+  s.strokeStyle='#5f6368';s.lineWidth=5;s.beginPath();s.arc(100,py+55,18,0,7);s.stroke();s.beginPath();s.moveTo(113,py+68);s.lineTo(128,py+83);s.stroke();
+  if(!q)txtc(s,'Search Google or type a URL',150,py+68,{sz:38,f:APP,col:'#9aa0a6'});
+  lines.forEach((l,i)=>txtc(s,l,150,py+68+i*54,{sz:40,f:APP,col:'#202124'}));
+  if(!searching&&T>=T_TYPE&&Math.floor(T*2.6)%2===0){const ll=lines[lines.length-1]||'';s.fillStyle=INK;s.fillRect(150+measc(s,ll,40,APP)+4,py+30+(lines.length-1)*54,4,48)}
+  const ry=py+ph+50;
+  // scanning: result rows appear and get rejected
+  if(T>=T_SCAN&&T<T_FOUND){for(let i=0;i<7;i++){const born=T_SCAN+i*.14,dead=born+.35;if(T<born)continue;const a=T<dead?eo((T-born)/.1):Math.max(0,1-(T-dead)/.2);if(a<=0)continue;
+      const y=ry+i*150;rrc(s,40,y,SW-80,128,22,'#f8f9fa',null,2,a);rrc(s,70,y+28,380,22,11,'#dadce0',null,2,a);rrc(s,70,y+66,520,16,8,'#e8eaed',null,2,a);rrc(s,70,y+92,300,16,8,'#e8eaed',null,2,a);
+      if(T>dead-.12){s.globalAlpha=a;s.strokeStyle='#5f6368';s.lineWidth=5;s.beginPath();s.moveTo(SW-110,y+40);s.lineTo(SW-80,y+70);s.moveTo(SW-80,y+40);s.lineTo(SW-110,y+70);s.stroke();s.globalAlpha=1}}}
+  // found: one video result
+  if(T>=T_FOUND){const fa=eo((T-T_FOUND)/.25);txtc(s,'Videos',40,ry+10,{sz:32,f:APP,w:600,col:'#202124',a:fa});
+    const cy=CARD.y=ry+40;s.save();s.globalAlpha=fa;s.beginPath();s.roundRect(CARD.x,cy,CARD.w,CARD.h,26);s.clip();if(thumb)s.drawImage(thumb,CARD.x,cy,CARD.w,CARD.h);s.fillStyle='rgba(0,0,0,.25)';s.fillRect(CARD.x,cy,CARD.w,CARD.h);s.restore();
+    s.globalAlpha=fa;s.fillStyle=LIME;s.beginPath();s.arc(CARD.x+CARD.w/2,cy+CARD.h/2,58,0,7);s.fill();s.fillStyle=INK;s.beginPath();s.moveTo(CARD.x+CARD.w/2-16,cy+CARD.h/2-28);s.lineTo(CARD.x+CARD.w/2+30,cy+CARD.h/2);s.lineTo(CARD.x+CARD.w/2-16,cy+CARD.h/2+28);s.closePath();s.fill();
+    rrc(s,CARD.x+20,cy+CARD.h-62,150,44,22,'rgba(0,0,0,.65)');txtc(s,'VIDEO',CARD.x+95,cy+CARD.h-32,{sz:22,f:MONO,w:700,col:'#fff',al:'center'});
+    txtc(s,'Everything you need to know about Tessera',CARD.x,cy+CARD.h+60,{sz:38,f:APP,w:600,col:'#1a0dab',a:fa});txtc(s,'Before you start · @emuch4pf',CARD.x,cy+CARD.h+108,{sz:30,f:APP,col:'#4d5156',a:fa});s.globalAlpha=1}
+  else CARD.y=ry+40;}
+// ---------- phone in pseudo-3D ----------
+const PW=370,PH=PW*SH/SW;
+function phoneMatrix(T){const sw=eio(T/1.6);const dive=eio((T-T_DIVE)/DIVE);
+  let cx=lerp(1350,W*.36,sw),cy=lerp(1250,H*.5,sw),rot=lerp(.5,-.06,sw),sk=lerp(-.35,-.06,sw),sc=lerp(.75,1,sw);
+  cx+=Math.sin(T*.7)*6;cy+=Math.cos(T*.6)*5;rot+=Math.sin(T*.5)*.01;
+  return new DOMMatrix().translate(cx,cy).rotate(rot*57.2958).skewX(sk*57.2958).scale(sc*PW/SW)}
+function drawPhone(m,thumb){x.save();x.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);
+  // body thickness
+  x.fillStyle='#b8bab4';x.beginPath();x.roundRect(-SW/2-34+22,-SH/2-34+26,SW+68,SH+68,120);x.fill();
+  x.shadowColor='rgba(0,0,0,.25)';x.shadowBlur=120;x.shadowOffsetY=60;x.fillStyle='#16171a';x.beginPath();x.roundRect(-SW/2-34,-SH/2-34,SW+68,SH+68,120);x.fill();x.shadowBlur=0;x.shadowOffsetY=0;
+  x.save();x.beginPath();x.roundRect(-SW/2,-SH/2,SW,SH,90);x.clip();x.drawImage(scr,-SW/2,-SH/2);x.restore();
+  x.fillStyle='#000';x.beginPath();x.roundRect(-110,-SH/2+22,220,62,31);x.fill();x.restore()}
+// ---------- floating UI around the phone ----------
+function floatCard(X,Y,w,h,rot,a,draw){x.save();x.globalAlpha=a;x.translate(X,Y);x.rotate(rot);x.shadowColor='rgba(0,0,0,.12)';x.shadowBlur=50;x.shadowOffsetY=20;rr(-w/2,-h/2,w,h,26,'#ffffff');x.shadowBlur=0;x.shadowOffsetY=0;draw(w,h);x.restore();x.globalAlpha=1}
+function captions(lt){const t=lt+CLIP0;const idx=WORDS.findIndex(w=>t<w.t1+.25);if(idx<0)return;const st=Math.floor(idx/4)*4,grp=WORDS.slice(st,st+4);
+  const sz=60,sp=measc(x,' ',sz,SANS,800);const ws=grp.map(w=>w.w.replace(/,$/,'').toUpperCase());const tot=ws.reduce((a,w)=>a+measc(x,w,sz,SANS,800),0)+sp*(ws.length-1);let X=W/2-tot/2;
+  ws.forEach((w,i)=>{const on=t>=grp[i].t0,cur=on&&t<grp[i].t1+.05;x.save();x.shadowColor='rgba(0,0,0,.85)';x.shadowBlur=18;txt(w,X,H-120,{sz,w:800,col:cur?LIME:'#F4F4F0',a:on?1:.55});x.restore();X+=measc(x,w,sz,SANS,800)+sp})}
+async function frame(T){x.setTransform(1,0,0,1,0,0);x.globalAlpha=1;
+  const thumb=await img(T>=T_PLAY?Math.floor((T-T_PLAY+CLIP0)*30)+1:Math.floor(CLIP0*30)+1);
+  if(T>=T_PLAY){x.drawImage(thumb,0,0,W,H);const v=x.createRadialGradient(W/2,H/2,H*.45,W/2,H/2,H);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(0,0,0,.45)');x.fillStyle=v;x.fillRect(0,0,W,H);
+    captions(T-T_PLAY);mark(78,74,44,'#F4F4F0',.9);if(T<T_PLAY+.08){x.fillStyle='rgba(255,255,255,.4)';x.fillRect(0,0,W,H)}
+    const END=T_PLAY+(7.35-CLIP0);if(T>END-.4){x.fillStyle=`rgba(255,255,255,${cl((T-(END-.4))/.4)})`;x.fillRect(0,0,W,H)}return}
+  // soft light background
+  x.fillStyle=BG;x.fillRect(0,0,W,H);const g=x.createRadialGradient(W*.4,H*.45,50,W*.4,H*.45,1000);g.addColorStop(0,'rgba(210,251,149,.35)');g.addColorStop(1,'rgba(242,242,238,0)');x.fillStyle=g;x.fillRect(0,0,W,H);
+  const d=T-T_FOUND,sh=d>=0&&d<.45?(1-d/.45)*24:0;
+  x.save();x.translate(Math.sin(T*90)*sh,Math.cos(T*77)*sh*.7);
+  // camera dive: zoom toward the result card on the phone
+  const m=phoneMatrix(T);drawScreen(T,thumb);
+  const dv=eio((T-T_DIVE)/DIVE);let cam=new DOMMatrix();
+  if(dv>0){const c=m.transformPoint({x:-SW/2+CARD.x+CARD.w/2,y:-SH/2+CARD.y+CARD.h/2});const cw=Math.hypot(m.a,m.b)*CARD.w;const target=W/cw;const z=Math.pow(target,dv);
+    cam=new DOMMatrix().translate(lerp(c.x,W/2,dv),lerp(c.y,H/2,dv)).scale(z).translate(-c.x,-c.y)}
+  x.setTransform(cam.a,cam.b,cam.c,cam.d,cam.e,cam.f);
+  // floating query card (big, readable) beside the phone
+  const qa=eo((T-T_TYPE)/.4)*(1-eo((T-T_FOUND)/.3));if(qa>0){const typed=Math.floor(cl((T-T_TYPE)/TYPE_D)*Q.length);const L=wrap(x,Q.slice(0,typed)||' ',760,46,APP,500);
+    floatCard(1380,lerp(330,300,eo((T-T_TYPE)/.6)),860,L.length*60+110,-.03,qa,(w,h)=>{L.forEach((l,i)=>txtc(x,l,-w/2+50,-h/2+80+i*60,{sz:46,f:APP,w:500,col:INK}));txtc(x,'YOU',w/2-50,-h/2+44,{sz:16,f:MONO,w:700,col:'#7a7d78',al:'right',ls:4})})}
+  if(T>=T_SCAN-.3&&T<T_FOUND+.2){const a=eo((T-(T_SCAN-.3))/.3)*(1-eo((T-T_FOUND)/.2));
+    floatCard(1380,560,620,110,.02,a,(w,h)=>{txtc(x,'On it. Searching…',-w/2+44,14,{sz:44,f:APP,w:600,col:INK})});
+    // rejected results fly out of the phone into space
+    for(let i=0;i<9;i++){const born=T_SCAN+i*.13,k=cl((T-born)/.9);if(k<=0||k>=1)continue;const ang=2.0+i*.26,dist=lerp(80,520+i*20,eo(k));const c=m.transformPoint({x:0,y:-120});
+      floatCard(c.x+Math.cos(ang)*dist*1.4,c.y+Math.sin(ang)*dist*.8,240,90,ang*.2,(1-k)*a,(w,h)=>{rrc(x,-w/2+20,-h/2+22,140,14,7,'#dadce0');rrc(x,-w/2+20,-h/2+48,180,10,5,'#e8eaed');x.strokeStyle='#5f6368';x.lineWidth=4;x.beginPath();x.moveTo(w/2-44,-12);x.lineTo(w/2-24,8);x.moveTo(w/2-24,-12);x.lineTo(w/2-44,8);x.stroke()})}
+    const cnt=Math.floor(eio(cl((T-T_SCAN)/(T_FOUND-T_SCAN-.2)))*1284);rr(1380-250,700,500,56,28,INK,null,2,a);txt(`SCANNING ${cnt.toLocaleString('en-US')} ANSWERS`,1380,737,{sz:20,f:MONO,w:700,col:LIME,al:'center',ls:4,a})}
+  drawPhone(m,thumb);
+  if(d>=0){const fa=eo(d/.25);if(d<.7){const r=d/.7,c=m.transformPoint({x:-SW/2+CARD.x+CARD.w/2,y:-SH/2+CARD.y+CARD.h/2});x.strokeStyle=`rgba(18,19,23,${(1-r)*.8})`;x.lineWidth=18*(1-r)+2;x.beginPath();x.arc(c.x,c.y,40+r*1200,0,7);x.stroke()}
+    // hand-drawn marker circle around the result + "found it" card
+    const c=m.transformPoint({x:-SW/2+CARD.x+CARD.w/2,y:-SH/2+CARD.y+CARD.h/2});const ck=eo((d-.15)/.5);x.strokeStyle=INK;x.lineWidth=7;x.lineCap='round';x.beginPath();
+    for(let i=0;i<=60*ck;i++){const a=i/60*Math.PI*2.15-1.4,r=1+Math.sin(i*.3)*.03;const px=c.x+Math.cos(a)*215*r,py=c.y+Math.sin(a)*150*r;i?x.lineTo(px,py):x.moveTo(px,py)}x.stroke();
+    floatCard(1380,560,520,110,-.02,fa*(1-dv),(w,h)=>{txtc(x,'Found it.',-w/2+44,16,{sz:50,f:APP,w:700,col:INK})});
+    rr(1380-200,700,400,56,28,LIME,null,2,fa*(1-dv));txt('1 RESULT FOUND',1380,737,{sz:22,f:MONO,w:700,col:INK,al:'center',ls:6,a:fa*(1-dv)})}
+  x.restore();x.setTransform(1,0,0,1,0,0);
+  if(T>=T_FOUND-.15&&T<T_FOUND){x.fillStyle=BG;x.fillRect(0,0,W,H)}
+  if(d>=0&&d<.06){x.fillStyle='rgba(210,251,149,.6)';x.fillRect(0,0,W,H)}
+  if(T<.35){x.fillStyle=`rgba(255,255,255,${1-T/.35})`;x.fillRect(0,0,W,H)}}
+window.init=(w,m)=>{WORDS=w;setMark(m)};
+window.frameJPEG=async T=>{await frame(T);return cv.toDataURL('image/jpeg',.93)};
+</script></body></html>
